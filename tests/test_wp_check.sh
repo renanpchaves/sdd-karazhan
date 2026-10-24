@@ -74,7 +74,10 @@ mkdir -p tests/aceite; printf 'def test_x():\n    assert True\n' > tests/aceite/
 git add tests/aceite/test_x.py; git commit -qm aceite
 out=$(bash $W WP-01 --tasks $T || true)
 assert_contains "$out" "aceite-intacto: falha" "aceite-intacto falha"
-if command -v pytest >/dev/null 2>&1; then assert_contains "$out" "aceite: ok" "oráculo roda e passa"; fi
+if command -v pytest >/dev/null 2>&1; then
+  assert_contains "$out" "aceite: ok" "oráculo roda e passa"
+  assert_contains "$out" "== aceite (sem arquivo da WP: rodando tests/aceite inteiro)" "sem arquivo da WP: diretório inteiro, avisado"
+fi
 assert_contains "$out" "tests/aceite/test_x.py" "arquivo de aceite listado"
 assert_exit 1 bash $W WP-01 --tasks $T
 # config do pytest vigiada
@@ -119,6 +122,20 @@ if command -v pytest >/dev/null 2>&1; then
   git add tests/aceite/test_b.py; git commit -qm xfail
   out=$(bash $W WP-01 --tasks $T || true)
   assert_contains "$out" "aceite: falha" "xfail no oráculo é falha"
+  # aceite por WP: test_wp<NN>_*.py roda só o arquivo da WP; --tudo roda o diretório inteiro
+  git checkout -qb feat/001-x-WP-09 feat/001-x
+  rm -rf tests/aceite; mkdir -p tests/aceite
+  printf 'def test_a():\n    assert True\n' > tests/aceite/test_wp01_a.py
+  printf 'def test_b():\n    assert False\n' > tests/aceite/test_wp02_b.py
+  printf '### WP-01 — coleta\n- Dono: eng-grom\n- Possui: pkg/coleta.py, tests/**\n\n### WP-02 — envio\n- Dono: eng-thrall\n- Possui: pkg/envio.py\n' > $T
+  git add -f $T tests/aceite/test_wp01_a.py tests/aceite/test_wp02_b.py; git commit -qm aceite-por-wp
+  out=$(bash $W WP-01 --tasks $T || true)
+  assert_contains "$out" "aceite: ok" "WP-01 roda só test_wp01_*"
+  out=$(bash $W WP-02 --tasks $T || true)
+  assert_contains "$out" "aceite: falha" "WP-02 roda test_wp02_* e falha"
+  out=$(bash $W WP-01 --tasks $T --tudo || true)
+  assert_contains "$out" "aceite: falha" "--tudo roda tests/aceite inteiro"
+  assert_contains "$out" "testes: ok" "etapa testes não coleta tests/aceite"
 fi
 # spec cita tests/aceite, mas o diretório não existe: falha, não ausente
 git checkout -qb feat/001-x-WP-08 feat/001-x

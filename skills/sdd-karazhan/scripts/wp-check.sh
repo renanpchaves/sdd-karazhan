@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]
+# wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--tudo]
 # Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
 # senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
 # Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, aceite, dry-run, diff, fora-dos-paths, aceite-intacto.
+# aceite roda tests/aceite/test_wp<NN>_*.py da WP (sem eles, tests/aceite inteiro); --tudo força o inteiro (pouso).
 # ruff e pytest vêm do .venv do repo, se existir; senão do PATH.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
 # o rodapé "== resumo" repete uma linha por etapa.
@@ -12,17 +13,19 @@
 . "$(dirname "$0")/../lib/common.sh"
 . "$ROOT/lib/tasks.sh"
 
-AJUDA="uso: wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]"
+AJUDA="uso: wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--tudo]"
 case "${1:-}" in -h|--help) usage "$AJUDA" ;; esac
 need git
 wp=""
 base=""
 tasks=""
+tudo=0
 while [ $# -gt 0 ]; do
   case "$1" in
     -h|--help) usage "$AJUDA" ;;
     --base) [ $# -ge 2 ] || die "$AJUDA"; base="$2"; shift 2 ;;
     --tasks) [ $# -ge 2 ] || die "$AJUDA"; tasks="$2"; shift 2 ;;
+    --tudo) tudo=1; shift ;;
     -*) die "opção desconhecida: $1
 $AJUDA" ;;
     *) [ -z "$wp" ] || die "$AJUDA"; wp="$1"; shift ;;
@@ -137,7 +140,8 @@ fi
 
 # testes
 if [ -d tests ] && [ -n "$pytest_bin" ]; then
-  roda "$pytest_bin" -q
+  # tests/aceite tem etapa própria, filtrada por WP.
+  roda "$pytest_bin" -q --ignore=tests/aceite
   # exit 5 = nenhum teste coletado: não há evidência, não é falha.
   case "$rc" in 0) st=ok ;; 5) st=ausente ;; *) st=falha ;; esac
   etapa testes "$st" "$saida"
@@ -154,11 +158,26 @@ fi
 # aceite: o oráculo precisa rodar de verdade; skip, xfail ou nada coletado é falha.
 # Skip e xfail só contam na linha de resumo do pytest (-rsx), não num caminho com "xfail".
 if [ -d tests/aceite ] && [ -n "$pytest_bin" ]; then
-  roda "$pytest_bin" tests/aceite -rsx -p no:cacheprovider
+  # Arquivos da WP: tests/aceite/test_wp<nn>_*.py (nn = dois dígitos de WP-NN).
+  nn="${wp#[Ww][Pp]-}"
+  case "$nn" in [0-9][0-9]) ;; *) nn="" ;; esac
+  alvo=()
+  if [ "$tudo" -eq 0 ] && [ -n "$nn" ]; then
+    for f in tests/aceite/test_wp"$nn"_*.py; do
+      if [ -f "$f" ]; then alvo+=("$f"); fi
+    done
+  fi
+  if [ "${#alvo[@]}" -gt 0 ]; then
+    cab=""
+  else
+    alvo=(tests/aceite)
+    if [ "$tudo" -eq 1 ]; then cab=" (--tudo: tests/aceite inteiro)"; else cab=" (sem arquivo da WP: rodando tests/aceite inteiro)"; fi
+  fi
+  roda "$pytest_bin" "${alvo[@]}" -rsx -p no:cacheprovider
   st=ok
   [ "$rc" -eq 0 ] || st=falha
   if printf '%s\n' "$saida" | grep -Eq '^(SKIPPED|XFAIL)( |\[)'; then st=falha; fi
-  etapa aceite "$st" "$saida"
+  etapa aceite "$st" "$saida" "$cab"
 elif [ -d tests/aceite ]; then
   etapa aceite ausente "tests/aceite existe, mas pytest não foi encontrado"
 elif grep -q 'tests/aceite' "$(dirname "$tasks")/spec.md" 2>/dev/null; then

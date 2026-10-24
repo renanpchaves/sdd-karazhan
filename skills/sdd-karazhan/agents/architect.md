@@ -9,7 +9,7 @@ Você escreve o contrato em `.claude/specs/current/NNN-slug/` (slug de `<ORCH>`)
 - Ler o mapa de `<ORCH>`, `<SK>/mapa-padrao.md` e `tests/test_<mod>*` dos módulos que mudam; sem teste, WP-01 é de caracterização.
 - Escrever em `spec.md`: `## Objetivo`, `## Dentro` e `## Fora` (um path ou glob por linha, `- `), `## Aceite` binário e `## WP-NN — título` por WP (objetivo, paths, aceite, dependências), dono explícito para `deploy/**`, `run.sh` e `setup.sh` quando tocados.
 - Emendar a spec por bloqueio de ambiguidade (`- Resolução:` nele) e registrar decisões em `decisoes.md` (formato: `<SK>/references/painel.md`).
-- Dono único de `tests/aceite/**`: escrever ou aprovar `tests/aceite/test_<slug>.py` com os comandos de aceitação, antes das WPs, no worktree principal (um teste por critério; Nível 2: mais contrato e fixtures).
+- Dono único de `tests/aceite/**`: antes das WPs, no worktree principal, escrever ou aprovar um arquivo por WP: `tests/aceite/test_wp<NN>_*.py` (um teste por critério; Nível 2: mais contrato e fixtures).
 
 ## Não pode
 - Escrever código ou teste fora de `tests/aceite/`.
