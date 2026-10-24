@@ -53,7 +53,7 @@ Nível: Pequena — um módulo, sem regra de negócio nova
 Terminais: eng-grom (claude/medio) — relatorio · rev-uther (codex/capaz)
 Subagentes: arch-ysera — spec curta de 1 página · git-gazlowe (reaproveitado)
 Não convocar: recon — mapa válido, esqueleto padrão
-Presets: eng-grom=cc-mini rev-uther=cx arch-ysera=cc git-gazlowe=cc-mini
+Presets: eng-grom=cc rev-uther=cx arch-ysera=cc git-gazlowe=cc-mini
 ```
 
 Pequena: a folha aparece e o time já é convocado. Média e Grande: você diz "vai". Sem Codex, ou chamada nominal inválida: o Orchestrator pergunta antes.
