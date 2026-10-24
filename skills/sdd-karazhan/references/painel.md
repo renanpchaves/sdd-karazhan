@@ -35,9 +35,11 @@ O `painel.sh` considera aberto todo bloco sem linha `- Resolução:`.
 - Resolução: America/Sao_Paulo; spec emendada por arch-ysera
 ```
 
-`- Resolução:` só entra quando o bloqueio estiver resolvido.
+`- Resolução:` só entra quando o bloqueio estiver resolvido, escrita por quem resolveu: o Orchestrator nos bloqueios de orquestração, o Architect nos de contrato.
 
 ## Formato de `decisoes.md`
+
+O arquivo é do Orchestrator; o Architect acrescenta as próprias entradas, com ele como autor.
 
 ```md
 ## 2026-10-24 · orch-jaina · Reviewer em subagente Claude (sem Codex)

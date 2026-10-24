@@ -31,12 +31,12 @@ Nome de cada agente: o da folha, que já vem do `pick-name.sh`. Para papel extra
 
 ## Comandos (modo Maestri)
 
-Preencha `<ORCH>`, `<GIT>`, `<WP>`, `<PATHS>` e `<NOTA>` do role com `sed`, sem editar o arquivo da skill:
+Preencha `<SK>`, `<ORCH>`, `<GIT>`, `<WP>`, `<PATHS>` e `<NOTA>` do role com `sed`, sem editar o arquivo da skill:
 
 ```bash
 # forma geral: maestri role create "<nome>" "$(cat agents/x.md)"
-SK="<raiz da skill>"   # resolvida pelo Orchestrator
-maestri role create "eng-grom" "$(sed -e 's|<ORCH>|orch-jaina|g' -e 's|<GIT>|git-gazlowe|g' \
+SK="<raiz da skill>"   # caminho absoluto de skills/sdd-karazhan, resolvido pelo Orchestrator
+maestri role create "eng-grom" "$(sed -e "s|<SK>|$SK|g" -e 's|<ORCH>|orch-jaina|g' -e 's|<GIT>|git-gazlowe|g' \
   -e 's|<WP>|WP-01|g' -e 's|<PATHS>|pkg/coleta.py, tests/test_coleta.py|g' \
   -e 's|<NOTA>|tasks-eng-grom|g' "$SK/agents/engineer.md")"
 maestri note create --name "tasks-eng-grom" "<conteúdo da nota>"
@@ -44,9 +44,9 @@ maestri recruit "eng-grom" --preset "<preset>" --role "eng-grom" --dir "<worktre
 maestri connect "eng-grom" "tasks-eng-grom"
 ```
 
-- `--dir`: Engineer no worktree da WP; Reviewer no worktree desanexado `../<repo>-rev-WP-NN`; Architect e Git Manager (Grande) na raiz do repo.
+- `--dir`: Engineer no worktree da WP; Reviewer no worktree desanexado `../<repo>-rev`, único no andar; Architect e Git Manager (Grande) na raiz do repo.
 - Preset: o da linha `Presets:` da folha. Engineer sempre em preset `claude`; Reviewer sempre em preset `codex`.
-- `role create` sempre com `"$(sed ... agents/x.md)"` ou `"$(cat agents/x.md)"` quando o role não tem placeholder a preencher.
+- `role create` sempre com `"$(sed ... $SK/agents/x.md)"`: todo role tem ao menos `<SK>` a preencher. Placeholder sem valor para o papel (ex.: `<GIT>` no Recon) não aparece no role.
 
 ## Uma nota por executor
 
@@ -58,7 +58,9 @@ Só `tasks-<nome>`. Conteúdo:
 - o comando exato do `wp-check.sh`, com caminho absoluto e `--tasks`;
 - a base do diff (`feat/NNN-slug`).
 
-Nova WP para o mesmo executor: `maestri note write "tasks-<nome>" "<conteúdo>"`. Leitura: `maestri note read "tasks-<nome>"`.
+- Engineer: uma WP por Engineer por andar. Nova WP é novo role, novo worktree, novo `.sdd-role` e nova nota.
+- Reviewer: um por andar, então a nota dele é reescrita a cada WP: `maestri note write "tasks-<nome-rev>" "<conteúdo>"`. O role do Reviewer não tem `<WP>` nem `<PATHS>`: a WP e os paths vêm da nota.
+- Leitura: `maestri note read "tasks-<nome>"`.
 
 ## Delegar e acompanhar
 
@@ -72,7 +74,7 @@ Case cada resposta pelo nome do agente. Retorno fora do bloco fixo: peça de nov
 
 ## Subagentes (Recon sempre; Architect e Git Manager conforme a folha)
 
-Prompt do subagente = role com placeholders preenchidos + mensagem de quatro linhas. Sem nota no canvas, `<NOTA>` vira "a mensagem de delegação" e o conteúdo da nota vai na própria mensagem. Use o tier da folha e o nome sorteado; registre em `equipe.md` igual a um terminal.
+Prompt do subagente = role com placeholders preenchidos (inclusive `<SK>`) + mensagem de quatro linhas. Sem nota no canvas, `<NOTA>` vira "a mensagem de delegação" e o conteúdo da nota vai na própria mensagem. Use o tier da folha e o nome sorteado; registre em `equipe.md` igual a um terminal.
 
 ## Modo subagente (sem `maestri`)
 

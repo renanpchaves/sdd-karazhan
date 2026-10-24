@@ -13,7 +13,7 @@ paths=pkg/coleta.py, tests/test_coleta.py
 root=<raiz da skill>
 ```
 
-- Quem roda: o Git Manager, um worktree por WP e um desanexado por Reviewer.
+- Quem roda: o Git Manager, um worktree por WP (`eng`) e um único worktree desanexado do Reviewer por andar (`rev`; ali WP e paths não restringem nada, o `pre-commit` bloqueia todo commit).
 - `guard-install.sh` recusa (exit 2) se `core.hooksPath` estiver definido (husky e afins) ou se já existir um `pre-commit` que não é do sdd-karazhan. Nesses casos o Git Manager devolve `bloqueado` e o usuário decide se encadeia o hook à mão.
 
 ## `pre-commit`
@@ -44,4 +44,4 @@ Hook `PreToolUse` do plugin para `Edit`, `Write` e `MultiEdit` (`hooks/hooks.jso
 
 ## Codex (verificação da Task 6)
 
-O Codex CLI 0.153.2 tem hooks (feature `hooks`, exige confiança no projeto, flag `--dangerously-bypass-hook-trust`), mas a compatibilidade do `path-guard.sh` com os hooks de ferramenta do Codex **não foi verificada**. A garantia mínima no Codex é: sandbox `workspace-write` com raiz no worktree desanexado do Reviewer, `pre-commit` com `role=rev` e a checagem de diff do `wp-check.sh`. O role do Reviewer proíbe editar; o ambiente garante que nada editado ali chegue ao histórico.
+O Codex CLI 0.153.2 tem hooks (feature `hooks`, exige confiança no projeto), mas a compatibilidade do `path-guard.sh` com os hooks de ferramenta do Codex **não foi verificada**. A garantia mínima no Codex é: sandbox `workspace-write` com raiz no worktree desanexado do Reviewer, `pre-commit` com `role=rev` e a checagem de diff do `wp-check.sh`. O role do Reviewer proíbe editar; o ambiente garante que nada editado ali chegue ao histórico.
