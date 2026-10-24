@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# pre-commit do sdd-karazhan. Sem .sdd-role na raiz do worktree, não faz nada.
+# sdd-karazhan pre-commit
+# Sem .sdd-role na raiz do worktree, não faz nada.
 # Bloqueia (1) arquivo staged fora dos paths da WP e (2) commit sem SDD_GIT_MANAGER.
 top="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 role_file="$top/.sdd-role"
@@ -12,7 +13,7 @@ wp="$(campo wp)"
 paths="$(campo paths)"
 root="$(campo root)"
 
-staged="$(git -c core.quotepath=off diff --cached --name-only)"
+staged="$(git -c core.quotepath=off diff --cached --name-only --no-renames)"
 
 if [ "$role" = "rev" ]; then
   if [ -n "$staged" ]; then
@@ -21,7 +22,7 @@ if [ "$role" = "rev" ]; then
   fi
 else
   if [ ! -f "$root/lib/tasks.sh" ]; then
-    echo "pre-commit: lib/tasks.sh não encontrado em root=$root (.sdd-role)" >&2
+    echo "pre-commit: lib/tasks.sh não encontrado em root=$root; rode guard-install.sh novamente" >&2
     exit 1
   fi
   . "$root/lib/tasks.sh"

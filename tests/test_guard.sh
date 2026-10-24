@@ -52,3 +52,60 @@ assert_exit 2 bash "$SK/scripts/guard-install.sh" . eng WP-01 "script.py"
 assert_contains "$(bash "$SK/scripts/guard-install.sh" . eng WP-01 script.py 2>&1 || true)" "core.hooksPath já definido em .husky" "hooksPath msg"
 assert_eq 0 "$(ls -A .git/hooks | grep -c '^pre-commit$' || true)" "nada instalado"
 assert_exit 0 jq -e '.hooks.PreToolUse[0].matcher == "Edit|Write|MultiEdit"' "$PWD_PLUGIN/hooks/hooks.json"
+
+# --- correções da revisão ---
+cd "$R"
+bash "$SK/scripts/guard-install.sh" . eng WP-01 "deploy/**,pkg/coleta.py" >/dev/null
+# rename de fora dos paths para dentro não passa
+git mv pkg/envio.py deploy/envio.py
+assert_exit 1 env SDD_GIT_MANAGER=1 git commit -qm t
+assert_contains "$(SDD_GIT_MANAGER=1 git commit -qm t 2>&1 || true)" "bloqueado: pkg/envio.py" "rename bypass"
+git reset -q --hard
+# cwd em subdiretório do worktree: .sdd-role pela raiz
+jc() { jq -nc --arg t "$1" --arg c "$2" --arg f "$3" '{tool_name:$t,cwd:$c,tool_input:{file_path:$f}}'; }
+assert_exit 2 bash -c "$(declare -f jc); jc Edit '$R/pkg' '$R/pkg/envio.py' | bash '$H'"
+assert_exit 0 bash -c "$(declare -f jc); jc Edit '$R/pkg' '$R/pkg/coleta.py' | bash '$H'"
+assert_exit 0 bash -c "$(declare -f jc); jc Edit '$R/pkg' 'coleta.py' | bash '$H'"
+assert_exit 2 bash -c "$(declare -f jc); jc Edit '$R/pkg' 'envio.py' | bash '$H'"
+# .sdd-role é intocável
+assert_exit 2 hook Edit "$R/.sdd-role"
+assert_exit 2 hook Write ".sdd-role"
+# jq ausente: bloqueia onde há .sdd-role, libera onde não há
+mkdir -p "$TMP/bin"; printf '#!/bin/sh\nexit 127\n' > "$TMP/bin/jq"; chmod +x "$TMP/bin/jq"
+assert_exit 2 bash -c "cd '$R' && echo '{}' | PATH='$TMP/bin':\"\$PATH\" bash '$H'"
+assert_contains "$(cd "$R" && echo '{}' | PATH="$TMP/bin:$PATH" bash "$H" 2>&1 || true)" "path-guard: jq ausente" "msg jq"
+assert_exit 0 bash -c "cd '$TMP' && echo '{}' | PATH='$TMP/bin':\"\$PATH\" bash '$H'"
+# path-guard não depende do root= do .sdd-role
+sed -i 's|^root=.*|root=/nao/existe|' "$R/.sdd-role"
+assert_exit 0 hook Edit "$R/pkg/coleta.py"
+assert_exit 2 hook Edit "$R/pkg/envio.py"
+# pre-commit com root inválido: bloqueia e orienta
+echo "# r" >> pkg/coleta.py; git add pkg/coleta.py
+assert_contains "$(SDD_GIT_MANAGER=1 git commit -qm t 2>&1 || true)" "rode guard-install.sh novamente" "root inválido"
+git reset -q --hard
+# path-guard fail-closed sem lib/tasks.sh (cópia isolada do hook)
+mkdir -p "$TMP/iso/hooks"; cp "$H" "$TMP/iso/hooks/path-guard.sh"
+assert_exit 2 bash -c "$(declare -f jc); jc Edit '$R' '$R/pkg/coleta.py' | bash '$TMP/iso/hooks/path-guard.sh'"
+assert_contains "$(jc Edit "$R" "$R/pkg/coleta.py" | bash "$TMP/iso/hooks/path-guard.sh" 2>&1 || true)" "path-guard: lib/tasks.sh ausente" "msg lib ausente"
+bash "$SK/scripts/guard-install.sh" . eng WP-01 "deploy/**,pkg/coleta.py" >/dev/null   # restaura root
+
+# marcador: sobrescreve pre-commit nosso, recusa o de terceiros
+bash "$SK/scripts/guard-install.sh" . eng WP-01 "pkg/coleta.py" >/dev/null
+assert_exit 0 bash "$SK/scripts/guard-install.sh" . eng WP-01 "pkg/coleta.py"
+HK=$(git rev-parse --git-path hooks)/pre-commit
+printf '#!/bin/sh\necho outro\n' > "$HK"
+assert_exit 2 bash "$SK/scripts/guard-install.sh" . eng WP-01 "pkg/coleta.py"
+assert_contains "$(cat "$HK")" "echo outro" "hook de terceiros preservado"
+rm -f "$HK"
+
+# worktree vinculado: hook comum, .sdd-role só no worktree guardado
+R3=$(fixture_repo padrao); cd "$R3"
+git worktree add -q "$TMP/wt" -b feat/x
+assert_exit 0 bash "$SK/scripts/guard-install.sh" "$TMP/wt" eng WP-01 "pkg/coleta.py"
+cd "$TMP/wt"
+echo "# w" >> pkg/coleta.py; git add pkg/coleta.py
+assert_exit 1 git commit -qm t
+assert_exit 0 env SDD_GIT_MANAGER=1 git commit -qm t
+cd "$R3"
+echo "# m" >> pkg/envio.py; git add pkg/envio.py
+assert_exit 0 git commit -qm t   # sem .sdd-role no worktree principal: no-op

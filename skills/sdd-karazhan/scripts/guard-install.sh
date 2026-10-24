@@ -18,7 +18,8 @@ paths="$4"
 case "$role" in eng|rev) ;; *) die "role inválido: $role (use eng ou rev)" ;; esac
 [ -d "$worktree" ] || die "worktree não encontrado: $worktree"
 worktree="$(cd "$worktree" && pwd)"
-git -C "$worktree" rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git: $worktree"
+top="$(git -C "$worktree" rev-parse --show-toplevel 2>/dev/null)" || die "não é um repositório git: $worktree"
+worktree="$top"
 
 fonte="$ROOT/hooks/pre-commit"
 [ -f "$fonte" ] || die "hook não encontrado: $fonte"
@@ -38,8 +39,8 @@ git_path() {
 
 hooks_dir="$(git_path hooks)"
 destino="$hooks_dir/pre-commit"
-if [ -e "$destino" ] && ! cmp -s "$fonte" "$destino"; then
-  die "já existe um pre-commit diferente em $destino; encadeie manualmente chamando $fonte"
+if [ -e "$destino" ] && ! grep -q "^# sdd-karazhan pre-commit" "$destino"; then
+  die "já existe um pre-commit que não é do sdd-karazhan em $destino; encadeie manualmente chamando $fonte"
 fi
 mkdir -p "$hooks_dir"
 cp "$fonte" "$destino"
