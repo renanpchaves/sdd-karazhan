@@ -197,7 +197,8 @@ else
   recon=0
   if [ "$mapa" != ok ] || [ "$esqueleto" = fora ]; then recon=1; fi
   arch_term=0
-  if [ "$n_areas" -ge 2 ] || { [ "$tipo" = feature ] && [ "$spec" = não ]; }; then arch_term=1; fi
+  # time mínimo: com 1 área (mesmo feature sem spec) o Architect é subagente de spec curta.
+  if [ "$n_areas" -ge 2 ] || [ "$nivel" = Grande ]; then arch_term=1; fi
 
   [ "$recon" -eq 0 ] || convocar rec claude barato sub
   if [ "$arch_term" -eq 1 ]; then convocar arch claude capaz terminal; else convocar arch claude capaz sub "spec curta"; fi
