@@ -1,0 +1,18 @@
+{
+  "name": "sdd-karazhan",
+  "displayName": "SDD Karazhan",
+  "description": "Orquestração SDD para Maestri (Claude Code + Codex): convocação mínima por script, guardrails de ambiente e spec como contrato. Fallback em subagentes.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Renan Chaves"
+  },
+  "repository": "https://github.com/renanpchaves/sdd-karazhan",
+  "license": "MIT",
+  "keywords": [
+    "maestri",
+    "spec-driven-development",
+    "multi-agent",
+    "agent-orchestration",
+    "code-review"
+  ]
+}

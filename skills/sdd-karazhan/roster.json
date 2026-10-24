@@ -1,0 +1,8 @@
+{
+  "orch": ["antonidas", "jaina", "aethas", "khadgar", "aegwynn", "kelthuzad"],
+  "arch": ["alexstrasza", "nozdormu", "ysera", "kalecgos", "wrathion", "ebyssian", "vyranoth", "merithra", "krasus"],
+  "rec": ["garona", "valeera", "mathias", "shandris", "nathanos", "rexxar"],
+  "eng": ["grom", "saurfang", "durotan", "orgrim", "cairne", "baine", "thrall", "varian", "muradin", "magni", "tyrande", "malfurion", "illidan"],
+  "rev": ["uther", "tirion", "turalyon", "bolvar", "liadrin", "alleria", "arthas"],
+  "git": ["gazlowe", "gallywix", "mekkatorque", "thermaplugg", "brann", "sprocket"]
+}

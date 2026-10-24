@@ -1,0 +1,13 @@
+{
+  "mapa_max_dias": 30,
+  "eng_max": 3,
+  "palavras": {
+    "correcao": ["bug", "ajuste", "fix", "corrigir", "erro"],
+    "feature": ["feature", "novo", "nova", "migração", "migracao", "módulo", "modulo", "adicionar", "criar"]
+  },
+  "esqueleto": {
+    "plist": "deploy/*.plist",
+    "tests": "tests",
+    "run": "run.sh"
+  }
+}

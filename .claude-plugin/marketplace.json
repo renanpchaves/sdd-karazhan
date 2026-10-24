@@ -1,0 +1,13 @@
+{
+  "name": "sdd-karazhan",
+  "owner": {
+    "name": "Renan Chaves"
+  },
+  "plugins": [
+    {
+      "name": "sdd-karazhan",
+      "source": "./",
+      "description": "Orquestração SDD para Maestri (Claude Code + Codex): convocação mínima por script, guardrails de ambiente e spec como contrato. Fallback em subagentes."
+    }
+  ]
+}
