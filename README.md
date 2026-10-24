@@ -44,7 +44,7 @@ Papel diz o trabalho. Nome dá identidade. Não precisa saber lore.
 /sdd-karazhan adicionar filtro por empresa no relatório
 ```
 
-O script lê o repo e mostra a folha de convocação:
+O Orchestrator lê o inventário e monta a folha:
 
 ```
 Pedido: adicionar filtro por empresa no relatório
@@ -88,7 +88,7 @@ Mínimo é 3. Quem orquestra não implementa. Quem implementa não revisa. Dois 
 
 | Script | Faz |
 |---|---|
-| `convocar.sh` | Dimensiona o pedido. Imprime a folha. |
+| `inventario.sh` | Lista fatos do repo. O Orchestrator decide o time. |
 | `pick-name.sh eng` | Sorteia nome livre do elenco. |
 | `scaffold.sh 003-slug` | Cria specs e tasks. |
 | `mapa-check.sh` | Mapa ainda vale? Idade e impressão digital da árvore. |
