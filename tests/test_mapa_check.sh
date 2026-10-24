@@ -9,3 +9,21 @@ bash $S --stamp; sed -i 's/date=[0-9-]*/date=2020-01-01/' .claude/specs/mapa.md
 assert_contains "$(bash $S || true)" "vencido-idade" "idade"
 R2=$(fixture_repo plano); cd $R2; mkdir -p .claude/specs
 assert_contains "$(bash $S || true)" "esqueleto=fora" "repo fora do padrão"
+# fingerprint ignora .claude/: versionar o mapa e arquivos de specs não invalida
+R3=$(fixture_repo padrao); cd $R3; mkdir -p .claude/specs
+bash $S --stamp >/dev/null; git add -A; git commit -qm mapa
+assert_contains "$(bash $S || true)" "mapa=ok" "mapa versionado segue ok"
+echo "x" > .claude/specs/decisoes.md; git add -A; git commit -qm specs
+assert_exit 0 bash $S
+echo "novo" > pkg/novo.py; git add -A; git commit -qm novo
+assert_contains "$(bash $S || true)" "vencido-arvore" "arquivo fora de .claude/ invalida"
+# brain_dir: mapa vai para <brain_dir>/repos/<nome>.md
+R4=$(fixture_repo padrao); cd $R4; mkdir -p .claude/specs
+printf '{"presets":{},"config":{},"brain_dir":"%s"}\n' "$TMP/brain" > .claude/specs/karazhan.json
+bash $S --stamp >/dev/null
+M="$TMP/brain/repos/$(basename "$R4").md"
+[ -f "$M" ] || fail "mapa do brain_dir não criado: $M"
+assert_contains "$(head -n1 "$M")" "<!-- karazhan fingerprint=" "primeira linha do mapa no brain"
+assert_exit 0 bash $S
+# fora de repo git: exit 2
+assert_exit 2 bash -c "cd '$TMP' && bash '$S'"

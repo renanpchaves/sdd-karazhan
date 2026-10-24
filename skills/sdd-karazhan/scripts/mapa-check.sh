@@ -6,6 +6,7 @@
 # Executar na raiz do repo alvo.
 . "$(dirname "$0")/../lib/common.sh"
 need jq git
+git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
 
 AJUDA="uso: mapa-check.sh [--stamp] [--mapa <arquivo>], executado na raiz do repo alvo"
 stamp=0
@@ -43,18 +44,20 @@ if [ -z "$mapa" ]; then
   fi
 fi
 
-# Impressão digital: 12 primeiros hex do sha1 da lista de arquivos versionados.
+# Impressão digital: 12 primeiros hex do sha1 da lista de arquivos versionados, ignorando .claude/
+# (o próprio mapa vive lá; senão o carimbo se invalidaria ao ser versionado).
 if command -v sha1sum >/dev/null 2>&1; then
   hash=sha1sum
 else
   hash="shasum"
 fi
-fp="$(git ls-files | $hash | cut -c1-12)"
+fp="$({ git ls-files | grep -v '^\.claude/' || true; } | $hash | cut -c1-12)"
 
 if [ "$stamp" -eq 1 ]; then
   linha="<!-- karazhan fingerprint=$fp date=$(date +%Y-%m-%d) -->"
   mkdir -p "$(dirname "$mapa")"
   tmp="$(mktemp)"
+  trap 'rm -f "$tmp"' EXIT
   if [ -f "$mapa" ]; then
     if head -n1 "$mapa" | grep -q '^<!-- karazhan '; then
       { echo "$linha"; tail -n +2 "$mapa"; } > "$tmp"
@@ -64,7 +67,7 @@ if [ "$stamp" -eq 1 ]; then
   else
     { echo "$linha"; echo "# Mapa — $(basename "$(git rev-parse --show-toplevel)")"; } > "$tmp"
   fi
-  mv "$tmp" "$mapa"
+  cat "$tmp" > "$mapa"
   echo "carimbado: $mapa fingerprint=$fp"
   exit 0
 fi
