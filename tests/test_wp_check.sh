@@ -155,17 +155,20 @@ if command -v pytest >/dev/null 2>&1; then
   assert_contains "$out" "aceite: falha" "--tudo roda tests/aceite inteiro"
   assert_contains "$out" "== aceite (--tudo: tests/aceite inteiro)" "cabeçalho do --tudo"
   assert_contains "$out" "testes: ok" "etapa testes não coleta tests/aceite"
-  # regressão entre WPs: a WP-01 pronto quebrada reprova a WP-10
+  # regressão entre WPs, só com --regressao: a WP-01 pronto quebrada reprova a WP-10
   printf 'def test_a():\n    assert False\n' > tests/aceite/test_wp01_a.py
   git commit -qam wp01-quebrada
-  out=$(bash $W WP-10 --tasks $T || true)
+  out=$(bash $W WP-10 --tasks $T --regressao || true)
   assert_contains "$out" "aceite: ok" "WP-01 em fazendo não entra na WP-10"
   tarefas pronto > $T
   out=$(bash $W WP-10 --tasks $T || true)
-  assert_contains "$out" "aceite: falha" "WP-01 pronto quebrada reprova a WP-10"
+  assert_contains "$out" "aceite: ok" "sem --regressao, só os arquivos da WP"
+  assert_contains "$out" "== aceite (WP-10)" "sem --regressao, cabeçalho só da WP"
+  out=$(bash $W WP-10 --tasks $T --regressao || true)
+  assert_contains "$out" "aceite: falha" "WP-01 pronto quebrada reprova a WP-10 com --regressao"
   assert_contains "$out" "== aceite (WP-10; regressão: WP-01)" "cabeçalho lista a regressão"
   tarefas aprovado > $T
-  out=$(bash $W WP-10 --tasks $T || true)
+  out=$(bash $W WP-10 --tasks $T --regressao || true)
   assert_contains "$out" "aceite: ok" "WP-01 aprovado (ainda não integrada) não entra"
   case "$out" in *"regressão: WP-01"*) fail "aprovado entrou na regressão: $out" ;; esac
   git checkout -q -- $T

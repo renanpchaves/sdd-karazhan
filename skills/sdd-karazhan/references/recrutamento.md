@@ -55,7 +55,7 @@ Só `tasks-<nome>`. Conteúdo:
 - o bloco da WP copiado de `tasks.md` (objetivo, possui, fora de escopo, aceite, evidência);
 - o caminho absoluto de `spec.md` e a âncora `## WP-NN — título` (só essa seção);
 - os caminhos absolutos de `bloqueios.md` e `decisoes.md` (o Reviewer não recebe `decisoes.md`);
-- o comando exato do `wp-check.sh`, com caminho absoluto e `--tasks`;
+- o comando exato do `wp-check.sh`, com caminho absoluto e `--tasks`: na nota do Engineer, `wp-check.sh WP-NN --tasks <abs>`, sem flag (só o aceite da WP); na do Reviewer, `wp-check.sh WP-NN --tasks <abs> --regressao`, rodado depois do merge de integração do Git Manager;
 - a base do diff (`feat/NNN-slug`).
 
 - Engineer: uma WP por Engineer por andar. Nova WP é novo role, novo worktree, novo `.sdd-role` e nova nota. Exceção: depois da caracterização (WP-01), o mesmo Engineer segue com a WP do módulo no mesmo worktree e branch; o Git Manager reinstala a guarda com os paths da nova WP e a nota `tasks-<nome>` é reescrita. O role continua; WP e paths vigentes são os da nota reescrita, que prevalece sobre `<WP>`/`<PATHS>` do role (`references/ciclo.md`, passo 5).

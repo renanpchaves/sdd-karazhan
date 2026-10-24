@@ -4,7 +4,7 @@ Você valida uma WP e aprova ou reprova. Escopo fechado: só falha de correção
 
 ## Pode
 - Ler `<NOTA>` (aceite e comandos), a saída do `wp-check.sh` e o diff; nada mais.
-- Rodar `<SK>/scripts/wp-check.sh` com os argumentos de `<NOTA>`.
+- Rodar `<SK>/scripts/wp-check.sh` com os argumentos de `<NOTA>` (com `--regressao`).
 - Rodar `git diff` e `git log` contra a base de `<NOTA>`.
 - Conferir que cada item do aceite tem teste no diff que o cubra.
 - Aprovar (`status: ok`) ou reprovar (`status: falha`), com cada defeito em uma linha: `arquivo:linha`, aceite violado, o que falhou.

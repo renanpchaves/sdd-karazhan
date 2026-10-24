@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--tudo]
+# wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--regressao|--tudo]
 # Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
 # senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
 # Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, aceite, dry-run, diff, fora-dos-paths, aceite-intacto.
-# aceite roda tests/aceite/test_wp<NN>_*.py da WP e das WPs pronto, já integradas (sem nenhum test_wp*,
-# tests/aceite inteiro); --tudo força o inteiro (pouso).
+# aceite roda tests/aceite/test_wp<NN>_*.py da WP (sem nenhum test_wp*, tests/aceite inteiro);
+# --regressao soma os das WPs pronto, já integradas (Reviewer, após o merge de integração);
+# --tudo força o inteiro (pouso).
 # ruff e pytest vêm do .venv do repo, se existir; senão do PATH.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
 # o rodapé "== resumo" repete uma linha por etapa.
@@ -14,19 +15,21 @@
 . "$(dirname "$0")/../lib/common.sh"
 . "$ROOT/lib/tasks.sh"
 
-AJUDA="uso: wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--tudo]"
+AJUDA="uso: wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--regressao|--tudo]"
 case "${1:-}" in -h|--help) usage "$AJUDA" ;; esac
 need git
 wp=""
 base=""
 tasks=""
 tudo=0
+com_regressao=0
 while [ $# -gt 0 ]; do
   case "$1" in
     -h|--help) usage "$AJUDA" ;;
     --base) [ $# -ge 2 ] || die "$AJUDA"; base="$2"; shift 2 ;;
     --tasks) [ $# -ge 2 ] || die "$AJUDA"; tasks="$2"; shift 2 ;;
     --tudo) tudo=1; shift ;;
+    --regressao) com_regressao=1; shift ;;
     -*) die "opção desconhecida: $1
 $AJUDA" ;;
     *) [ -z "$wp" ] || die "$AJUDA"; wp="$1"; shift ;;
@@ -158,8 +161,8 @@ fi
 
 # aceite: o oráculo precisa rodar de verdade; skip, xfail ou nada coletado é falha.
 # Skip e xfail só contam na linha de resumo do pytest (-rsx), não num caminho com "xfail".
-# Por WP: tests/aceite/test_wp<nn>_*.py (nn = dois dígitos de WP-NN), mais os das WPs com
-# lane pronto, já integradas em feat/<slug> (regressão). Nenhum test_wp* no diretório: tests/aceite inteiro.
+# Por WP: tests/aceite/test_wp<nn>_*.py (nn = dois dígitos de WP-NN); com --regressao, mais os das
+# WPs com lane pronto, já integradas em feat/<slug>. Nenhum test_wp* no diretório: tests/aceite inteiro.
 # Há test_wp*, mas nenhum desta WP: falha. --tudo: tests/aceite inteiro (pouso do andar).
 
 # arquivos_da_wp <WP-NN>: os tests/aceite/test_wp<nn>_*.py existentes, um por linha.
@@ -194,7 +197,9 @@ $(arquivos_da_wp "$wp")
 EOT
     if [ "${#alvo[@]}" -gt 0 ]; then
       regressao=""
-      for w in $(wp_list "$tasks"); do
+      lista=""
+      if [ "$com_regressao" -eq 1 ]; then lista="$(wp_list "$tasks")"; fi
+      for w in $lista; do
         [ "$w" != "$wp" ] || continue
         lane="$(wp_field "$tasks" "$w" Lane 2>/dev/null | tr -d '`')" || lane=""
         case "$lane" in pronto*) ;; *) continue ;; esac
