@@ -1,24 +1,46 @@
 # Convocação
 
-Entrada: pedido + `inventario.sh`; o Orchestrator decide. Área tocada: módulo citado no pedido ou área do inventário (plist, launchd → `deploy`; alembic → `migracoes`). Áreas implícitas pela migração (`models`, `db`, `schemas`, as que existirem) contam como UMA área junto com a migração: um Builder.
+Entrada: pedido + `inventario.sh`; o Orchestrator decide em três passos: conta as áreas, escolhe o tamanho, escolhe o nível.
 
-## Nível e tamanho
+## 1. Área
+
+Parte do repo que um Builder assume sozinho: um módulo citado no pedido (`coleta`, `relatorio`) ou uma área do inventário (`deploy` = plist, launchd, `run.sh`, `setup.sh`; `config`; `migracoes` = alembic). Migração leva junto `models`, `db` e `schemas`: tudo isso conta como UMA área.
+
+## 2. Tamanho (o time)
+
+| Tamanho | Áreas tocadas | Builders | Architect | Git Manager | Espera "vai"? |
+|---|---|---|---|---|---|
+| Pequena | 1 | 1 | subagente | subagente | não |
+| Média | 2 a `bld_max` | 1 por área | terminal | subagente | sim |
+| Grande | mais que `bld_max`, ou `grande` | `bld_max`, áreas agrupadas por dependência | terminal | terminal | sim |
+
+Reviewer: um, em Codex, em qualquer tamanho.
+
+## 3. Nível (o contrato)
+
+Independe do tamanho:
 
 | Nível | Quando | Contrato |
 |---|---|---|
 | Nível 0 | O diff cabe numa frase | Nenhum: o Orchestrator avisa que não usa a skill e para; o usuário faz direto, com pytest |
-| 1 | Pequena | Spec de 1 página: objetivo, arquivos e interfaces, fora de escopo, comandos de aceitação. `plan.md` opcional |
-| 2 | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger (`tasks.md`, `decisoes.md`) |
+| 1 | Pequena sem banco, integração nova nem auth | Spec de 1 página: objetivo, arquivos e interfaces, fora de escopo, comandos de aceitação. `plan.md` opcional |
+| 2 | Média ou Grande; ou qualquer tamanho com banco (migração inclusa), integração nova ou auth; ou projeto novo | Spec curta, testes de contrato e fixtures aprovados antes, ledger (`tasks.md`, `decisoes.md`); `plan.md` com 2+ WPs |
 
-Tamanho: Pequena = 1 área; Média = 2 a `bld_max`; Grande = mais que `bld_max`, ou `grande`. Tamanho e contrato são eixos separados: 1 área com integração ou banco (inclusive migração, que já leva `models`/`db`/`schemas`) = Pequena + Nível 2 (Architect subagente: spec curta + testes de contrato exigidos; `plan.md` só com 2+ WPs).
+| Pedido | Áreas | Tamanho | Nível |
+|---|---|---|---|
+| "corrigir o texto do e-mail" | 1 | — | 0 |
+| "filtro por empresa no relatório" | 1 | Pequena | 1 |
+| "ler um campo novo da API do Graph no coletor" | 1 | Pequena | 2 |
+| "coletor novo com plist no launchd" | 2 | Média | 2 |
+| "migração + sincronização + relatório + envio" | 4 | Grande | 2 |
 
 ## Papéis
 
-- **Architect** (claude/capaz): terminal com 2+ áreas, nominal `arch` ou Grande; senão subagente de spec curta.
+- **Architect** (claude/capaz): terminal ou subagente conforme a tabela de tamanho; nominal `arch` = terminal.
 - **Recon** (claude/barato): subagente antes do Architect se `mapa` ≠ `ok` ou `esqueleto: fora`; nunca em `repo: novo`.
-- **Builder**: terminal Claude Code, um por área, até `bld_max`; com mais áreas que `bld_max`, agrupe por dependência (ex.: relatorio+envio num Builder). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
+- **Builder**: terminal Claude Code; agrupamento por dependência na Grande (ex.: relatorio+envio). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
 - **Reviewer** (codex/capaz): terminal. Sem Codex: no Maestri, `Reviewer: NÃO CONVOCADO (sem Codex)` em `Terminais:` e pergunte; fora dele, subagente Claude noutro preset, degradação em `decisoes.md`.
-- **Git Manager** (claude/barato): subagente na Pequena e Média, terminal na Grande. Reaproveita o Git Manager de `conectados` só com origem `terminal`.
+- **Git Manager** (claude/barato): conforme a tabela de tamanho. Reaproveita o de `conectados` só com origem `terminal`.
 
 Nome: `pick-name.sh <prefixo>` (o personagem, ex.: `Grom`). Em `Terminais:` e `Subagentes:`, papel antes do nome (`Builder Grom`); em `Presets:`, `Nome=preset`. Preset: família e tier em `presets`; sem o tier, sobe antes de descer (medio → capaz → barato).
 
@@ -28,7 +50,7 @@ Projeto novo: duas folhas. Folha 1 (git + arch, `Tamanho: a definir (até o plan
 
 Brownfield: o Architect confere `tests/test_<mod>*`; sem teste, a WP-01 é o teste de caracterização (fixture em `tests/fixtures/`, teste em `tests/`), feita em série pelo Builder do módulo, no mesmo worktree, antes da WP dele, e revisada antes da WP do módulo; não muda o tamanho.
 
-Folha: sete linhas, porquê inline. Pequena: mostre e siga; terminais só nascem após o checkpoint da spec (passo 3), e `para` ajusta o time. Média e Grande: espere uma palavra. `NÃO CONVOCADO` ou nominal inválida: mostre o motivo e espere.
+Folha: sete linhas, porquê inline. Pequena segue sem esperar, mas os terminais só nascem após o checkpoint da spec (passo 3), e `para` ajusta o time. `NÃO CONVOCADO` ou nominal inválida: mostre o motivo e espere.
 
 Chamada nominal (`/sdd-karazhan arch bld git`): só esses; `bld` exige `git`, `rev` exige `bld`. `grande` sozinho só força o tamanho.
 

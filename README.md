@@ -62,17 +62,39 @@ Já sabe quem quer? Chama pelo nome:
 
 Vem só quem você chamou. Builder exige Git Manager; Reviewer exige Builder. Faltou: o Orchestrator avisa e pergunta de novo. `/sdd-karazhan grande <pedido>` não é chamada nominal: só força o tamanho Grande.
 
-## Três níveis
+## Tamanho e nível
 
-| Nível | Quando | Contrato | Time |
+Duas perguntas separadas: **quantas pessoas** (tamanho) e **quanto contrato** (nível).
+
+**Área** é uma parte do repo que um Builder assume sozinho: um módulo (`coleta`, `relatorio`), `deploy` (plist, `run.sh`, `setup.sh`), `config` ou `migracoes` (alembic, com `models`/`db`/`schemas` juntos). O Orchestrator conta quantas o pedido toca.
+
+**Tamanho = o time.**
+
+| Tamanho | Áreas | Builders | Architect | Git Manager | Espera seu "vai"? |
+|---|---|---|---|---|---|
+| **Pequena** | 1 | 1 | subagente | subagente | não |
+| **Média** | 2 a `bld_max` (3) | 1 por área | terminal | subagente | sim |
+| **Grande** | mais que `bld_max` | `bld_max`, áreas agrupadas | terminal | terminal | sim |
+
+Reviewer: sempre um, em Codex. Pequena = 2 terminais executores (Builder + Reviewer) mais o seu. Quem orquestra não implementa. Quem implementa não revisa.
+
+**Nível = o contrato.**
+
+| Nível | Quando | Contrato |
+|---|---|---|
+| **0** | O diff cabe numa frase | Nenhum. O Orchestrator avisa que não vai usar a skill e para: você faz direto e roda pytest. |
+| **1** | Pequena sem banco, integração nova nem auth | Spec de 1 página com comandos de aceitação |
+| **2** | Média ou Grande; ou banco, integração nova, auth ou projeto novo em qualquer tamanho | Spec curta, testes de contrato e fixtures aprovados antes, ledger |
+
+**Exemplos**
+
+| Pedido | Áreas | Tamanho | Nível |
 |---|---|---|---|
-| **0** | O diff cabe numa frase | Nenhum. O Orchestrator avisa que não vai usar a skill e para: você faz direto e roda pytest. | Você |
-| **1** | Pequena: uma área | Spec de 1 página com comandos de aceitação | 1 Builder · Reviewer · Architect subagente · Git Manager subagente |
-| **2** | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2 a `bld_max` Builders. Grande: mais áreas que `bld_max`, Architect e Git Manager em terminal |
-
-Pequena: 2 terminais executores (Builder + Reviewer) mais o seu. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
-
-Nível e tamanho são eixos separados: uma área com integração ou banco (inclusive migração) é Pequena com contrato Nível 2.
+| "corrigir o texto do e-mail" | 1 | — | 0 |
+| "filtro por empresa no relatório" | 1 | Pequena | 1 |
+| "ler um campo novo da API do Graph no coletor" | 1 | Pequena | 2 |
+| "coletor novo com plist no launchd" | 2 | Média | 2 |
+| "migração + sincronização + relatório + envio" | 4 | Grande | 2 |
 
 Projeto novo: duas folhas. A primeira (Git Manager faz `git init`, Architect escreve spec e plan) sempre espera sua palavra; a segunda sai do `plan.md`, e a onda 1 é o esqueleto, em série. Repo antigo com módulo sem teste: teste de caracterização antes de mexer.
 
