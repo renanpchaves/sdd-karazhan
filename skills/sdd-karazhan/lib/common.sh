@@ -26,3 +26,6 @@ need() {
     command -v "$c" >/dev/null 2>&1 || die "comando obrigatório ausente: $c" 2
   done
 }
+
+# jqr <args>: jq -r sem CR (no Windows o jq emite CRLF). Usar para ler strings de JSON.
+jqr() { jq -r "$@" | tr -d '\r'; }
