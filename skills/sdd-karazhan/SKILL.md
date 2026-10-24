@@ -20,14 +20,14 @@ Rode `maestri list`. Sem `maestri`, siga em modo subagente e diga isso na primei
 Detalhe em `references/ciclo.md`. Scripts em `scripts/`.
 
 1. Inventariar: `inventario.sh` imprime os fatos.
-2. Decidir: o time sai de `references/convocacao.md`. Mostre a folha; Pequena convoca direto, Média e Grande esperam uma palavra.
-3. Contratar: Recon (se a folha pedir), `scaffold.sh`, Architect.
+2. Decidir: o time sai de `references/convocacao.md`. Mostre a folha; Pequena segue sem esperar (terminais só depois do checkpoint da spec), Média e Grande esperam uma palavra.
+3. Contratar: Recon (antes do Architect, se a folha pedir), `scaffold.sh`, Architect.
 4. Particionar: `donos.sh` precisa sair 0.
 5. Recrutar: Git Manager, Engineers e Reviewer (`references/recrutamento.md`).
 6. Delegar: quatro linhas por WP. Evidência com `wp-check.sh`.
 7. Integrar: `painel.sh --publicar` e checkpoint.
 
-Níveis de contrato: 0 (diff de uma frase: sem skill), 1 (Pequena: spec de 1 página), 2 (Média, Grande, projeto novo: spec, testes de contrato e ledger).
+Níveis de contrato: 0 (diff de uma frase: sem skill), 1 (Pequena: spec de 1 página), 2 (Média, Grande, projeto novo, integração ou banco: spec, testes de contrato e ledger). Tamanho do time é outro eixo.
 
 ## Papéis
 

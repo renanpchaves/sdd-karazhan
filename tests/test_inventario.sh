@@ -98,6 +98,16 @@ assert_contains "$(bash $I)" "áreas: pacote, deploy, config, tests" "setup.sh s
 rm setup.sh; git add -A
 assert_contains "$(bash $I)" "áreas: pacote, config, tests" "sem deploy/, run.sh nem setup.sh"
 
+# --- alembic/ vira a área migracoes e não entra em módulos ---
+R5=$(fixture_repo padrao); cd $R5
+mkdir -p alembic/versions; printf 'x = 1
+' > alembic/env.py; printf 'y = 2
+' > alembic/versions/x.py
+git add -A; git commit -qm alembic
+out=$(bash $I)
+assert_eq "áreas: pacote, deploy, config, migracoes, tests" "$(linha "$out" áreas)" "alembic é migracoes"
+assert_eq "módulos: cli, coleta, envio, relatorio, settings" "$(linha "$out" módulos)" "alembic fora de módulos"
+
 # --- plano: esqueleto fora ---
 R2=$(fixture_repo plano); cd $R2
 out=$(bash $I)

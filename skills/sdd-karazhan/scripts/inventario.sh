@@ -34,10 +34,10 @@ lista() {
   if [ -z "$1" ]; then echo "$2"; else printf '%s\n' "$1" | awk 'NR > 1 { printf ", " } { printf "%s", $0 }'; echo; fi
 }
 
-# --- código: módulos e áreas ---
+# --- código: módulos e áreas (alembic/ é a área migracoes, fora de módulos) ---
 modulos=""
 if [ -n "$top" ]; then
-  modulos="$({ git -c core.quotepath=off ls-files '*.py' | tr -d '\r' | grep -vE '(^|/)tests/' || true; } |
+  modulos="$({ git -c core.quotepath=off ls-files '*.py' | tr -d '\r' | grep -vE '(^|/)(tests|alembic)/' || true; } |
     sed 's#.*/##; s/\.py$//' | grep -vE '^__.*__$' | tr '[:upper:]' '[:lower:]' | LC_ALL=C sort -u)"
 fi
 pacote=0
@@ -52,6 +52,7 @@ if [ "$novo" -eq 0 ]; then
   if [ "$pacote" -eq 1 ]; then add_area pacote; fi
   if [ -d deploy ] || [ -f run.sh ] || [ -f setup.sh ]; then add_area deploy; fi
   if [ -d config ]; then add_area config; fi
+  if [ -d alembic ]; then add_area migracoes; fi
   if [ -d tests ]; then add_area tests; fi
 fi
 

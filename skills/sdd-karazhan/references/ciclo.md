@@ -16,14 +16,14 @@ scripts/pick-name.sh orch        # nome com que o Orchestrator assina
 
 ## 2. Decidir
 
-- Com o pedido e o inventário, aplique `references/convocacao.md`: nível de contrato, papéis, tiers, presets e nomes (`pick-name.sh <prefixo>` por papel; `git-*` em `conectados` é reaproveitado).
-- Nível 0: não use a skill. Faça direto e rode pytest.
-- Mostre a folha (sete linhas, porquê inline). Pequena: convoque em seguida. Média e Grande: espere uma palavra.
-- Chamada nominal (`arch eng rev git`, `grande`): só os papéis pedidos. `eng` sem `git` ou `rev` sem `eng`: mostre o motivo e pergunte de novo. Não complete a lista por conta própria.
-- `Reviewer: NÃO CONVOCADO (sem Codex)`: pergunte ao usuário se segue sem Reviewer ou se configura um preset Codex. Não siga em silêncio.
+- Com o pedido e o inventário, aplique `references/convocacao.md`: nível de contrato (0/1/2), tamanho do time, papéis, tiers, presets e nomes (`pick-name.sh <prefixo>` por papel; `git-*` em `conectados` é reaproveitado).
+- Nível 0: o Orchestrator diz ao usuário que não vai usar a skill e para; o usuário faz direto.
+- Mostre a folha (sete linhas, porquê inline; a linha `Tamanho:` diz Pequena, Média ou Grande). Pequena: siga sem esperar; os terminais só nascem depois do checkpoint da spec (passo 5), e o usuário responde `para` para ajustar o time. Média e Grande: espere uma palavra.
+- Chamada nominal (`arch eng rev git`): só os papéis pedidos; `arch` nominal é terminal. `eng` sem `git` ou `rev` sem `eng`: mostre o motivo e pergunte de novo. Não complete a lista por conta própria. `grande` sozinho não é chamada nominal: só força o tamanho Grande.
+- `Reviewer: NÃO CONVOCADO (sem Codex)` na linha `Terminais:`: pergunte ao usuário se segue sem Reviewer ou se configura um preset Codex. Não siga em silêncio.
 - Registre em `decisoes.md` cada papel convocado e o sinal que o justificou; desvio da rubrica, com o motivo.
-- `repo: novo`: o Git Manager subagente faz `git init -b main`, `.gitignore` e commit vazio; depois o Architect, antes de dimensionar o resto (`references/convocacao.md`).
-- Folha com Recon: rode-o como subagente com `agents/recon.md` antes do passo 3. Sem Recon, o Architect lê o mapa válido existente (`.claude/specs/mapa.md` ou `<brain_dir>/repos/<repo>.md`) mais o `mapa-padrao.md`.
+- `repo: novo`: duas folhas. Folha 1 (git + arch) sempre espera uma palavra; o Git Manager subagente faz `git init -b main`, `.gitignore` e commit vazio, e o Architect escreve `spec.md` e `plan.md`. Folha 2 sai depois do `plan.md`, com uma área por fronteira de arquivo, e segue as regras normais.
+- Folha com Recon: rode-o como subagente com `agents/recon.md` antes do Architect (passo 3). Sem Recon, o Architect lê o mapa válido existente (`.claude/specs/mapa.md` ou `<brain_dir>/repos/<repo>.md`) mais o `mapa-padrao.md`.
 
 ## 3. Contratar
 
@@ -31,11 +31,12 @@ scripts/pick-name.sh orch        # nome com que o Orchestrator assina
 scripts/scaffold.sh NNN-slug     # NNN = próximo número livre em current/ e archive/
 ```
 
-- Architect terminal (2+ áreas, chamada nominal ou Grande): conduz a descoberta e escreve `spec.md` e `plan.md`.
+- Spec existente (`spec=sim`): siga a regra da rubrica; continuar ou reusar slug dispensa o `scaffold.sh`.
+- Architect terminal (2+ áreas, chamada nominal `arch` ou Grande): conduz a descoberta e escreve `spec.md` e `plan.md`.
 - Architect subagente (demais casos): escreve a spec curta com o que o Orchestrator passar. Na Pequena, a conversa de descoberta com o usuário é do Orchestrator, que entrega as respostas ao subagente; o Architect só escreve.
-- Nível 1: spec de 1 página com comandos de aceitação; `plan.md` opcional. Nível 2: spec curta, testes de contrato e fixtures aprovados pelo usuário antes das WPs de implementação, `plan.md` obrigatório.
-- Módulo sem teste que vai mudar: a primeira WP é o teste de caracterização.
-- Projeto novo: onda 1 é o esqueleto, em série, por um Engineer.
+- Nível 1: spec de 1 página com comandos de aceitação; `plan.md` opcional. Nível 2: spec curta, testes de contrato e fixtures aprovados pelo usuário antes das WPs de implementação, `plan.md` obrigatório. Pequena + Nível 2: spec curta + lista dos testes de contrato exigidos; `plan.md` só com mais de uma WP.
+- Brownfield: o Architect confere `tests/test_<mod>*` dos módulos que mudam. Sem teste, a WP-01 é o teste de caracterização (fixture gravada em `tests/fixtures/`, teste em `tests/`), escrita pelo Engineer e revisada antes das outras WPs.
+- Projeto novo: onda 1 é o esqueleto, em série, por um Engineer seguindo `mapa-padrao.md`; depois, paralelo.
 - Checkpoint: o usuário aprova a spec. O Orchestrator nunca escreve spec.
 
 ## 4. Particionar

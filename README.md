@@ -49,14 +49,14 @@ O `inventario.sh` imprime oito linhas de fatos: módulos, áreas, specs, mapa, p
 ```
 Pedido: "adicionar filtro por empresa no relatório"
 Sinais: módulos=1 (relatorio) · spec=não · mapa=ok · testes=sim · nível 1
-Nível: Pequena — um módulo, sem regra de negócio nova
-Terminais: eng-grom (claude/medio) — relatorio · rev-uther (codex/capaz)
+Tamanho: Pequena — um módulo, sem regra de negócio nova
+Terminais: eng-grom (claude/medio) — relatorio · rev-uther (codex/capaz) — Codex, contexto limpo
 Subagentes: arch-ysera — spec curta de 1 página · git-gazlowe (reaproveitado)
 Não convocar: recon — mapa válido, esqueleto padrão
-Presets: eng-grom=cc rev-uther=cx arch-ysera=cc git-gazlowe=cc-mini
+Presets: eng-grom=cc (medio → cc, sem preset medio) rev-uther=cx arch-ysera=cc git-gazlowe=cc-mini
 ```
 
-Pequena: a folha aparece e o time já é convocado. Média e Grande: você diz "vai". Sem Codex, ou chamada nominal inválida: o Orchestrator pergunta antes.
+Pequena: a folha aparece e o trabalho segue sem esperar; os terminais só nascem depois que você aprova a spec. Para mudar o time, responda `para`. Média e Grande: você diz "vai". Sem Codex, ou chamada nominal inválida: o Orchestrator pergunta antes.
 
 Já sabe quem quer? Chama pelo nome:
 
@@ -64,19 +64,21 @@ Já sabe quem quer? Chama pelo nome:
 /sdd-karazhan arch eng git
 ```
 
-Vem só quem você chamou. Engineer exige Git Manager; Reviewer exige Engineer. Faltou: o Orchestrator avisa e pergunta de novo.
+Vem só quem você chamou. Engineer exige Git Manager; Reviewer exige Engineer. Faltou: o Orchestrator avisa e pergunta de novo. `/sdd-karazhan grande <pedido>` não é chamada nominal: só força o tamanho Grande.
 
 ## Três níveis
 
 | Nível | Quando | Contrato | Time |
 |---|---|---|---|
-| **0** | O diff cabe numa frase | Nenhum. Não use a skill: faça direto e rode pytest. | Você |
+| **0** | O diff cabe numa frase | Nenhum. O Orchestrator avisa que não vai usar a skill e para: você faz direto e roda pytest. | Você |
 | **1** | Pequena: uma área | Spec de 1 página com comandos de aceitação | 1 Engineer · Reviewer · Architect subagente |
-| **2** | Média, Grande, projeto novo, integração nova ou banco | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2–3 Engineers. Grande: mais áreas que `eng_max`, Architect e Git Manager em terminal |
+| **2** | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2 a `eng_max` Engineers. Grande: mais áreas que `eng_max`, Architect e Git Manager em terminal |
 
 Mínimo é 3 terminais. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
 
-Projeto novo: o Git Manager faz `git init`, o Architect vem primeiro e a onda 1 é o esqueleto, em série. Repo antigo com módulo sem teste: teste de caracterização antes de mexer.
+Nível e tamanho são eixos separados: uma área com integração ou banco (inclusive migração) é Pequena com contrato Nível 2.
+
+Projeto novo: duas folhas. A primeira (Git Manager faz `git init`, Architect escreve spec e plan) sempre espera sua palavra; a segunda sai do `plan.md`, e a onda 1 é o esqueleto, em série. Repo antigo com módulo sem teste: teste de caracterização antes de mexer.
 
 ## Regras que não se negociam
 

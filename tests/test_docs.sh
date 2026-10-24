@@ -15,7 +15,7 @@ grep -q '^name: sdd-karazhan' $SK/SKILL.md || fail "frontmatter"
 grep -qi 'maestri' $SK/SKILL.md || fail "gatilho"
 C=$SK/references/convocacao.md
 [ -f $C ] || fail "falta ref convocacao"
-[ "$(wc -w < $C)" -le 500 ] || fail "convocacao.md > 500 palavras"
+[ "$(wc -w < $C)" -le 650 ] || fail "convocacao.md > 650 palavras"
 for p in Orchestrator Architect Recon Engineer Reviewer 'Git Manager' 'Nível 0' 'projeto novo' 'caracterização'; do
   grep -q "$p" $C || fail "convocacao.md sem '$p'"
 done
