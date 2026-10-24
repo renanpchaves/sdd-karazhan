@@ -29,3 +29,12 @@ need() {
 
 # jqr <args>: jq -r sem CR (no Windows o jq emite CRLF). Usar para ler strings de JSON.
 jqr() { jq -r "$@" | tr -d '\r'; }
+
+# dias_desde <YYYY-MM-DD>: imprime os dias inteiros entre a data e hoje.
+# GNU date (Linux, Git Bash) com fallback BSD (macOS). Retorna 1 se a data for inválida.
+dias_desde() {
+  local ts agora
+  ts="$(date -d "$1" +%s 2>/dev/null)" || ts="$(date -j -f %Y-%m-%d "$1" +%s 2>/dev/null)" || return 1
+  agora="$(date +%s)"
+  echo $(((agora - ts) / 86400))
+}
