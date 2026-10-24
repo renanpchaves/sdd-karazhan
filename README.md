@@ -4,9 +4,9 @@
 
 # sdd-karazhan
 
-**Spec primeiro. Time mínimo. Codex julga o Claude.**
+**Spec primeiro. Time mínimo. Revisão independente.**
 
-Plugin do Claude Code para orquestrar agentes no [Maestri](https://maestri.dev).
+Plugin do Claude Code para orquestrar times de agentes de IA. Roda com terminais no canvas do [Maestri](https://maestri.dev) ou com subagentes num terminal comum.
 
 ---
 
@@ -110,9 +110,10 @@ Por que assim: [`docs/pesquisa/2026-10-24-praticas-agentes.md`](docs/pesquisa/20
 | `painel.sh 003-slug` | Gera o painel do `tasks.md`. |
 | `guard-install.sh` | Instala `.sdd-role` e `pre-commit` no worktree. |
 
-## Fora do Maestri
+## Onde roda
 
-Funciona. Com degradação explícita: papéis viram subagentes do Claude Code, Reviewer cai para Claude em preset diferente, guard de path vira só checagem de diff. A skill avisa na primeira linha.
+- **Maestri:** cada papel é um terminal no canvas, com nota própria e worktree próprio. Reviewer em Codex.
+- **Terminal comum, sem Maestri:** os papéis viram subagentes do Claude Code; Reviewer em Claude com preset diferente; guard de path vira só checagem de diff. A skill avisa na primeira linha qual modo está ativo.
 
 ## Instalar
 

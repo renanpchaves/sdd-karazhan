@@ -1,7 +1,7 @@
 {
   "name": "sdd-karazhan",
   "displayName": "SDD Karazhan",
-  "description": "Orquestração SDD para Maestri (Claude Code + Codex): convocação mínima por script, guardrails de ambiente e spec como contrato. Fallback em subagentes.",
+  "description": "Orquestração SDD de times de agentes, no canvas do Maestri ou com subagentes no terminal: time mínimo decidido sobre fatos do repo, guardrails de ambiente e spec como contrato.",
   "version": "0.1.0",
   "author": {
     "name": "Renan Chaves"

@@ -1,6 +1,6 @@
 ---
 name: sdd-karazhan
-description: Orquestra times de agentes de IA no Maestri com a spec em markdown como contrato. Convoca só o time que a missão precisa, decidido sobre fatos do repo, com Engineer em Claude Code e Reviewer em Codex. Use quando o usuário mencionar Maestri, Modo Maestro, partitura, andar (do Maestri), recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
+description: Orquestra times de agentes de IA, no canvas do Maestri ou com subagentes no terminal, com a spec em markdown como contrato. Convoca só o time que a missão precisa, decidido sobre fatos do repo, com Engineer em Claude Code e Reviewer em Codex. Use quando o usuário mencionar Maestri, Modo Maestro, partitura, andar (do Maestri), recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
 ---
 
 # sdd-karazhan
