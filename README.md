@@ -2,8 +2,6 @@
   <img src="assets/banner.jpg" alt="sdd-karazhan" width="100%">
 </p>
 
-# sdd-karazhan
-
 **Spec primeiro. Time mínimo. Revisão independente.**
 
 Plugin do Claude Code para orquestrar times de agentes de IA. Roda com terminais no canvas do [Maestri](https://maestri.dev) ou com subagentes num terminal comum.
