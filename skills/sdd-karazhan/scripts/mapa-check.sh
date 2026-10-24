@@ -5,10 +5,11 @@
 # Exit 0 para ok, 1 para os demais. --stamp grava/atualiza a 1ª linha do mapa e sai 0.
 # Executar na raiz do repo alvo.
 . "$(dirname "$0")/../lib/common.sh"
-need jq git
-git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
 
 AJUDA="uso: mapa-check.sh [--stamp] [--mapa <arquivo>], executado na raiz do repo alvo"
+case "${1:-}" in -h|--help) usage "$AJUDA" ;; esac
+need jq git
+git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
 stamp=0
 mapa=""
 while [ $# -gt 0 ]; do

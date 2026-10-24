@@ -4,12 +4,12 @@
 # O hook vai para o hooks/ comum do repo (worktrees compartilham): instalar uma vez vale para
 # todos, e é no-op onde não há .sdd-role. Exit 2 se core.hooksPath já estiver definido.
 . "$(dirname "$0")/../lib/common.sh"
-need git
 
 AJUDA="uso: guard-install.sh <worktree> <eng|rev> <WP-NN> <paths-csv>"
 case "${1:-}" in
   -h|--help) usage "$AJUDA" ;;
 esac
+need git
 [ "$#" -eq 4 ] || die "$AJUDA"
 worktree="$1"
 role="$2"

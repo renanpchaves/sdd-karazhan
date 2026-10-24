@@ -10,9 +10,10 @@
 # Executar no worktree da feature (a raiz do git é usada).
 . "$(dirname "$0")/../lib/common.sh"
 . "$ROOT/lib/tasks.sh"
-need git
 
 AJUDA="uso: wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]"
+case "${1:-}" in -h|--help) usage "$AJUDA" ;; esac
+need git
 wp=""
 base=""
 tasks=""

@@ -6,14 +6,14 @@
 # Executar na raiz do repo alvo.
 . "$(dirname "$0")/../lib/common.sh"
 . "$ROOT/lib/tasks.sh"
-need git
-git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
 
 AJUDA="uso: donos.sh NNN-slug, executado na raiz do repo alvo"
 case "${1:-}" in
   -h|--help) usage "$AJUDA" ;;
   "") die "$AJUDA" ;;
 esac
+need git
+git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
 slug="$1"
 dir=".claude/specs/current/$slug"
 spec="$dir/spec.md"

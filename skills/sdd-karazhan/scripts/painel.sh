@@ -7,9 +7,10 @@
 # Exit 2 se current/NNN-slug/tasks.md não existe ou os argumentos são inválidos.
 . "$(dirname "$0")/../lib/common.sh"
 . "$ROOT/lib/tasks.sh"
-need git
 
 AJUDA="uso: painel.sh NNN-slug [--publicar]"
+case "${1:-}" in -h|--help) usage "$AJUDA" ;; esac
+need git
 slug=""
 publicar=0
 while [ $# -gt 0 ]; do

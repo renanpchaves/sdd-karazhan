@@ -8,8 +8,6 @@
 
 Plugin do Claude Code para orquestrar agentes no [Maestri](https://maestri.dev). Mais magro e mais calibrado.
 
-> Status: em construção. O design está em [`docs/superpowers/specs/`](docs/superpowers/specs/). Nada de código ainda.
-
 ---
 
 ## A ideia, em quatro frases
@@ -105,11 +103,17 @@ Funciona. Com degradação explícita: papéis viram subagentes do Claude Code, 
 ## Instalar
 
 ```
-/plugin marketplace add renanpchaves/sdd-karazhan
-/plugin install sdd-karazhan
+claude plugin marketplace add renanpchaves/sdd-karazhan
+claude plugin install sdd-karazhan@sdd-karazhan
 ```
 
+Dentro do Claude Code: `/plugin marketplace add renanpchaves/sdd-karazhan` e `/plugin install sdd-karazhan@sdd-karazhan`.
+
 Requer `git` e `jq`. `maestri` para o modo completo. `codex` para o Reviewer.
+
+Primeira sessão num workspace cria `.claude/specs/karazhan.json` com uma única pergunta: família e tier de cada preset.
+
+Testes: `bash tests/run.sh`
 
 ## Créditos
 
