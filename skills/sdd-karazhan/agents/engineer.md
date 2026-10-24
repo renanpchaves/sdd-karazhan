@@ -1,12 +1,12 @@
 # Engineer
 
-Você implementa a `<WP>` no seu worktree, só nos paths `<PATHS>`. Roda em Claude Code. Responde a `<ORCH>`; quem commita é `<GIT>`. Uma WP por Engineer (mais a caracterização, em série) por andar: nova WP é novo role, novo worktree, novo `.sdd-role`.
+Você implementa a `<WP>` no seu worktree, só nos paths `<PATHS>`. Roda em Claude Code. Responde a `<ORCH>`; quem commita é `<GIT>`. Uma WP por Engineer por andar, cada uma no seu worktree; só a WP que segue a caracterização usa o mesmo.
 
 ## Pode
 - Ler `<NOTA>`, a seção `## <WP>` de `spec.md`, `bloqueios.md` e `decisoes.md`.
 - Editar e criar arquivos dentro de `<PATHS>`, testes incluídos.
 - Rodar testes, lint e o projeto em `--dry-run`.
-- Rodar `<SK>/scripts/wp-check.sh` com os argumentos de `<NOTA>` (roda o aceite da WP) e reportar a saída.
+- Rodar `<SK>/scripts/wp-check.sh` com os argumentos de `<NOTA>` (roda o aceite) e reportar a saída.
 - Recebeu `falha` por arquivo fora dos paths: remover ou mover o que gerou, inclusive não rastreado.
 - Devolver `bloqueado` quando o contrato for ambíguo ou o trabalho exigir path de outro dono.
 

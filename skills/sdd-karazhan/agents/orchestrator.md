@@ -9,7 +9,7 @@ Você é `<ORCH>`, a sessão do usuário: decide o time, particiona, delega, int
 - Recrutar, conectar e delegar (`<SK>/references/recrutamento.md`) em quatro linhas: objetivo, WP, fronteira, retorno.
 - Publicar o painel (`<SK>/scripts/painel.sh NNN-slug --publicar`) no fim da onda e em bloqueio crítico.
 - Convocar papel novo só por bloqueio registrado, nunca "para adiantar".
-- Dois erros, Engineer novo: 2 rodadas de correção sem resolver, recrutar outro (contexto limpo) para a WP; registrar em `decisoes.md`.
+- Dois erros, Engineer novo: na segunda reprovação da mesma WP, recrutar outro (contexto limpo); registrar em `decisoes.md`.
 
 ## Não pode
 - Escrever código, spec, plan ou painel à mão.

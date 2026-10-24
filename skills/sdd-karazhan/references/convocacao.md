@@ -1,6 +1,6 @@
 # Convocação
 
-Entrada: pedido + `inventario.sh`; o Orchestrator decide. Área tocada: módulo citado no pedido ou área do inventário (plist, launchd → `deploy`; alembic → `migracoes`). Migração implica também `models`, `db` ou `schemas`, os que existirem.
+Entrada: pedido + `inventario.sh`; o Orchestrator decide. Área tocada: módulo citado no pedido ou área do inventário (plist, launchd → `deploy`; alembic → `migracoes`). Áreas implícitas pela migração (`models`, `db`, `schemas`, as que existirem) contam como UMA área junto com a migração: um Engineer.
 
 ## Nível e tamanho
 
@@ -10,13 +10,13 @@ Entrada: pedido + `inventario.sh`; o Orchestrator decide. Área tocada: módulo 
 | 1 | Pequena | Spec de 1 página: objetivo, arquivos e interfaces, fora de escopo, comandos de aceitação. `plan.md` opcional |
 | 2 | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger (`tasks.md`, `decisoes.md`) |
 
-Tamanho: Pequena = 1 área; Média = 2 a `eng_max`; Grande = mais que `eng_max`, ou `grande`. Tamanho e contrato são eixos separados: 1 área com integração ou banco (inclusive migração) = Pequena + Nível 2 (Architect subagente: spec curta + testes de contrato exigidos; `plan.md` só com 2+ WPs).
+Tamanho: Pequena = 1 área; Média = 2 a `eng_max`; Grande = mais que `eng_max`, ou `grande`. Tamanho e contrato são eixos separados: 1 área com integração ou banco (inclusive migração, que já leva `models`/`db`/`schemas`) = Pequena + Nível 2 (Architect subagente: spec curta + testes de contrato exigidos; `plan.md` só com 2+ WPs).
 
 ## Papéis
 
 - **Architect** (claude/capaz): terminal com 2+ áreas, nominal `arch` ou Grande; senão subagente de spec curta.
 - **Recon** (claude/barato): subagente antes do Architect se `mapa` ≠ `ok` ou `esqueleto: fora`; nunca em `repo: novo`.
-- **Engineer**: terminal Claude Code, um por área, até `eng_max`; com mais áreas que `eng_max`, agrupe por dependência (ex.: db+migracoes num Engineer). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
+- **Engineer**: terminal Claude Code, um por área, até `eng_max`; com mais áreas que `eng_max`, agrupe por dependência (ex.: relatorio+envio num Engineer). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
 - **Reviewer** (codex/capaz): terminal. Sem Codex: no Maestri, `Reviewer: NÃO CONVOCADO (sem Codex)` em `Terminais:` e pergunte; fora dele, subagente Claude noutro preset, degradação em `decisoes.md`.
 - **Git Manager** (claude/barato): subagente na Pequena e Média, terminal na Grande. Reaproveita `git-*` de `conectados`.
 
@@ -26,7 +26,7 @@ Nome: `pick-name.sh <prefixo>`. Preset: família e tier em `presets`; sem o tier
 
 Projeto novo: duas folhas. Folha 1 (git + arch, `Tamanho: a definir (até o plan.md)`) sempre espera uma palavra: Git Manager subagente (`git init -b main`, `.gitignore`, commit vazio); Architect: subagente se o usuário trouxe spec (converter, não reconstruir), terminal se trouxe ideia. Folha 2, depois do `plan.md`: uma área por fronteira (módulo ou pacote do `plan.md`, não arquivo), regras normais; onda 1 = esqueleto em série (um Engineer, `mapa-padrao.md`).
 
-Brownfield: o Architect confere `tests/test_<mod>*`; sem teste, a WP-01 é o teste de caracterização (fixture em `tests/fixtures/`, teste em `tests/`), feita em série pelo Engineer do módulo, antes da WP dele, e revisada antes das outras; não muda o tamanho.
+Brownfield: o Architect confere `tests/test_<mod>*`; sem teste, a WP-01 é o teste de caracterização (fixture em `tests/fixtures/`, teste em `tests/`), feita em série pelo Engineer do módulo, no mesmo worktree, antes da WP dele, e revisada antes das outras; não muda o tamanho.
 
 Folha: sete linhas, porquê inline. Pequena: mostre e siga; terminais só nascem após o checkpoint da spec (passo 3), e `para` ajusta o time. Média e Grande: espere uma palavra. `NÃO CONVOCADO` ou nominal inválida: mostre o motivo e espere.
 
@@ -62,10 +62,10 @@ Presets: arch-nozdormu=cc eng-saurfang=cc eng-thrall=cc rev-tirion=cx git-gallyw
 
 **sincronia**:
 ```
-Pedido: "migração alembic do centro de custo + sincronização incremental"
-Sinais: áreas=4 (db, migracoes, schemas, sync) · spec=não · mapa=ok · testes=sim · nível 2
+Pedido: "migração alembic do centro de custo + sincronização incremental + relatório e envio do fechamento"
+Sinais: áreas=4 (migracoes+db+schemas, sync, relatorio, envio) · spec=não · mapa=ok · testes=sim · nível 2
 Tamanho: Grande — 4 áreas > eng_max 3
-Terminais: arch-kalecgos (claude/capaz) — Grande · eng-durotan (claude/capaz) — db+migracoes, por dependência · eng-cairne (claude/medio) — schemas · eng-baine (claude/medio) — sync · rev-bolvar (codex/capaz) — revisão · git-mekkatorque (claude/barato) — Grande
+Terminais: arch-kalecgos (claude/capaz) — Grande · eng-durotan (claude/capaz) — migracoes+db+schemas, uma área · eng-cairne (claude/medio) — sync · eng-baine (claude/medio) — relatorio+envio, por dependência · rev-bolvar (codex/capaz) — revisão · git-mekkatorque (claude/barato) — Grande
 Subagentes: nenhum
 Não convocar: recon — mapa válido, esqueleto padrão
 Presets: arch-kalecgos=cc eng-durotan=cc eng-cairne=cc eng-baine=cc rev-bolvar=cx git-mekkatorque=cc-mini

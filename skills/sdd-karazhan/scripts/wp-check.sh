@@ -3,7 +3,8 @@
 # Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
 # senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
 # Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, aceite, dry-run, diff, fora-dos-paths, aceite-intacto.
-# aceite roda tests/aceite/test_wp<NN>_*.py da WP (sem eles, tests/aceite inteiro); --tudo força o inteiro (pouso).
+# aceite roda tests/aceite/test_wp<NN>_*.py da WP e das WPs aprovado/pronto (sem nenhum test_wp*,
+# tests/aceite inteiro); --tudo força o inteiro (pouso).
 # ruff e pytest vêm do .venv do repo, se existir; senão do PATH.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
 # o rodapé "== resumo" repete uma linha por etapa.
@@ -157,29 +158,66 @@ fi
 
 # aceite: o oráculo precisa rodar de verdade; skip, xfail ou nada coletado é falha.
 # Skip e xfail só contam na linha de resumo do pytest (-rsx), não num caminho com "xfail".
-if [ -d tests/aceite ] && [ -n "$pytest_bin" ]; then
-  # Arquivos da WP: tests/aceite/test_wp<nn>_*.py (nn = dois dígitos de WP-NN).
-  nn="${wp#[Ww][Pp]-}"
-  case "$nn" in [0-9][0-9]) ;; *) nn="" ;; esac
-  alvo=()
-  if [ "$tudo" -eq 0 ] && [ -n "$nn" ]; then
-    for f in tests/aceite/test_wp"$nn"_*.py; do
-      if [ -f "$f" ]; then alvo+=("$f"); fi
-    done
-  fi
-  if [ "${#alvo[@]}" -gt 0 ]; then
-    cab=""
-  else
-    alvo=(tests/aceite)
-    if [ "$tudo" -eq 1 ]; then cab=" (--tudo: tests/aceite inteiro)"; else cab=" (sem arquivo da WP: rodando tests/aceite inteiro)"; fi
-  fi
-  roda "$pytest_bin" "${alvo[@]}" -rsx -p no:cacheprovider
-  st=ok
-  [ "$rc" -eq 0 ] || st=falha
-  if printf '%s\n' "$saida" | grep -Eq '^(SKIPPED|XFAIL)( |\[)'; then st=falha; fi
-  etapa aceite "$st" "$saida" "$cab"
+# Por WP: tests/aceite/test_wp<nn>_*.py (nn = dois dígitos de WP-NN), mais os das WPs com
+# lane aprovado ou pronto (regressão). Nenhum test_wp* no diretório: tests/aceite inteiro.
+# Há test_wp*, mas nenhum desta WP: falha. --tudo: tests/aceite inteiro (pouso do andar).
+
+# arquivos_da_wp <WP-NN>: os tests/aceite/test_wp<nn>_*.py existentes, um por linha.
+arquivos_da_wp() {
+  local n="${1#[Ww][Pp]-}" f
+  case "$n" in [0-9][0-9]) ;; *) return 0 ;; esac
+  for f in tests/aceite/test_wp"$n"_*.py; do
+    if [ -f "$f" ]; then echo "$f"; fi
+  done
+}
+
+if [ -d tests/aceite ] && [ -z "$pytest_bin" ]; then
+  etapa aceite falha "pytest ausente com oráculo presente"
 elif [ -d tests/aceite ]; then
-  etapa aceite ausente "tests/aceite existe, mas pytest não foi encontrado"
+  alvo=()
+  cab=""
+  algum=0
+  for f in tests/aceite/test_wp*.py; do
+    if [ -f "$f" ]; then algum=1; break; fi
+  done
+  if [ "$tudo" -eq 1 ]; then
+    alvo=(tests/aceite)
+    cab=" (--tudo: tests/aceite inteiro)"
+  elif [ "$algum" -eq 0 ]; then
+    alvo=(tests/aceite)
+    cab=" (sem arquivo da WP: rodando tests/aceite inteiro)"
+  else
+    while IFS= read -r f; do
+      if [ -n "$f" ]; then alvo+=("$f"); fi
+    done <<EOT
+$(arquivos_da_wp "$wp")
+EOT
+    if [ "${#alvo[@]}" -gt 0 ]; then
+      regressao=""
+      for w in $(wp_list "$tasks"); do
+        [ "$w" != "$wp" ] || continue
+        lane="$(wp_field "$tasks" "$w" Lane 2>/dev/null | tr -d '`')" || lane=""
+        case "$lane" in aprovado*|pronto*) ;; *) continue ;; esac
+        achou=0
+        while IFS= read -r f; do
+          if [ -n "$f" ]; then alvo+=("$f"); achou=1; fi
+        done <<EOT
+$(arquivos_da_wp "$w")
+EOT
+        if [ "$achou" -eq 1 ]; then regressao="${regressao:+$regressao, }$w"; fi
+      done
+      cab=" ($wp${regressao:+; regressão: $regressao})"
+    fi
+  fi
+  if [ "${#alvo[@]}" -eq 0 ]; then
+    etapa aceite falha "sem arquivo da WP (tests/aceite/test_wp${wp#[Ww][Pp]-}_*.py)"
+  else
+    roda "$pytest_bin" "${alvo[@]}" -rsx -p no:cacheprovider
+    st=ok
+    [ "$rc" -eq 0 ] || st=falha
+    if printf '%s\n' "$saida" | grep -Eq '^(SKIPPED|XFAIL)( |\[)'; then st=falha; fi
+    etapa aceite "$st" "$saida" "$cab"
+  fi
 elif grep -q 'tests/aceite' "$(dirname "$tasks")/spec.md" 2>/dev/null; then
   etapa aceite falha "oráculo declarado na spec mas ausente"
 else
