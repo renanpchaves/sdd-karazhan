@@ -281,19 +281,29 @@ EOT
 fi
 
 # aceite-intacto: tests/aceite é do Architect; qualquer mudança na WP reprova.
-# Config do pytest também: conftest e arquivos de config poderiam neutralizar o oráculo.
-# pyproject.toml, setup.cfg e tox.ini só reprovam se os hunks tocam config do pytest
-# (dependência nova não reprova).
+# Config do pytest também: pytest.ini, pytest.toml e .pytest.toml reprovam sempre.
+# pyproject.toml, setup.cfg e tox.ini só reprovam se uma linha +/- é seção ou chave do pytest
+# (dependência como "pytest>=8" passa); conftest.py só se mexe em hook de coleta ou skip/xfail
+# (fixture comum passa).
+cfg_pytest='^[+-][[:space:]]*(\[(tool\.pytest|tool:pytest|pytest)|(testpaths|addopts|python_files|python_classes|python_functions|pythonpath|norecursedirs|required_plugins|minversion|xfail_strict|usefixtures|filterwarnings)[[:space:]]*=)'
+hook_coleta='^[+-].*(pytest_collection_modifyitems|pytest_ignore_collect|collect_ignore|pytest_pycollect|pytest_runtest_setup|mark\.skip|mark\.xfail|pytest\.skip|pytest\.xfail)'
 rc=0
-saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite tests/conftest.py conftest.py pytest.ini pytest.toml .pytest.toml 2>&1)" || rc=$?
-if [ "$rc" -eq 0 ]; then
-  for f in pyproject.toml setup.cfg tox.ini; do
-    hunks="$(git diff --no-renames "$base...HEAD" -- "$f" 2>/dev/null || true)"
-    if printf '%s\n' "$hunks" | grep -Eq '^[+-].*(pytest|testpaths|addopts|conftest)'; then
+saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite pytest.ini pytest.toml .pytest.toml 2>&1)" || rc=$?
+# toca <regex> <arquivo...>: acrescenta a $saida cada arquivo cujo diff tem linha +/- que casa.
+toca() {
+  local re="$1" f hunks
+  shift
+  for f in "$@"; do
+    hunks="$(git -c core.quotepath=off diff --no-color --no-ext-diff --no-renames "$base...HEAD" -- "$f" 2>/dev/null || true)"
+    if printf '%s\n' "$hunks" | grep -Eq "$re"; then
       saida="${saida:+$saida
 }$f"
     fi
   done
+}
+if [ "$rc" -eq 0 ]; then
+  toca "$cfg_pytest" pyproject.toml setup.cfg tox.ini
+  toca "$hook_coleta" conftest.py tests/conftest.py
 fi
 if [ "$rc" -eq 0 ] && [ -z "$saida" ]; then
   etapa aceite-intacto ok ""

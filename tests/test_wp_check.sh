@@ -86,10 +86,13 @@ assert_contains "$out" "aceite: falha" "oráculo sem pytest é falha"
 assert_contains "$out" "pytest ausente com oráculo presente" "motivo sem pytest"
 # config do pytest vigiada
 git checkout -qb feat/001-x-WP-03 feat/001-x
-printf '# conftest\n' > tests/conftest.py; git add tests/conftest.py; git commit -qm conftest
+printf 'import pytest\n\n\n@pytest.fixture\ndef dado():\n    return 1\n' > tests/conftest.py; git add tests/conftest.py; git commit -qm conftest
 out=$(bash $W WP-01 --tasks $T || true)
-assert_contains "$out" "aceite-intacto: falha" "conftest vigiado"
-assert_contains "$out" "tests/conftest.py" "conftest listado"
+assert_contains "$out" "aceite-intacto: ok" "conftest com fixture comum passa"
+printf '\n\ndef pytest_collection_modifyitems(config, items):\n    items.clear()\n' >> tests/conftest.py; git commit -qam hook-coleta
+out=$(bash $W WP-01 --tasks $T || true)
+assert_contains "$out" "aceite-intacto: falha" "hook de coleta no conftest reprova"
+assert_contains "$(printf '%s\n' "$out" | sed -n '/== aceite-intacto/,/aceite-intacto:/p')" "tests/conftest.py" "conftest listado"
 assert_exit 1 bash $W WP-01 --tasks $T
 for cfg in pytest.toml .pytest.toml; do
   git checkout -qb "feat/001-x-cfg$cfg" feat/001-x
@@ -100,9 +103,9 @@ for cfg in pytest.toml .pytest.toml; do
 done
 # pyproject.toml: dependência nova não reprova; config do pytest reprova
 git checkout -qb feat/001-x-pyproj-dep feat/001-x
-printf '[project]\nname = "x"\ndependencies = ["requests"]\n' > pyproject.toml; git add pyproject.toml; git commit -qm dep
+printf '[project]\nname = "x"\ndependencies = ["requests", "pytest>=8"]\n\n[project.optional-dependencies]\ntest = [\n    "pytest-mock",\n]\n' > pyproject.toml; git add pyproject.toml; git commit -qm dep
 out=$(bash $W WP-01 --tasks $T || true)
-assert_contains "$out" "aceite-intacto: ok" "dependência no pyproject.toml não reprova"
+assert_contains "$out" "aceite-intacto: ok" "dependência (inclusive pytest-mock) no pyproject.toml não reprova"
 git checkout -qb feat/001-x-pyproj-pytest feat/001-x
 printf '[tool.pytest.ini_options]\naddopts = "-q"\n' > pyproject.toml; git add pyproject.toml; git commit -qm pytest-cfg
 out=$(bash $W WP-01 --tasks $T || true)
