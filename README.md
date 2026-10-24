@@ -15,13 +15,13 @@ Plugin do Claude Code para orquestrar agentes no [Maestri](https://maestri.dev).
 1. Arquiteto escreve contrato. Engineer cumpre contrato. Ninguém implementa sem contrato.
 2. Um Engineer, um worktree, um dono por arquivo. Hook impede o resto.
 3. Quem escreve código é Claude. Quem julga é Codex. Sempre.
-4. Convoca só quem a missão precisa. Script decide. Você aprova com uma palavra.
+4. Convoca só quem a missão precisa. Script levanta os fatos, o Orchestrator decide, você vê o porquê.
 
 ## Por que existe
 
 Time grande para feature pequena custa caro. Nota e painel escritos à mão gastam token. Pergunta de preset toda hora cansa. Orquestração assim dá preguiça de chamar.
 
-A resposta: script dimensiona, script cria notas, script gera painel, script sorteia nome. O Orchestrator só decide.
+A resposta: script inventaria o repo, script cria notas, script gera painel, script sorteia nome. O Orchestrator só decide.
 
 ## Quem vem à festa
 
@@ -44,19 +44,19 @@ Papel diz o trabalho. Nome dá identidade. Não precisa saber lore.
 /sdd-karazhan adicionar filtro por empresa no relatório
 ```
 
-O Orchestrator lê o inventário e monta a folha:
+O `inventario.sh` imprime oito linhas de fatos: módulos, áreas, specs, mapa, presets, Codex, quem já está conectado. Não lê o pedido. O Orchestrator cruza pedido e fatos com a rubrica (`references/convocacao.md`) e monta a folha, com o porquê de cada papel:
 
 ```
-Pedido: adicionar filtro por empresa no relatório
-Sinais: módulos=1 (relatorio) · spec=não · mapa=ok · testes=sim · tipo=feature
-Nível: Pequena
-Terminais: eng-grom (claude/medio) · rev-uther (codex/capaz)
-Subagentes: arch-alexstrasza (spec curta) · git-gazlowe
-Não convocar: recon (mapa válido, esqueleto padrão)
-Presets: arch-alexstrasza=cc eng-grom=cc rev-uther=cx git-gazlowe=cc-mini
+Pedido: "adicionar filtro por empresa no relatório"
+Sinais: módulos=1 (relatorio) · spec=não · mapa=ok · testes=sim · nível 1
+Nível: Pequena — um módulo, sem regra de negócio nova
+Terminais: eng-grom (claude/medio) — relatorio · rev-uther (codex/capaz)
+Subagentes: arch-ysera — spec curta de 1 página · git-gazlowe (reaproveitado)
+Não convocar: recon — mapa válido, esqueleto padrão
+Presets: eng-grom=cc-mini rev-uther=cx arch-ysera=cc git-gazlowe=cc-mini
 ```
 
-Você diz "vai". Pronto.
+Pequena: a folha aparece e o time já é convocado. Média e Grande: você diz "vai". Sem Codex, ou chamada nominal inválida: o Orchestrator pergunta antes.
 
 Já sabe quem quer? Chama pelo nome:
 
@@ -64,17 +64,19 @@ Já sabe quem quer? Chama pelo nome:
 /sdd-karazhan arch eng git
 ```
 
-Script não decide. Só valida. Nunca adiciona quem você não pediu.
+Vem só quem você chamou. Engineer exige Git Manager; Reviewer exige Engineer. Faltou: o Orchestrator avisa e pergunta de novo.
 
-## Três tamanhos
+## Três níveis
 
-| Nível | Terminais | Quando |
-|---|---|---|
-| **Pequena** | Orchestrator · 1 Engineer · Reviewer | Ajuste. Coletor novo em repo conhecido. |
-| **Média** | Orchestrator · 2–3 Engineers · Reviewer · Architect | Feature que toca 2–3 módulos. |
-| **Grande** | Time completo | Raro. |
+| Nível | Quando | Contrato | Time |
+|---|---|---|---|
+| **0** | O diff cabe numa frase | Nenhum. Não use a skill: faça direto e rode pytest. | Você |
+| **1** | Pequena: uma área | Spec de 1 página com comandos de aceitação | 1 Engineer · Reviewer · Architect subagente |
+| **2** | Média, Grande, projeto novo, integração nova ou banco | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2–3 Engineers. Grande: mais áreas que `eng_max`, Architect e Git Manager em terminal |
 
-Mínimo é 3. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
+Mínimo é 3 terminais. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
+
+Projeto novo: o Git Manager faz `git init`, o Architect vem primeiro e a onda 1 é o esqueleto, em série. Repo antigo com módulo sem teste: teste de caracterização antes de mexer.
 
 ## Regras que não se negociam
 

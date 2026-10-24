@@ -1,6 +1,6 @@
 ---
 name: sdd-karazhan
-description: Orquestra times de agentes de IA no Maestri com a spec em markdown como contrato. Convoca só o time que a missão precisa, por script, com Engineer em Claude Code e Reviewer em Codex. Use quando o usuário mencionar Maestri, Modo Maestro, partitura, andar (do Maestri), recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
+description: Orquestra times de agentes de IA no Maestri com a spec em markdown como contrato. Convoca só o time que a missão precisa, decidido sobre fatos do repo, com Engineer em Claude Code e Reviewer em Codex. Use quando o usuário mencionar Maestri, Modo Maestro, partitura, andar (do Maestri), recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
 ---
 
 # sdd-karazhan
@@ -8,7 +8,7 @@ description: Orquestra times de agentes de IA no Maestri com a spec em markdown 
 **Recebeu um role de executor (Engineer, Reviewer, Git Manager, Recon, Architect)? Pare aqui.** Esta skill é do Orchestrator. Siga só o seu role.
 
 1. A spec é o contrato. Ninguém implementa sem ela.
-2. O time mínimo é convocado por script, não por palpite.
+2. O time mínimo sai dos fatos do `inventario.sh` e da rubrica, não de palpite.
 3. Engineer em Claude, Reviewer em Codex. Quem produz não aprova.
 
 ## Antes de tudo
@@ -19,13 +19,15 @@ Rode `maestri list`. Sem `maestri`, siga em modo subagente e diga isso na primei
 
 Detalhe em `references/ciclo.md`. Scripts em `scripts/`.
 
-1. Inventariar: `mapa-check.sh`, `pick-name.sh`.
-2. Convocar: `convocar.sh`. Mostre a folha e espere o "vai".
+1. Inventariar: `inventario.sh` imprime os fatos.
+2. Decidir: o time sai de `references/convocacao.md`. Mostre a folha; Pequena convoca direto, Média e Grande esperam uma palavra.
 3. Contratar: Recon (se a folha pedir), `scaffold.sh`, Architect.
 4. Particionar: `donos.sh` precisa sair 0.
 5. Recrutar: Git Manager, Engineers e Reviewer (`references/recrutamento.md`).
 6. Delegar: quatro linhas por WP. Evidência com `wp-check.sh`.
 7. Integrar: `painel.sh --publicar` e checkpoint.
+
+Níveis de contrato: 0 (diff de uma frase: sem skill), 1 (Pequena: spec de 1 página), 2 (Média, Grande, projeto novo: spec, testes de contrato e ledger).
 
 ## Papéis
 

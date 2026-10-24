@@ -7,25 +7,22 @@ Sete passos, sempre nesta ordem. Os scripts ficam em `scripts/` da skill: o Orch
 ```bash
 maestri list                     # responde → modo Maestri; comando ausente → modo subagente
 maestri preset list              # presets do workspace (só no modo Maestri)
-scripts/mapa-check.sh            # mapa=ok|ausente|vencido-idade|vencido-arvore esqueleto=padrao|fora
+scripts/inventario.sh            # oito linhas de fatos: repo, módulos, áreas, specs, mapa, presets, conectados, eng_max
 scripts/pick-name.sh orch        # nome com que o Orchestrator assina
 ```
 
 - Preset sem entrada em `.claude/specs/karazhan.json`: faça a pergunta única (`references/recrutamento.md`) antes de convocar.
-- `git-*` já conectado em `maestri list` é reaproveitado pela folha.
+- O script só coleta fatos. Não lê o pedido nem decide o time.
 
-## 2. Convocar
+## 2. Decidir
 
-```bash
-scripts/convocar.sh "<pedido>"                  # dimensiona
-scripts/convocar.sh "<pedido>" grande           # força Grande
-scripts/convocar.sh "<pedido>" arch eng rev git # chamada nominal: só valida, nunca adiciona papel
-```
-
-- Mostre a folha (seis linhas + `Presets:`) e espere uma palavra do usuário antes de recrutar.
-- Chamada nominal com exit 2 (ex.: `Engineer exige Git Manager`, `Reviewer exige Engineer`, papel desconhecido): mostre a mensagem ao usuário e pergunte de novo quais papéis. Não complete a lista por conta própria.
+- Com o pedido e o inventário, aplique `references/convocacao.md`: nível de contrato, papéis, tiers, presets e nomes (`pick-name.sh <prefixo>` por papel; `git-*` em `conectados` é reaproveitado).
+- Nível 0: não use a skill. Faça direto e rode pytest.
+- Mostre a folha (sete linhas, porquê inline). Pequena: convoque em seguida. Média e Grande: espere uma palavra.
+- Chamada nominal (`arch eng rev git`, `grande`): só os papéis pedidos. `eng` sem `git` ou `rev` sem `eng`: mostre o motivo e pergunte de novo. Não complete a lista por conta própria.
 - `Reviewer: NÃO CONVOCADO (sem Codex)`: pergunte ao usuário se segue sem Reviewer ou se configura um preset Codex. Não siga em silêncio.
-- Registre em `decisoes.md` cada papel convocado e o sinal que o justificou.
+- Registre em `decisoes.md` cada papel convocado e o sinal que o justificou; desvio da rubrica, com o motivo.
+- `repo: novo`: o Git Manager subagente faz `git init -b main`, `.gitignore` e commit vazio; depois o Architect, antes de dimensionar o resto (`references/convocacao.md`).
 - Folha com Recon: rode-o como subagente com `agents/recon.md` antes do passo 3. Sem Recon, o Architect lê o mapa válido existente (`.claude/specs/mapa.md` ou `<brain_dir>/repos/<repo>.md`) mais o `mapa-padrao.md`.
 
 ## 3. Contratar
@@ -34,8 +31,11 @@ scripts/convocar.sh "<pedido>" arch eng rev git # chamada nominal: só valida, n
 scripts/scaffold.sh NNN-slug     # NNN = próximo número livre em current/ e archive/
 ```
 
-- Architect terminal (2+ módulos, chamada nominal ou Grande): conduz a descoberta e escreve `spec.md` e `plan.md`.
+- Architect terminal (2+ áreas, chamada nominal ou Grande): conduz a descoberta e escreve `spec.md` e `plan.md`.
 - Architect subagente (demais casos): escreve a spec curta com o que o Orchestrator passar. Na Pequena, a conversa de descoberta com o usuário é do Orchestrator, que entrega as respostas ao subagente; o Architect só escreve.
+- Nível 1: spec de 1 página com comandos de aceitação; `plan.md` opcional. Nível 2: spec curta, testes de contrato e fixtures aprovados pelo usuário antes das WPs de implementação, `plan.md` obrigatório.
+- Módulo sem teste que vai mudar: a primeira WP é o teste de caracterização.
+- Projeto novo: onda 1 é o esqueleto, em série, por um Engineer.
 - Checkpoint: o usuário aprova a spec. O Orchestrator nunca escreve spec.
 
 ## 4. Particionar

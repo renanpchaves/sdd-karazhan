@@ -13,3 +13,10 @@ grep -q 'dry-run' $SK/mapa-padrao.md || fail "mapa-padrao sem dry-run"
 [ "$(sed '1,/^---$/d' $SK/SKILL.md | wc -w)" -le 400 ] || fail "SKILL.md > 400 palavras"
 grep -q '^name: sdd-karazhan' $SK/SKILL.md || fail "frontmatter"
 grep -qi 'maestri' $SK/SKILL.md || fail "gatilho"
+C=$SK/references/convocacao.md
+[ -f $C ] || fail "falta ref convocacao"
+[ "$(wc -w < $C)" -le 500 ] || fail "convocacao.md > 500 palavras"
+for p in Orchestrator Architect Recon Engineer Reviewer 'Git Manager' 'Nível 0' 'projeto novo' 'caracterização'; do
+  grep -q "$p" $C || fail "convocacao.md sem '$p'"
+done
+! grep -rq 'convocar\.sh' skills README.md || fail "sobrou menção a convocar.sh"

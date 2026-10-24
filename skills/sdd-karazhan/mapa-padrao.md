@@ -29,7 +29,7 @@ Vale para repo com esqueleto padrão (`mapa-check.sh` diz `esqueleto=padrao`: `d
 
 ## Onde o pedido toca
 
-Casar as palavras do pedido com os nomes dos módulos do pacote (o `convocar.sh` já faz isso). Mudança em CLI, `config.py` ou cliente externo pode tocar também `.env.example` e `README.md`: confira e dê dono.
+Casar as palavras do pedido com os módulos que o `inventario.sh` lista; quem casa é o Orchestrator (`references/convocacao.md`). Mudança em CLI, `config.py` ou cliente externo pode tocar também `.env.example` e `README.md`: confira e dê dono.
 
 ## Onde é perigoso
 
