@@ -20,7 +20,7 @@ aceite=tests/aceite/**
 ## `pre-commit`
 
 - Instalado uma vez em `.git/hooks`: os worktrees compartilham os hooks. Sem `.sdd-role` na raiz do worktree, não faz nada (o checkout principal segue livre).
-- `role=eng`: bloqueia arquivo em stage fora dos paths da WP. Usa `--no-renames`, para um rename não esconder o path de origem.
+- `role=eng`: bloqueia arquivo em stage fora dos paths da WP. Usa `--no-renames`, para um rename não esconder o path de origem. Também bloqueia stage em `tests/aceite/**` (`aceite=` do `.sdd-role`, sem diferenciar maiúsculas), mesmo que `paths` case.
 - `role=rev`: bloqueia qualquer commit com arquivo em stage.
 - Sem `SDD_GIT_MANAGER` no ambiente: bloqueia o commit.
 - `root=` do `.sdd-role` aponta para a skill instalada. Depois de atualizar o plugin ele pode ficar velho: o `pre-commit` bloqueia com "rode guard-install.sh novamente", e o Git Manager roda de novo.
@@ -34,21 +34,22 @@ aceite=tests/aceite/**
 Hook `PreToolUse` do plugin para `Edit`, `Write`, `MultiEdit` e `NotebookEdit` (`hooks/hooks.json`).
 
 - Ativa pelo cwd da sessão: só age se a raiz do worktree do cwd tiver `.sdd-role`. Por isso o Engineer nasce com `--dir` no seu worktree.
-- `role=eng`: bloqueia escrita fora dos paths da WP, fora do worktree e em `.sdd-role`.
+- `role=eng`: bloqueia escrita fora dos paths da WP, fora do worktree, em `.sdd-role` e em `tests/aceite/**` (antes dos paths; o caminho é normalizado: `//`, `/./` e maiúsculas não contornam).
 - `role=rev`: bloqueia toda edição.
 - Não cobre Bash (redirecionamento, `sed -i`, cópia): para isso existem o `pre-commit` e o `wp-check.sh`.
 - No modo subagente não se aplica: subagentes compartilham o cwd da sessão principal.
 
 ## `wp-check.sh`
 
-`scripts/wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]` roda lint, testes, dry-run real, diff, fora-dos-paths e aceite-intacto contra a base (padrão `feat/<slug>`), ignorando `.claude/`. Arquivo commitado fora dos paths da WP é `falha`, independente de quem commitou.
+`scripts/wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]` roda lint, testes, aceite, dry-run real, diff, fora-dos-paths e aceite-intacto contra a base (padrão `feat/<slug>`), ignorando `.claude/`. Arquivo commitado fora dos paths da WP é `falha`, independente de quem commitou.
 
 ## Oráculo de aceite
 
 - O quê: `tests/aceite/test_<slug>.py` traz os comandos de aceitação da spec como testes executáveis. É a prática com mais respaldo contra retrabalho: o implementador roda o teste, mas não o edita.
 - Quem: só o Architect escreve ali, antes das WPs começarem (subagente: no worktree principal). Engineer e Reviewer não.
-- Como o ambiente garante: `.sdd-role` leva `aceite=tests/aceite/**`. Com `role=eng`, o `path-guard.sh` nega escrita ali (`tests/aceite é do Architect`) antes de olhar os paths, e o `pre-commit` nega stage (`bloqueado: <path> — tests/aceite é do Architect`), mesmo com `paths=tests/**`. O `wp-check.sh` fecha: `aceite-intacto: falha` se a WP mudou algo em `tests/aceite/` contra a base, e o Reviewer reprova.
-- Limite: como o resto, não cobre Bash; o `aceite-intacto` pega o que for commitado.
+- Como o ambiente garante: `.sdd-role` leva `aceite=tests/aceite/**`. Com `role=eng`, o `path-guard.sh` nega escrita ali (`tests/aceite é do Architect`) antes de olhar os paths, e o `pre-commit` nega stage (`bloqueado: <path> — tests/aceite é do Architect`), mesmo com `paths=tests/**`. O `wp-check.sh` fecha com duas etapas. `aceite-intacto: falha` se a WP mudou `tests/aceite/` ou a config do pytest (`tests/conftest.py`, `conftest.py`, `pytest.ini`, `pyproject.toml`, `setup.cfg`, `tox.ini`), que poderiam neutralizar o oráculo. `aceite: falha` se `pytest tests/aceite` sai com código diferente de 0, não coleta nada (exit 5) ou tem `SKIPPED`/`XFAIL`; `ausente` sem a pasta ou sem pytest. O Reviewer reprova com qualquer uma.
+- Antes das WPs: o Git Manager commita `tests/aceite/**` em `feat/NNN-slug` (`references/ciclo.md`, passo 5), senão os worktrees nascem sem o oráculo.
+- Limite: não cobre Bash. Um `.sdd-role` sem `aceite=` (instalação antiga) ou editado pelo Bash desliga a proteção do hook e do `pre-commit`; `aceite-intacto` e `aceite` do `wp-check.sh` são a rede final. `guard-install.sh` de novo restaura.
 
 ## Codex (verificação da Task 6)
 

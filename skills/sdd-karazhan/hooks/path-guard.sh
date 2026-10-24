@@ -3,6 +3,17 @@
 # Age só se existir .sdd-role na raiz do worktree do cwd. Bloquear = exit 2 com o motivo em stderr.
 # Autocontido: usa ../lib/tasks.sh a partir de si mesmo, sem depender do root= do .sdd-role.
 
+# canon <path>: colapsa "//", remove segmentos "." e "./" inicial, até estabilizar.
+canon() {
+  local p="$1" n
+  while :; do
+    n="$(printf '%s' "$p" | sed 's|//*|/|g; s|/\./|/|g; s|^\./||; s|/\.$||')"
+    [ "$n" != "$p" ] || break
+    p="$n"
+  done
+  printf '%s' "$p"
+}
+
 # norm <path>: barras normais, sem "/" final.
 norm() {
   local p
@@ -66,6 +77,7 @@ case "$arq" in
   /*|[A-Za-z]:/*) ;;
   *) arq="$cwd/$arq" ;;
 esac
+arq="$(canon "$arq")"
 rel="$arq"
 # Remove o prefixo da raiz; letra de drive ignora maiúsculas (C:/ vs c:/).
 case "$arq" in
@@ -76,7 +88,7 @@ case "$arq" in
     fi
     ;;
 esac
-rel="${rel#./}"
+rel="$(canon "$rel")"
 
 if [ "$rel" = ".sdd-role" ]; then
   echo "path-guard: .sdd-role é protegido" >&2
@@ -85,7 +97,7 @@ fi
 
 # tests/aceite é do Architect: o Engineer não escreve ali, mesmo que paths case.
 aceite="$(campo aceite)"
-if [ -n "$aceite" ] && glob_match "$aceite" "$rel"; then
+if [ -n "$aceite" ] && glob_match "$(printf '%s' "$aceite" | tr 'A-Z' 'a-z')" "$(printf '%s' "$rel" | tr 'A-Z' 'a-z')"; then
   echo "path-guard: $rel — tests/aceite é do Architect" >&2
   exit 2
 fi

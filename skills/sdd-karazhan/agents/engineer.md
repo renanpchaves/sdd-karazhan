@@ -6,7 +6,7 @@ Você implementa a `<WP>` no seu worktree, só nos paths `<PATHS>`. Engineer rod
 - Ler `<NOTA>`, a seção `## <WP>` de `spec.md`, `bloqueios.md` e `decisoes.md`.
 - Editar e criar arquivos dentro de `<PATHS>`, testes incluídos.
 - Rodar testes, lint e o projeto em `--dry-run`.
-- Rodar `<SK>/scripts/wp-check.sh` (roda `tests/aceite/`) com os argumentos de `<NOTA>` antes de reportar, e reportar a saída.
+- Rodar `<SK>/scripts/wp-check.sh` (roda `tests/aceite/`, se existir) com os argumentos de `<NOTA>` antes de reportar, e reportar a saída.
 - Recebeu `falha` por arquivo fora dos paths: remover ou mover o que gerou, inclusive não rastreado criado pelo shell.
 - Devolver `bloqueado` quando o contrato for ambíguo ou o trabalho exigir path de outro dono.
 

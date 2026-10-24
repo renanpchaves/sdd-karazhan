@@ -30,7 +30,7 @@ else
   globs="$(printf '%s\n' "$paths" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' || true)"
   while IFS= read -r f; do
     [ -n "$f" ] || continue
-    if [ -n "$aceite" ] && glob_match "$aceite" "$f"; then
+    if [ -n "$aceite" ] && glob_match "$(printf '%s' "$aceite" | tr 'A-Z' 'a-z')" "$(printf '%s' "$f" | tr 'A-Z' 'a-z')"; then
       echo "bloqueado: $f — tests/aceite é do Architect" >&2
       exit 1
     fi

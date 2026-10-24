@@ -68,10 +68,35 @@ echo "# c2" >> pkg/coleta.py; git commit -qam coleta2
 out=$(bash $W WP-01 --tasks $T); code=$?
 assert_eq 0 $code "aceite intacto: exit 0"
 assert_contains "$out" "aceite-intacto: ok" "aceite-intacto ok"
-assert_eq 6 "$(printf '%s\n' "$out" | sed -n '/== resumo/,$p' | tail -n +2 | wc -l | tr -d ' ')" "resumo com 6 linhas"
+assert_eq 7 "$(printf '%s\n' "$out" | sed -n '/== resumo/,$p' | tail -n +2 | wc -l | tr -d ' ')" "resumo com 7 linhas"
+assert_contains "$out" "aceite: ausente" "sem tests/aceite: ausente"
 mkdir -p tests/aceite; printf 'def test_x():\n    assert True\n' > tests/aceite/test_x.py
 git add tests/aceite/test_x.py; git commit -qm aceite
 out=$(bash $W WP-01 --tasks $T || true)
 assert_contains "$out" "aceite-intacto: falha" "aceite-intacto falha"
+assert_contains "$out" "aceite: ok" "oráculo roda e passa"
 assert_contains "$out" "tests/aceite/test_x.py" "arquivo de aceite listado"
 assert_exit 1 bash $W WP-01 --tasks $T
+# config do pytest vigiada
+git checkout -qb feat/001-x-WP-03 feat/001-x
+printf '# conftest\n' > tests/conftest.py; git add tests/conftest.py; git commit -qm conftest
+out=$(bash $W WP-01 --tasks $T || true)
+assert_contains "$out" "aceite-intacto: falha" "conftest vigiado"
+assert_contains "$out" "tests/conftest.py" "conftest listado"
+assert_exit 1 bash $W WP-01 --tasks $T
+# oráculo com skip não vale
+if command -v pytest >/dev/null 2>&1; then
+  git checkout -qb feat/001-x-WP-04 feat/001-x
+  mkdir -p tests/aceite
+  printf 'import pytest\n\n\n@pytest.mark.skip(reason="x")\ndef test_a():\n    assert False\n' > tests/aceite/test_a.py
+  git add tests/aceite/test_a.py; git commit -qm skip
+  out=$(bash $W WP-01 --tasks $T || true)
+  assert_contains "$out" "aceite: falha" "skip no oráculo é falha"
+  assert_exit 1 bash $W WP-01 --tasks $T
+  # sem nenhum teste coletado também é falha
+  git checkout -qb feat/001-x-WP-05 feat/001-x
+  mkdir -p tests/aceite; printf '# vazio\n' > tests/aceite/helper.py
+  git add tests/aceite/helper.py; git commit -qm vazio
+  out=$(bash $W WP-01 --tasks $T || true)
+  assert_contains "$out" "aceite: falha" "nada coletado é falha"
+fi

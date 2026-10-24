@@ -54,6 +54,7 @@ Lanes: `planejado` → `fazendo` → `revisão` → `aprovado` → `pronto` (int
 
 ## 5. Recrutar
 
+- Depois do checkpoint da spec e antes do `worktree add` das WPs, o Git Manager commita `tests/aceite/**` (e `.claude/specs/**`) em `feat/NNN-slug` no worktree principal (hook no-op), com `SDD_GIT_MANAGER=1`. Sem isso as WPs nascem sem o oráculo.
 - Git Manager primeiro: branch `feat/NNN-slug`, um worktree por WP da onda (com `setup.sh` rodado nele, se existir) e um único worktree do Reviewer no andar, desanexado, com guarda (`agents/git-manager.md`):
 
 ```bash

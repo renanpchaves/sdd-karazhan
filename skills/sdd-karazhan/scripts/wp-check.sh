@@ -2,7 +2,7 @@
 # wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]
 # Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
 # senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
-# Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, dry-run, diff, fora-dos-paths, aceite-intacto.
+# Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, aceite, dry-run, diff, fora-dos-paths, aceite-intacto.
 # ruff e pytest vêm do .venv do repo, se existir; senão do PATH.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
 # o rodapé "== resumo" repete uma linha por etapa.
@@ -151,6 +151,19 @@ else
   etapa testes ausente "sem tests/ nem script test em package.json"
 fi
 
+# aceite: o oráculo precisa rodar de verdade; skip, xfail ou nada coletado é falha.
+if [ -d tests/aceite ] && [ -n "$pytest_bin" ]; then
+  roda "$pytest_bin" tests/aceite -rsx -p no:cacheprovider
+  st=ok
+  [ "$rc" -eq 0 ] || st=falha
+  case "$saida" in *SKIPPED*|*XFAIL*|*xfail*) st=falha ;; esac
+  etapa aceite "$st" "$saida"
+elif [ -d tests/aceite ]; then
+  etapa aceite ausente "tests/aceite existe, mas pytest não foi encontrado"
+else
+  etapa aceite ausente "sem tests/aceite"
+fi
+
 # dry-run
 if [ -f run.sh ] && grep -rq -- '--dry-run' run.sh *.py */*.py 2>/dev/null; then
   # timeout (GNU), gtimeout (coreutils no macOS) ou sem limite, avisado no cabeçalho.
@@ -203,8 +216,9 @@ EOT
 fi
 
 # aceite-intacto: tests/aceite é do Architect; qualquer mudança na WP reprova.
+# Config do pytest também: conftest e arquivos de config poderiam neutralizar o oráculo.
 rc=0
-saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite 2>&1)" || rc=$?
+saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite tests/conftest.py conftest.py pytest.ini pyproject.toml setup.cfg tox.ini 2>&1)" || rc=$?
 if [ "$rc" -eq 0 ] && [ -z "$saida" ]; then
   etapa aceite-intacto ok ""
 else

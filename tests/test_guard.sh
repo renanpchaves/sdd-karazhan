@@ -132,3 +132,13 @@ assert_contains "$(SDD_GIT_MANAGER=1 git commit -qm t 2>&1 || true)" "bloqueado:
 git reset -q tests/aceite/x.py; rm -rf tests/aceite
 echo "# t" >> tests/test_cli.py; git add tests/test_cli.py
 assert_exit 0 env SDD_GIT_MANAGER=1 git commit -qm t
+# caminhos não canônicos não contornam o oráculo
+cd "$R"
+assert_exit 2 hook Edit "$R/tests//aceite/x.py"
+assert_exit 2 hook Edit "$R/tests/./aceite/x.py"
+assert_exit 2 hook Edit "tests/./aceite//x.py"
+assert_exit 2 hook Edit "$R/tests/ACEITE/x.py"
+assert_exit 2 hook Write "tests/Aceite/x.py"
+assert_contains "$(hook Edit "$R/tests//aceite/x.py" 2>&1 || true)" "tests/aceite é do Architect" "mensagem tests//aceite"
+assert_exit 2 nb "$R/tests/aceite/n.ipynb"
+assert_exit 0 hook Edit "$R/tests/./test_cli.py"
