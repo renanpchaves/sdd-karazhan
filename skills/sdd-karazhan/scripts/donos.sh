@@ -30,6 +30,8 @@ dentro="$(tasks_sem_comentarios "$spec" | awk '
     if (v != "") print v
   }')"
 
+[ -n "$dentro" ] || die "spec sem itens em ## Dentro: $spec"
+
 # WPs e seus globs (arrays paralelos; bash 3.2).
 ids=()
 globs=()
@@ -43,20 +45,45 @@ $(wp_list "$tasks")
 EOT
 [ "${#ids[@]}" -gt 0 ] || die "nenhuma WP em $tasks"
 
+# Candidatos: arquivos versionados que casam com cada entrada de Dentro. Entrada sem
+# metacaractere que não existe no git é arquivo planejado (entra na checagem e aparece
+# como órfão se nenhuma WP o possuir); com metacaractere e sem casamento, só avisa.
+todos="$(git -c core.quotepath=off ls-files)"
+cand=""
+while IFS= read -r e; do
+  [ -n "$e" ] || continue
+  e="${e#./}"
+  e="${e#/}"
+  case "$e" in */) e="$e**" ;; esac
+  achou=0
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    if glob_match "$e" "$f"; then
+      cand="$cand$f
+"
+      achou=1
+    fi
+  done <<EOT
+$todos
+EOT
+  if [ "$achou" -eq 0 ]; then
+    case "$e" in
+      *[*?]*) echo "aviso: nenhum arquivo casa $e" >&2 ;;
+      *) cand="$cand$e
+" ;;
+    esac
+  fi
+done <<EOT
+$dentro
+EOT
+cand="$(printf '%s' "$cand" | sort -u)"
+
 orfaos=""
 n_orf=0
 dups=""
 n_dup=0
 while IFS= read -r f; do
   [ -n "$f" ] || continue
-  dentro_ok=0
-  while IFS= read -r e; do
-    [ -n "$e" ] || continue
-    if glob_match "$e" "$f"; then dentro_ok=1; break; fi
-  done <<EOT
-$dentro
-EOT
-  [ "$dentro_ok" -eq 1 ] || continue
   donos=""
   n=0
   i=0
@@ -82,7 +109,7 @@ EOT
     n_dup=$((n_dup + 1))
   fi
 done <<EOT
-$(git ls-files)
+$cand
 EOT
 
 echo "orfaos: $n_orf"

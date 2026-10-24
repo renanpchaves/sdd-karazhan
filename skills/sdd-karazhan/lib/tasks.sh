@@ -56,7 +56,7 @@ wp_field() {
 wp_paths() {
   local val paths
   val="$(wp_field "$1" "$2" Possui)" || return 2
-  paths="$(printf '%s\n' "$val" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' || true)"
+  paths="$(printf '%s\n' "$val" | tr ',' '\n' | tr -d '`' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' || true)"
   [ -n "$paths" ] || { echo "$2 sem campo Possui" >&2; return 2; }
   printf '%s\n' "$paths"
 }
@@ -64,8 +64,11 @@ wp_paths() {
 # glob_match <glob> <path>: exit 0 se casa, 1 se não. Relativo à raiz do repo.
 # "**" casa qualquer profundidade (inclusive zero): "pkg/**" casa pkg/a.py e pkg/s/b.py;
 # "**/x" casa x e a/b/x. "*" e "?" não atravessam "/".
+# "./" ou "/" iniciais são ignorados no glob e no path; glob terminado em "/" vale "<glob>/**".
 glob_match() {
   local g="$1" p="$2" re="^" i=0 n c
+  g="${g#./}"; g="${g#/}"; p="${p#./}"; p="${p#/}"
+  case "$g" in */) g="$g**" ;; esac
   n=${#g}
   while [ "$i" -lt "$n" ]; do
     c="${g:$i:1}"
