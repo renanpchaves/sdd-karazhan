@@ -17,6 +17,17 @@ assert_contains "$out" "sem equipe registrada" "equipe sem linhas"
 printf '| Grom | Eng | exec | pkg/** | 2 |\n' >> .claude/specs/equipe.md
 out=$(bash $P 001-x)
 assert_contains "$out" "| Grom | Eng | exec | pkg/** | 2 |" "equipe copiada"
+# registro do Orchestrator acima da tabela: todas as linhas de agente aparecem; cabeçalho e separador não
+printf '# Equipe\n\nOrchestrator: Antonidas — role Orchestrator: atribuído (usuário, 2026-10-24)\n\nUma linha por agente.\n\n| Nome | Papel | Preset | Possui | Andar |\n|---|---|---|---|---|\n| Grom | Builder | cc | pkg/** | 1 |\n| Uther | Reviewer | cx | — | 1 |\n' > .claude/specs/equipe.md
+out=$(bash $P 001-x)
+assert_contains "$out" "| Grom | Builder | cc | pkg/** | 1 |" "registro acima: primeira linha de agente"
+assert_contains "$out" "| Uther | Reviewer | cx | — | 1 |" "registro acima: segunda linha de agente"
+case "$out" in *"| Nome | Papel"*|*"|---|---|---|---|---|"*|*"Antonidas"*) fail "cabeçalho, separador ou registro vazaram: $out" ;; esac
+# equipe.md sem cabeçalho: as linhas de agente continuam aparecendo
+printf 'Orchestrator: Antonidas — role Orchestrator: recusado (usuário, 2026-10-24)\n| Grom | Builder | cc | pkg/** | 1 |\n| Uther | Reviewer | cx | — | 1 |\n' > .claude/specs/equipe.md
+out=$(bash $P 001-x)
+assert_contains "$out" "| Grom | Builder | cc | pkg/** | 1 |" "sem cabeçalho: primeira linha"
+assert_contains "$out" "| Uther | Reviewer | cx | — | 1 |" "sem cabeçalho: segunda linha"
 # sem bloqueios abertos -> nenhum
 printf '# Bloqueios\n' > .claude/specs/bloqueios.md
 out=$(bash $P 001-x)

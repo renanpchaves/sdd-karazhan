@@ -55,5 +55,11 @@ grep -q 'bld_max' $SK/config.json || fail "config.json sem bld_max"
 # recruta antes da nota (nome final pode virar "#2"); pedido do role Orchestrator registrado em equipe.md
 rl=$(grep -n '^maestri recruit' $R | head -n 1 | cut -d: -f1); nl=$(grep -n '^maestri note create' $R | head -n 1 | cut -d: -f1)
 [ -n "$rl" ] && [ -n "$nl" ] && [ "$rl" -lt "$nl" ] || fail "recrutamento.md: recruit deve vir antes de note create"
-grep -qF 'role Orchestrator atribuído' $R || fail "recrutamento.md sem a linha de registro do role em equipe.md"
-grep -qF 'role Orchestrator atribuído' $SK/references/ciclo.md || fail "ciclo.md sem a linha de registro do role"
+grep -qF 'role Orchestrator: atribuído' $R || fail "recrutamento.md sem a linha de registro do role em equipe.md"
+grep -qF 'role Orchestrator: atribuído' $SK/references/ciclo.md || fail "ciclo.md sem a linha de registro do role"
+grep -qF 'role Orchestrator: recusado' $R || fail "recrutamento.md sem o registro de recusa do role"
+grep -qF 'atribuído|recusado' $SK/references/ciclo.md || fail "ciclo.md sem o registro de recusa"
+gr=$(grep -n '^maestri recruit "Grom"' $R | head -n 1 | cut -d: -f1); gn=$(grep -n '^maestri note create --name "tasks-Grom"' $R | head -n 1 | cut -d: -f1)
+[ -n "$gr" ] && [ -n "$gn" ] && [ "$gr" -lt "$gn" ] || fail "recrutamento.md: recruit Grom deve vir antes da nota tasks-Grom"
+grep -qF 'Nome | Papel' $R && grep -qF 'role Orchestrator: atribuído' $R || fail "recrutamento.md sem o conteúdo de equipe.md criado pelo Orchestrator"
+grep -q 'Carregue no passo 1' $R || fail "recrutamento.md deve ser carregado também no passo 1"

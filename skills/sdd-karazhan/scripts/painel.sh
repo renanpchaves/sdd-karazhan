@@ -57,10 +57,10 @@ if [ -f .claude/specs/bloqueios.md ]; then
     END { fecha() }')"
 fi
 
-# Equipe: linhas de tabela depois do cabeçalho e do separador.
+# Equipe: linhas de tabela, sem o cabeçalho (| Nome |...) e sem o separador (|---|...).
 equipe=""
 if [ -f .claude/specs/equipe.md ]; then
-  equipe="$(tr -d '\r' < .claude/specs/equipe.md | grep '^|' | awk 'NR > 2' || true)"
+  equipe="$(tr -d '\r' < .claude/specs/equipe.md | awk '/^\|/ && !/^\|[-: |]+\|$/ && !/^\| *Nome *\|/' || true)"
 fi
 
 painel="# Painel — $slug

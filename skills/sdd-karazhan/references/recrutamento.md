@@ -1,6 +1,6 @@
 # Recrutamento
 
-Carregue no passo 5 do ciclo. A skill nunca escolhe modelo, comando ou flag de bypass: usa só o que `maestri preset list` devolve, traduzido pelo `karazhan.json`.
+Carregue no passo 1 (seções Roles e Nome e role do Orchestrator) e no passo 5 do ciclo. A skill nunca escolhe modelo, comando ou flag de bypass: usa só o que `maestri preset list` devolve, traduzido pelo `karazhan.json`.
 
 ## Pergunta única do `karazhan.json`
 
@@ -55,6 +55,8 @@ maestri role create "Builder" "$(sed "s|<SK>|$SK|g" "$SK/agents/builder.md")" --
 
 Listado: reaproveite, não crie de novo. Antes de recrutar, confira se o texto está em dia: compare o `maestri role show "<Papel>"` inteiro com a saída de `sed "s|<SK>|$SK|g" "$SK/agents/<arquivo>.md"` (texto diferente: plugin atualizado, raiz mudou ou role de outra origem). O role é global, então nunca rode `maestri role write` sem o usuário: mostre o diff dos dois textos e pergunte. Recomende reescrever só quando `maestri list` não mostrar recruta vivo com aquele role, porque reescrever pode reiniciá-lo. Com o sim do usuário: `maestri role write "<Papel>" "$(sed "s|<SK>|$SK|g" "$SK/agents/<arquivo>.md")"`. Sem o sim, não recrute com esse role: o usuário decide (entrada em `bloqueios.md`).
 
+Exceção, o role `Orchestrator`: reescrevê-lo reinicia o terminal do próprio Orchestrator se ele tiver esse role. Mostre o diff, pergunte, e prefira reescrever entre sessões. A cláusula "não recrute com esse role" não vale para ele: sem o sim do usuário, siga com o role como está.
+
 ## Nome e role do Orchestrator
 
 Só no modo Maestri. O nome do Orchestrator é estável entre sessões: se o `You:` de `maestri list` já é um nome do pool `orch` de `roster.json` (sem diferenciar maiúsculas), use-o. Senão sorteie com `pick-name.sh orch` e renomeie o próprio terminal, sem reinício:
@@ -65,7 +67,30 @@ maestri arrange "<nome atual do You:>" --name "Antonidas"
 
 Avise o usuário numa linha. Se a resposta disser que o nome foi trocado (`Antonidas #2`, nome tomado), use o nome devolvido. Só `--name`: ícone e cor do terminal do Orchestrator são do usuário.
 
-O Maestri recusa `role assign` em si mesmo (`Cannot perform this action on yourself`). Garanta o role global `Orchestrator` (seção Roles). Não dependa do formato de `maestri list` para saber se o seu terminal já o tem: confira `.claude/specs/equipe.md`. Se houver a linha `Orchestrator: <seu nome atual> — role Orchestrator atribuído (usuário, <data>)`, não pergunte. Senão, peça ao usuário, uma vez, que o atribua pelo app ("Editar responsabilidade"), de preferência antes de começar o trabalho ou entre sessões, porque reinicia o terminal. Quando ele disser que atribuiu, acrescente essa linha ao fim de `equipe.md` (fora da tabela). Recusou ou adiou: não insista nesta sessão, nem registre. Sem o role, siga normalmente.
+O Maestri recusa `role assign` em si mesmo (`Cannot perform this action on yourself`). Garanta o role global `Orchestrator` (seção Roles). Não dependa do formato de `maestri list` para saber se o seu terminal já o tem: a fonte é `.claude/specs/equipe.md`, numa linha logo abaixo do título, acima da tabela:
+
+```
+Orchestrator: <Nome> — role Orchestrator: atribuído (usuário, <data>)
+Orchestrator: <Nome> — role Orchestrator: recusado (usuário, <data>)
+```
+
+- Com qualquer das duas linhas para o seu nome atual, nunca pergunte.
+- Sem elas, pergunte ao usuário, uma vez: peça que atribua o role pelo app ("Editar responsabilidade"), de preferência antes de começar o trabalho ou entre sessões, porque reinicia o terminal.
+- Respondeu que vai atribuir agora: registre `atribuído` na hora, antes do reinício. Recusou: registre `recusado`. Só "depois" ou "mais tarde": não registre e pergunte de novo na próxima sessão.
+- `equipe.md` ainda não existe (o passo 1 vem antes do `scaffold.sh`): crie-o com o mesmo conteúdo do `scaffold.sh`, com a linha de registro acima da tabela. O `scaffold.sh` nunca sobrescreve.
+
+```
+# Equipe
+
+Orchestrator: <Nome> — role Orchestrator: atribuído (usuário, <data>)
+
+Uma linha por agente: nome, papel, preset, paths possuídos e andar.
+
+| Nome | Papel | Preset | Possui | Andar |
+|---|---|---|---|---|
+```
+
+Sem o role, siga normalmente. A linha do Orchestrator fica em `equipe.md` ao liberar nomes no pouso.
 
 ## Comandos (modo Maestri)
 

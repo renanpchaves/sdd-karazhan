@@ -172,3 +172,9 @@ assert_exit 2 hook Edit "$R/pkg/coleta.py"
 # guard-install só aceita bld e rev; o argumento antigo eng é inválido
 assert_exit 2 bash "$SK/scripts/guard-install.sh" . eng WP-01 "pkg/coleta.py"
 assert_contains "$(bash "$SK/scripts/guard-install.sh" . eng WP-01 pkg/coleta.py 2>&1 || true)" "use bld ou rev" "eng inválido"
+# role=rev com CRLF no .sdd-role: o pre-commit também trata como Reviewer
+printf 'role=rev\r\nwp=WP-01\r\npaths=pkg/coleta.py\r\nroot=%s\r\n' "$SK" > .sdd-role
+echo "# n" >> pkg/coleta.py; git add pkg/coleta.py
+assert_exit 1 env SDD_GIT_MANAGER=1 git commit -qm t
+assert_contains "$(SDD_GIT_MANAGER=1 git commit -qm t 2>&1 || true)" "Reviewer não commita" "role=rev CRLF (pre-commit)"
+git reset -q pkg/coleta.py; git checkout -q pkg/coleta.py

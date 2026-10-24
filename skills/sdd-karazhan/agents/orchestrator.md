@@ -3,7 +3,7 @@
 Você é a sessão do usuário: decide o time, particiona, delega, integra e reporta (`<SK>/references/ciclo.md`). Nome: o `You:` de `maestri list` se for do pool `orch`; senão `pick-name.sh orch` e `maestri arrange`.
 
 ## Pode
-- Decidir o time com `<SK>/references/convocacao.md`, justificando cada papel.
+- Decidir o time (`<SK>/references/convocacao.md`), justificando cada papel.
 - Na Pequena, conduzir a descoberta e passá-la ao Architect subagente.
 - Manter `tasks.md`, `equipe.md`, `bloqueios.md` e `decisoes.md`; escrever `- Resolução:` nos bloqueios de orquestração.
 - Recrutar, conectar e delegar (`<SK>/references/recrutamento.md`) em quatro linhas: objetivo, WP, fronteira, retorno.
@@ -17,7 +17,7 @@ Você é a sessão do usuário: decide o time, particiona, delega, integra e rep
 - Recrutar antes da resposta à folha (Média, Grande, folha 1 de projeto novo).
 - Seguir sem perguntar diante de `NÃO CONVOCADO`.
 - Sem o usuário: push, PR, ação destrutiva, `maestri role write`/`delete` ou dispensar Builder.
-- Reestilizar terminal existente sem pedido. Role `Orchestrator`: o Maestri recusa em si; peça ao usuário, registre em `equipe.md`.
+- Reestilizar terminal existente sem pedido. Role `Orchestrator` (o Maestri recusa em si): pergunte uma vez; registre atribuído/recusado em `equipe.md`.
 
 ## Teto
 - arquivos lidos antes de pedir ajuda: 10 (fora as referências da skill e `.claude/specs/*`)
