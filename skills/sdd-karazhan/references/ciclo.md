@@ -1,6 +1,6 @@
 # Ciclo
 
-Sete passos, sempre nesta ordem. Os scripts ficam em `scripts/` da skill: o Orchestrator resolve a raiz do plugin (`${CLAUDE_PLUGIN_ROOT}/skills/sdd-karazhan`, ou o diretório base informado ao carregar a skill) e passa **caminhos absolutos** a todo agente, inclusive ao Reviewer no Codex. Nos roles essa raiz é o placeholder `<SK>`, preenchido junto com os demais (`references/recrutamento.md`). Scripts rodam na raiz do repo alvo, salvo indicação.
+Sete passos, sempre nesta ordem. Os scripts ficam em `scripts/` da skill: o Orchestrator resolve a raiz do plugin (`${CLAUDE_PLUGIN_ROOT}/skills/sdd-karazhan`, ou o diretório base informado ao carregar a skill) e passa **caminhos absolutos** a todo agente, inclusive ao Reviewer no Codex. Nos roles essa raiz é o placeholder `<SK>`, o único deles, preenchido ao criar o role do papel (`references/recrutamento.md`); o resto do que é de cada agente vai na nota `tasks-<Nome>`. Scripts rodam na raiz do repo alvo, salvo indicação.
 
 ## 1. Inventariar
 
@@ -8,16 +8,17 @@ Sete passos, sempre nesta ordem. Os scripts ficam em `scripts/` da skill: o Orch
 maestri list                     # responde → modo Maestri; comando ausente → modo subagente
 maestri preset list              # presets do workspace (só no modo Maestri)
 scripts/inventario.sh            # oito linhas de fatos: repo, módulos, áreas, specs, mapa, presets, conectados, eng_max
-scripts/pick-name.sh orch        # nome com que o Orchestrator assina
+scripts/pick-name.sh orch        # nome do Orchestrator (ex.: Antonidas), se ainda não tem um; ver abaixo
 ```
 
 - Preset sem entrada em `.claude/specs/karazhan.json`: faça a pergunta única (`references/recrutamento.md`) antes de convocar.
 - O script só coleta fatos. Não lê o pedido nem decide o time.
+- Nome do Orchestrator: se o `You:` de `maestri list` já é um nome do pool `orch` (sem diferenciar maiúsculas), use-o; só sorteie com `pick-name.sh orch` se não for (`references/recrutamento.md`, Nome do Orchestrator).
 
 ## 2. Decidir
 
 - Antes da folha, leia as entradas `lição` de `decisoes.md` (passo 7): elas valem como regra para esta feature.
-- Com o pedido e o inventário, aplique `references/convocacao.md`: nível de contrato (0/1/2), tamanho do time, papéis, tiers, presets e nomes (`pick-name.sh <prefixo>` por papel; `git-*` em `conectados` é reaproveitado).
+- Com o pedido e o inventário, aplique `references/convocacao.md`: nível de contrato (0/1/2), tamanho do time, papéis, tiers, presets e nomes (`pick-name.sh <prefixo>` por papel; Git Manager em `conectados` com origem `terminal` é reaproveitado).
 - Nível 0: o Orchestrator diz ao usuário que não vai usar a skill e para; o usuário faz direto.
 - Mostre a folha (sete linhas, porquê inline; a linha `Tamanho:` diz Pequena, Média ou Grande). Pequena: siga sem esperar; os terminais só nascem depois do checkpoint da spec (passo 3), e o usuário responde `para` para ajustar o time. Média e Grande: espere uma palavra.
 - Chamada nominal (`arch eng rev git`): só os papéis pedidos; `arch` nominal é terminal. `eng` sem `git` ou `rev` sem `eng`: mostre o motivo e pergunte de novo. Não complete a lista por conta própria. `grande` sozinho não é chamada nominal: só força o tamanho Grande.
@@ -69,13 +70,13 @@ git worktree add --detach ../<repo>-rev feat/NNN-slug        # uma vez por andar
 scripts/guard-install.sh ../<repo>-rev rev WP-NN <paths-csv> # para rev, WP e paths não restringem: todo commit é bloqueado
 ```
 
-- Uma WP por Engineer por andar: nova WP é novo role, novo worktree, novo `.sdd-role`. Única exceção: a caracterização (WP-01) e a WP seguinte do mesmo módulo correm no mesmo worktree e na mesma branch (`feat/NNN-slug-WP-01`), com o mesmo Engineer. Aprovada a WP-01, o Git Manager faz o merge dela em `feat/NNN-slug` e roda de novo `scripts/guard-install.sh <worktree> eng WP-02 <paths da WP-02>` (sobrescreve o `.sdd-role`); o Orchestrator delega a WP-02 reescrevendo a nota `tasks-<nome>`. Sem terminal nem worktree novos. Na WP seguinte, o role continua; WP e paths vigentes são os da nota `tasks-<nome>` reescrita, que prevalece sobre `<WP>`/`<PATHS>` do role. A caracterização fixa só comportamento que deve ser preservado: mudança intencional de comportamento caracterizado é bloqueio, com emenda do Architect, e o arquivo de teste passa ao `Possui` da WP que muda o comportamento.
+- Uma WP por Engineer por andar: nova WP é novo agente, novo worktree, novo `.sdd-role` e nova nota. Única exceção: a caracterização (WP-01) e a WP seguinte do mesmo módulo correm no mesmo worktree e na mesma branch (`feat/NNN-slug-WP-01`), com o mesmo Engineer. Aprovada a WP-01, o Git Manager faz o merge dela em `feat/NNN-slug` e roda de novo `scripts/guard-install.sh <worktree> eng WP-02 <paths da WP-02>` (sobrescreve o `.sdd-role`); o Orchestrator delega a WP-02 reescrevendo a nota `tasks-<Nome>`. Sem terminal nem worktree novos: o role é o do papel e não muda; só a nota `tasks-<Nome>` é reescrita. A caracterização fixa só comportamento que deve ser preservado: mudança intencional de comportamento caracterizado é bloqueio, com emenda do Architect, e o arquivo de teste passa ao `Possui` da WP que muda o comportamento.
 - Depois Engineers e Reviewer, com os comandos de `references/recrutamento.md`. Registre cada um em `equipe.md`.
 
 ## 6. Delegar
 
 - Mensagem de quatro linhas: objetivo, WP, fronteira, formato de retorno (o bloco fixo do role).
-- A nota `tasks-<nome>` traz o bloco da WP e o comando exato de evidência:
+- A nota `tasks-<Nome>` traz o bloco da WP e o comando exato de evidência:
 
 ```bash
 scripts/wp-check.sh WP-NN --tasks <abs>/.claude/specs/current/NNN-slug/tasks.md

@@ -18,9 +18,9 @@ Tamanho: Pequena = 1 área; Média = 2 a `eng_max`; Grande = mais que `eng_max`,
 - **Recon** (claude/barato): subagente antes do Architect se `mapa` ≠ `ok` ou `esqueleto: fora`; nunca em `repo: novo`.
 - **Engineer**: terminal Claude Code, um por área, até `eng_max`; com mais áreas que `eng_max`, agrupe por dependência (ex.: relatorio+envio num Engineer). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
 - **Reviewer** (codex/capaz): terminal. Sem Codex: no Maestri, `Reviewer: NÃO CONVOCADO (sem Codex)` em `Terminais:` e pergunte; fora dele, subagente Claude noutro preset, degradação em `decisoes.md`.
-- **Git Manager** (claude/barato): subagente na Pequena e Média, terminal na Grande. Reaproveita `git-*` de `conectados`.
+- **Git Manager** (claude/barato): subagente na Pequena e Média, terminal na Grande. Reaproveita o Git Manager de `conectados` só com origem `terminal`.
 
-Nome: `pick-name.sh <prefixo>`. Preset: família e tier em `presets`; sem o tier, sobe antes de descer (medio → capaz → barato).
+Nome: `pick-name.sh <prefixo>` (o personagem, ex.: `Grom`). Em `Terminais:` e `Subagentes:`, papel antes do nome (`Engineer Grom`); em `Presets:`, `Nome=preset`. Preset: família e tier em `presets`; sem o tier, sobe antes de descer (medio → capaz → barato).
 
 `spec=sim`: `em curso` e o pedido cabe nela → continue (mesmo slug, novas WPs); `vazia` e o pedido cabe no slug → reuse o slug; senão → slug novo, citando a anterior se for `aprovada`.
 
@@ -43,10 +43,10 @@ Erro recorrente vira harness: antes da folha, leia as entradas `lição` de `dec
 Pedido: "adicionar filtro por empresa no relatório"
 Sinais: áreas=1 (relatorio) · spec=não · mapa=ok · testes=sim · nível 1
 Tamanho: Pequena — 1 área, sem regra de negócio nova
-Terminais: eng-grom (claude/medio) — relatorio · rev-uther (codex/capaz) — Codex, contexto limpo
-Subagentes: arch-ysera — spec curta de 1 página · git-gazlowe (reaproveitado)
+Terminais: Engineer Grom (claude/medio) — relatorio · Reviewer Uther (codex/capaz) — Codex, contexto limpo
+Subagentes: Architect Ysera — spec curta de 1 página · Git Manager Gazlowe (reaproveitado)
 Não convocar: recon — mapa válido, esqueleto padrão
-Presets: eng-grom=cc (medio → cc, sem preset medio) rev-uther=cx arch-ysera=cc git-gazlowe=cc-mini
+Presets: Grom=cc (medio → cc, sem preset medio) Uther=cx Ysera=cc Gazlowe=cc-mini
 ```
 
 **licencas**:
@@ -54,10 +54,10 @@ Presets: eng-grom=cc (medio → cc, sem preset medio) rev-uther=cx arch-ysera=cc
 Pedido: "novo coletor de licenças com plist no launchd"
 Sinais: áreas=2 (coleta, deploy) · spec=não · mapa=ok · testes=sim · nível 2
 Tamanho: Média — 2 áreas
-Terminais: arch-nozdormu (claude/capaz) — 2 áreas · eng-saurfang (claude/medio) — coleta · eng-thrall (claude/capaz) — deploy · rev-tirion (codex/capaz) — revisão
-Subagentes: git-gallywix — Média
+Terminais: Architect Nozdormu (claude/capaz) — 2 áreas · Engineer Saurfang (claude/medio) — coleta · Engineer Thrall (claude/capaz) — deploy · Reviewer Tirion (codex/capaz) — revisão
+Subagentes: Git Manager Gallywix — Média
 Não convocar: recon — mapa válido, esqueleto padrão
-Presets: arch-nozdormu=cc eng-saurfang=cc eng-thrall=cc rev-tirion=cx git-gallywix=cc-mini
+Presets: Nozdormu=cc Saurfang=cc Thrall=cc Tirion=cx Gallywix=cc-mini
 ```
 
 **sincronia**:
@@ -65,10 +65,10 @@ Presets: arch-nozdormu=cc eng-saurfang=cc eng-thrall=cc rev-tirion=cx git-gallyw
 Pedido: "migração alembic do centro de custo + sincronização incremental + relatório e envio do fechamento"
 Sinais: áreas=4 (migracoes+db+schemas, sync, relatorio, envio) · spec=não · mapa=ok · testes=sim · nível 2
 Tamanho: Grande — 4 áreas > eng_max 3
-Terminais: arch-kalecgos (claude/capaz) — Grande · eng-durotan (claude/capaz) — migracoes+db+schemas, uma área · eng-cairne (claude/medio) — sync · eng-baine (claude/medio) — relatorio+envio, por dependência · rev-bolvar (codex/capaz) — revisão · git-mekkatorque (claude/barato) — Grande
+Terminais: Architect Kalecgos (claude/capaz) — Grande · Engineer Durotan (claude/capaz) — migracoes+db+schemas, uma área · Engineer Cairne (claude/medio) — sync · Engineer Baine (claude/medio) — relatorio+envio, por dependência · Reviewer Bolvar (codex/capaz) — revisão · Git Manager Mekkatorque (claude/barato) — Grande
 Subagentes: nenhum
 Não convocar: recon — mapa válido, esqueleto padrão
-Presets: arch-kalecgos=cc eng-durotan=cc eng-cairne=cc eng-baine=cc rev-bolvar=cx git-mekkatorque=cc-mini
+Presets: Kalecgos=cc Durotan=cc Cairne=cc Baine=cc Bolvar=cx Mekkatorque=cc-mini
 ```
 
 **coletor-alertas** (projeto novo, folha 1):
@@ -76,8 +76,8 @@ Presets: arch-kalecgos=cc eng-durotan=cc eng-cairne=cc eng-baine=cc rev-bolvar=c
 Pedido: "serviço novo que coleta alertas do monitoramento e manda resumo diário"
 Sinais: áreas=0 (repo novo) · spec=não · mapa=ausente · testes=não · nível 2
 Tamanho: a definir (até o plan.md)
-Terminais: arch-ysera (claude/capaz) — trouxe ideia, não spec
-Subagentes: git-gazlowe — git init
+Terminais: Architect Ysera (claude/capaz) — trouxe ideia, não spec
+Subagentes: Git Manager Gazlowe — git init
 Não convocar: recon — repo novo; eng e rev — só na folha 2
-Presets: arch-ysera=cc git-gazlowe=cc-mini
+Presets: Ysera=cc Gazlowe=cc-mini
 ```

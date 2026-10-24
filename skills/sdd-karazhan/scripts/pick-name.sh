@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # pick-name.sh <prefixo> [--em-uso <arquivo>]...
-# Sorteia um nome livre do roster.json e imprime "prefixo-nome".
+# Sorteia um nome livre do pool <prefixo> do roster.json e imprime o personagem com inicial maiúscula (Grom).
 # Nomes em uso: saída de `maestri list` (se existir) + cada --em-uso (padrão: .claude/specs/equipe.md).
-# SDD_SEED definido => primeiro nome livre na ordem do roster (determinístico).
+# Um nome está em uso se aparece como palavra inteira, sem diferenciar maiúsculas; o formato antigo
+# (prefixo-nome, da v0.1.0) também conta. SDD_SEED definido => primeiro nome livre na ordem do roster (determinístico).
 . "$(dirname "$0")/../lib/common.sh"
 
 AJUDA="uso: pick-name.sh <orch|arch|rec|eng|rev|git> [--em-uso <arquivo>]..."
@@ -28,18 +29,18 @@ done
 
 em_uso=""
 if command -v maestri >/dev/null 2>&1; then
-  em_uso="$(maestri list 2>/dev/null | grep -oE "$prefixo-[a-z]+" || true)"
+  em_uso="$(maestri list 2>/dev/null | palavras)"
 fi
 for f in "${fontes[@]}"; do
   [ -f "$f" ] || [ -c "$f" ] || continue
-  em_uso="$em_uso"$'\n'"$(grep -oE "$prefixo-[a-z]+" "$f" || true)"
+  em_uso="$em_uso"$'\n'"$(palavras < "$f")"
 done
 
 livres=()
 while IFS= read -r nome; do
   [ -n "$nome" ] || continue
-  printf '%s\n' "$em_uso" | grep -qxF "$prefixo-$nome" || livres+=("$nome")
-done < <(jqr ".$prefixo[]" "$ROOT/roster.json")
+  printf '%s\n' "$em_uso" | grep -qxF "$nome" || livres+=("$nome")
+done < <(jqr ".$prefixo[] | ascii_downcase" "$ROOT/roster.json")
 
 [ ${#livres[@]} -gt 0 ] || die "pool $prefixo esgotado; amplie roster.json" 1
 
@@ -48,4 +49,4 @@ if [ -n "${SDD_SEED:-}" ]; then
 else
   idx=$((RANDOM % ${#livres[@]}))
 fi
-echo "$prefixo-${livres[$idx]}"
+printf '%s\n' "${livres[$idx]}" | capitalizar

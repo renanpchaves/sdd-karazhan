@@ -30,11 +30,11 @@ O `painel.sh` considera aberto todo bloco sem linha `- Resolução:`.
 Qualquer agente abre entrada, inclusive o Git Manager num conflito de integração; o Orchestrator resolve e escreve a `- Resolução:` (nos de contrato, o Architect).
 
 ```md
-## 2026-10-24 · eng-grom · aceite do WP-02 não diz o fuso do relatório
+## 2026-10-24 · Grom · aceite do WP-02 não diz o fuso do relatório
 - Escopo: WP-02 (pkg/relatorio.py)
 - Segue andando: WP-01 e WP-03
 - Dono da decisão: usuário
-- Resolução: America/Sao_Paulo; spec emendada por arch-ysera
+- Resolução: America/Sao_Paulo; spec emendada por Ysera
 ```
 
 `- Resolução:` só entra quando o bloqueio estiver resolvido, escrita por quem resolveu: o Orchestrator nos bloqueios de orquestração, o Architect nos de contrato.
@@ -44,7 +44,7 @@ Qualquer agente abre entrada, inclusive o Git Manager num conflito de integraç�
 O arquivo é do Orchestrator; o Architect acrescenta as próprias entradas, com ele como autor.
 
 ```md
-## 2026-10-24 · orch-jaina · Reviewer em subagente Claude (sem Codex)
+## 2026-10-24 · Jaina · Reviewer em subagente Claude (sem Codex)
 - Racional: modo subagente, sem terminal Codex disponível
 - Alternativas: configurar preset Codex; seguir sem Reviewer
 - Custo de reverter: baixo, recrutar Reviewer Codex na próxima onda

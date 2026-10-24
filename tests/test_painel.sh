@@ -1,22 +1,22 @@
 . "$(dirname "$0")/lib.sh"; SK=$PWD/skills/sdd-karazhan; P=$SK/scripts/painel.sh
 R=$(fixture_repo padrao); cd $R; bash $SK/scripts/scaffold.sh 001-x >/dev/null
-printf '### WP-02 — b\n- Lane: revisão\n- Dono: eng-cairne\n- Possui: deploy/**\n### WP-10 — c\n- Dono: eng-x\n### WP-01 — a\n- Lane: aprovado\n- Dono: eng-grom\n- Possui: pkg/**\n' > .claude/specs/current/001-x/tasks.md
-printf '## 2026-10-23 · eng-grom · campo ambíguo\n- Escopo: WP-01\n## 2026-10-22 · eng-x · resolvido antigo\n- Resolução: decidido\n## 2026-10-21 · eng-y · outro resolvido\nResolução: feito\n' >> .claude/specs/bloqueios.md
+printf '### WP-02 — b\n- Lane: revisão\n- Dono: Cairne\n- Possui: deploy/**\n### WP-10 — c\n- Dono: eng-x\n### WP-01 — a\n- Lane: aprovado\n- Dono: Grom\n- Possui: pkg/**\n' > .claude/specs/current/001-x/tasks.md
+printf '## 2026-10-23 · Grom · campo ambíguo\n- Escopo: WP-01\n## 2026-10-22 · eng-x · resolvido antigo\n- Resolução: decidido\n## 2026-10-21 · eng-y · outro resolvido\nResolução: feito\n' >> .claude/specs/bloqueios.md
 out=$(bash $P 001-x)
 assert_contains "$out" "# Painel — 001-x" "título"
 assert_contains "$out" "| WP | Lane | Dono | Possui |" "cabeçalho"
-assert_contains "$out" "| WP-01 | aprovado | eng-grom | pkg/** |" "linha wp"
+assert_contains "$out" "| WP-01 | aprovado | Grom | pkg/** |" "linha wp"
 assert_contains "$out" "| WP-10 | — | eng-x | — |" "campos ausentes viram traço"
 [ "$(printf '%s\n' "$out" | grep -n 'WP-01' | head -1 | cut -d: -f1)" -lt "$(printf '%s\n' "$out" | grep -n 'WP-02' | head -1 | cut -d: -f1)" ] || fail "ordem"
 [ "$(printf '%s\n' "$out" | grep -n 'WP-02' | head -1 | cut -d: -f1)" -lt "$(printf '%s\n' "$out" | grep -n 'WP-10' | head -1 | cut -d: -f1)" ] || fail "ordem numérica"
 assert_contains "$out" "## Bloqueios abertos" "seção bloqueios"
-assert_contains "$out" "- 2026-10-23 · eng-grom · campo ambíguo" "bloqueio aberto"
+assert_contains "$out" "- 2026-10-23 · Grom · campo ambíguo" "bloqueio aberto"
 case "$out" in *"resolvido antigo"*|*"outro resolvido"*) fail "bloqueio resolvido listado: $out" ;; esac
 assert_contains "$out" "## Equipe" "seção equipe"
 assert_contains "$out" "sem equipe registrada" "equipe sem linhas"
-printf '| eng-grom | Eng | exec | pkg/** | 2 |\n' >> .claude/specs/equipe.md
+printf '| Grom | Eng | exec | pkg/** | 2 |\n' >> .claude/specs/equipe.md
 out=$(bash $P 001-x)
-assert_contains "$out" "| eng-grom | Eng | exec | pkg/** | 2 |" "equipe copiada"
+assert_contains "$out" "| Grom | Eng | exec | pkg/** | 2 |" "equipe copiada"
 # sem bloqueios abertos -> nenhum
 printf '# Bloqueios\n' > .claude/specs/bloqueios.md
 out=$(bash $P 001-x)

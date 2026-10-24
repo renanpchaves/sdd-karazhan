@@ -28,3 +28,10 @@ grep -q 'plutil' $SK/mapa-padrao.md || fail "mapa-padrao sem plutil"
 ! grep -rq 'checkpoint da spec (passo 5)' $SK || fail "checkpoint da spec é o passo 3"
 grep -q 'pelo Reviewer' $SK/agents/git-manager.md || fail "git-manager sem 'pelo Reviewer'"
 ! grep -q 'Mínimo é 3 terminais' README.md || fail "README ainda diz 3 terminais"
+# v0.1.1: nome = personagem, badge = papel; tudo do agente vai na nota tasks-<Nome>
+for f in $SK/agents/*.md; do
+  ! grep -qE '<(WP|PATHS|NOTA|ORCH|GIT)>' $f || fail "$f ainda tem placeholder de agente"
+done
+grep -qF -- '--role "Engineer"' $SK/references/recrutamento.md || fail "recrutamento.md sem --role \"Engineer\""
+grep -qF -- '--scope global' $SK/references/recrutamento.md || fail "recrutamento.md sem --scope global"
+! grep -rqE 'eng-grom|rev-uther|arch-ysera|git-gazlowe|orch-antonidas' skills README.md || fail "sobrou nome no formato antigo"

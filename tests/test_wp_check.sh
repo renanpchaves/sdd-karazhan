@@ -1,7 +1,7 @@
 . "$(dirname "$0")/lib.sh"; SK=$PWD/skills/sdd-karazhan; W=$SK/scripts/wp-check.sh
 R=$(fixture_repo padrao); cd $R; bash $SK/scripts/scaffold.sh 001-x >/dev/null
 T=.claude/specs/current/001-x/tasks.md
-printf '### WP-01 — coleta\n- Dono: eng-grom\n- Possui: pkg/coleta.py\n' > $T
+printf '### WP-01 — coleta\n- Dono: Grom\n- Possui: pkg/coleta.py\n' > $T
 printf 'def test_ok():\n    assert True\n' > tests/test_cli.py
 printf '#!/bin/sh\n[ "$1" = --dry-run ] && exit 0\nexit 1\n' > run.sh
 git commit -qam preparo
@@ -61,7 +61,7 @@ case "$out" in *"(sem timeout)"*) fail "gtimeout presente, mas cabeçalho diz se
 # --- aceite-intacto ---
 git checkout -q feat/001-x-WP-01 2>/dev/null || true
 git checkout -qb feat/001-x-WP-02 feat/001-x
-printf '### WP-01 — coleta\n- Dono: eng-grom\n- Possui: pkg/coleta.py, tests/**\n' > $T
+printf '### WP-01 — coleta\n- Dono: Grom\n- Possui: pkg/coleta.py, tests/**\n' > $T
 git add -f $T; git commit -qm tasks2
 git branch -f feat/001-x
 echo "# c2" >> pkg/coleta.py; git commit -qam coleta2
@@ -146,10 +146,10 @@ if command -v pytest >/dev/null 2>&1; then
   printf 'def test_b():\n    assert False\n' > tests/aceite/test_wp02_b.py
   printf 'def test_c():\n    assert True\n' > tests/aceite/test_wp10_c.py
   tarefas() { # <lane da WP-01>
-    printf '### WP-01 — coleta\n- Lane: %s\n- Dono: eng-grom\n- Possui: pkg/coleta.py, tests/**\n\n' "$1"
-    printf '### WP-02 — envio\n- Lane: fazendo\n- Dono: eng-thrall\n- Possui: pkg/envio.py\n\n'
-    printf '### WP-03 — relatório\n- Lane: fazendo\n- Dono: eng-cairne\n- Possui: pkg/relatorio.py\n\n'
-    printf '### WP-10 — cli\n- Lane: fazendo\n- Dono: eng-baine\n- Possui: pkg/cli.py\n'
+    printf '### WP-01 — coleta\n- Lane: %s\n- Dono: Grom\n- Possui: pkg/coleta.py, tests/**\n\n' "$1"
+    printf '### WP-02 — envio\n- Lane: fazendo\n- Dono: Thrall\n- Possui: pkg/envio.py\n\n'
+    printf '### WP-03 — relatório\n- Lane: fazendo\n- Dono: Cairne\n- Possui: pkg/relatorio.py\n\n'
+    printf '### WP-10 — cli\n- Lane: fazendo\n- Dono: Baine\n- Possui: pkg/cli.py\n'
   }
   tarefas fazendo > $T
   git add -f $T tests/aceite/test_wp01_a.py tests/aceite/test_wp02_b.py tests/aceite/test_wp10_c.py; git commit -qm aceite-por-wp

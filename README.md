@@ -32,7 +32,7 @@ A resposta: script inventaria o repo, script cria notas, script gera painel, scr
 | **Reviewer** | `rev` | Roda teste, lê diff, aprova ou devolve. **Codex.** |
 | **Git Manager** | `git` | Worktree, hook, commit, PR. Dono do git. |
 
-Nome no canvas: `prefixo-personagem`, sorteado de um elenco de Warcraft (`roster.json`, editável). Papel diz o trabalho. Nome dá identidade. Não precisa saber lore.
+Nome no canvas: o personagem; o badge mostra o papel (`Grom`, badge `Engineer`). O nome sai de um elenco de Warcraft (`roster.json`, editável; só letras). Papel diz o trabalho. Nome dá identidade. Não precisa saber lore. O prefixo da tabela é só a chave do pool no `pick-name.sh`.
 
 ## Como usar
 
@@ -46,10 +46,10 @@ O `inventario.sh` imprime oito linhas de fatos: módulos, áreas, specs, mapa, p
 Pedido: "adicionar filtro por empresa no relatório"
 Sinais: áreas=1 (relatorio) · spec=não · mapa=ok · testes=sim · nível 1
 Tamanho: Pequena — 1 área, sem regra de negócio nova
-Terminais: eng-grom (claude/medio) — relatorio · rev-uther (codex/capaz) — Codex, contexto limpo
-Subagentes: arch-ysera — spec curta de 1 página · git-gazlowe (reaproveitado)
+Terminais: Engineer Grom (claude/medio) — relatorio · Reviewer Uther (codex/capaz) — Codex, contexto limpo
+Subagentes: Architect Ysera — spec curta de 1 página · Git Manager Gazlowe (reaproveitado)
 Não convocar: recon — mapa válido, esqueleto padrão
-Presets: eng-grom=cc (medio → cc, sem preset medio) rev-uther=cx arch-ysera=cc git-gazlowe=cc-mini
+Presets: Grom=cc (medio → cc, sem preset medio) Uther=cx Ysera=cc Gazlowe=cc-mini
 ```
 
 Pequena: a folha aparece e o trabalho segue sem esperar; os terminais só nascem depois que você aprova a spec. Para mudar o time, responda `para`. Média e Grande: você diz "vai". Sem Codex, ou chamada nominal inválida: o Orchestrator pergunta antes.
@@ -135,6 +135,8 @@ Requer `git` e `jq`. `maestri` para o modo completo. `codex` para o Reviewer. `c
 Outro plugin com os mesmos gatilhos (Maestri, partitura, andar)? Desative um deles com `claude plugin disable <nome>`.
 
 Primeira sessão num workspace cria `.claude/specs/karazhan.json` com uma única pergunta: família e tier de cada preset.
+
+No Maestri, o plugin cria na máquina até cinco roles globais, um por papel: `Architect`, `Engineer`, `Reviewer`, `Git Manager` e `Orchestrator`. Valem para todos os projetos. Para remover: liste com `maestri role list` e apague pela interface do Maestri.
 
 Testes: `bash tests/run.sh`
 

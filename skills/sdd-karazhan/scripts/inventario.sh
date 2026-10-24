@@ -114,19 +114,34 @@ if awk -F'\t' '$2 == "codex" { achou = 1 } END { exit !achou }' "$tmpd/presets" 
 fi
 presets="$(awk -F'\t' '{ printf "%s%s=%s/%s", (NR > 1 ? " " : ""), $1, $2, $3 }' "$tmpd/presets")"
 
-# nomes_em (stdin): nomes de agente (prefixo-nome), um por linha. A âncora evita casar digit-foo como git-foo.
-nomes_em() { grep -oE '(^|[^a-z-])(orch|arch|rec|eng|rev|git)-[a-z]+' | sed 's/^[^a-z]//'; }
-
-# --- conectados: maestri list, senão equipe.md ---
-conectados=""
+# --- conectados: nomes do roster (todos os pools) como palavra inteira, sem diferenciar maiúsculas ---
+# Primeiro os de `maestri list` (terminal), depois os de equipe.md ainda não vistos. Saída: Nome (Papel, origem).
+# nomes_em (stdin): palavras candidatas, em minúsculas. Token com hífen só vale no formato antigo
+# prefixo-nome (eng-thrall → thrall); tasks-Gazlowe, digit-foo e Grommash não rendem nome.
+nomes_em() {
+  LC_ALL=C tr -c 'A-Za-z0-9_-' '\n' | LC_ALL=C tr 'A-Z' 'a-z' | awk '
+    /-/ { if ($0 ~ /^(orch|arch|rec|eng|rev|git)-[a-z]+$/) print substr($0, index($0, "-") + 1); next }
+    /^[a-z]+$/ { print }'
+}
+# so_agentes (stdin = maestri list): descarta as seções de notas e portais (cabeçalho sem recuo que cita
+# note/nota/portal antes do ":"); ficam a linha You: e as dos agentes conectados.
+so_agentes() {
+  awk '/^[^ \t*-]/ { secao_nota = (tolower($0) ~ /^[^:]*(note|nota|portal)[^:]*:/) } !secao_nota'
+}
+jqr 'to_entries[] | .key as $p | .value[] | "\(ascii_downcase)\t\($p)"' "$ROOT/roster.json" > "$tmpd/roster"
+: > "$tmpd/vistos"
 if command -v maestri >/dev/null 2>&1; then
-  nomes="$(maestri list 2>/dev/null | tr -d '\r' | nomes_em | awk '!v[$0]++' || true)"
-  conectados="$(printf '%s\n' "$nomes" | grep -v '^$' | sed 's/$/ (terminal)/' || true)"
+  maestri list 2>/dev/null | tr -d '\r' | so_agentes | nomes_em | awk '{ print "terminal\t" $0 }' >> "$tmpd/vistos" || true
 fi
-if [ -z "$conectados" ] && [ -f .claude/specs/equipe.md ]; then
-  nomes="$(tr -d '\r' < .claude/specs/equipe.md | nomes_em | awk '!v[$0]++' || true)"
-  conectados="$(printf '%s\n' "$nomes" | grep -v '^$' | sed 's/$/ (equipe.md)/' || true)"
+if [ -f .claude/specs/equipe.md ]; then
+  tr -d '\r' < .claude/specs/equipe.md | nomes_em | awk '{ print "equipe.md\t" $0 }' >> "$tmpd/vistos"
 fi
+conectados="$(awk -F'\t' '
+  BEGIN { papel["orch"] = "Orchestrator"; papel["arch"] = "Architect"; papel["rec"] = "Recon"
+          papel["eng"] = "Engineer"; papel["rev"] = "Reviewer"; papel["git"] = "Git Manager" }
+  NR == FNR { pool[$1] = $2; next }
+  ($2 in pool) && !v[$2]++ { printf "%s%s (%s, %s)\n", toupper(substr($2, 1, 1)), substr($2, 2), papel[pool[$2]], $1 }
+' "$tmpd/roster" "$tmpd/vistos")"
 
 # --- saída ---
 if [ "$novo" -eq 1 ]; then

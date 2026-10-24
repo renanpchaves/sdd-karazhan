@@ -30,6 +30,13 @@ need() {
 # jqr <args>: jq -r sem CR (no Windows o jq emite CRLF). Usar para ler strings de JSON.
 jqr() { jq -r "$@" | tr -d '\r'; }
 
+# palavras (stdin): uma palavra por linha, em minúsculas. Tudo que não é letra ASCII separa,
+# então o formato antigo prefixo-nome rende o nome, e "Grommash" não contém "grom" como palavra.
+palavras() { LC_ALL=C tr -c 'A-Za-z' '\n' | LC_ALL=C tr 'A-Z' 'a-z' | grep -v '^$' || true; }
+
+# capitalizar (stdin): inicial maiúscula em cada linha (bash 3.2 não tem ${var^}).
+capitalizar() { awk '{ print toupper(substr($0, 1, 1)) substr($0, 2) }'; }
+
 # dias_desde <YYYY-MM-DD>: imprime os dias inteiros entre a data e hoje.
 # GNU date (Linux, Git Bash) com fallback BSD (macOS). Retorna 1 se a data for inválida.
 dias_desde() {

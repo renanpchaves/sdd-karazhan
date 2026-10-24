@@ -47,7 +47,7 @@ criar "$dir/tasks.md" "# Tasks — $slug
 <!--
 ### WP-01 — <título>
 - Lane: planejado
-- Dono: <prefixo-nome>
+- Dono: <Nome>
 - Possui: <path/**, outro/arquivo.py>
 - Fora de escopo: <paths de outros donos>
 - Objetivo: <resultado, não receita>

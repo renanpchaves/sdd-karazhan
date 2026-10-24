@@ -67,15 +67,23 @@ assert_eq "specs: 001-x (aprovada), 002-y (em curso), 003-z (vazia), 004-w (em c
 printf '### WP-01 — a\n- Lane: pronto\n' >> .claude/specs/current/003-z/tasks-done.md
 assert_contains "$(linha "$(bash $I)" specs)" "003-z (aprovada)" "feature pousada é aprovada"
 
-# --- conectados: equipe.md e maestri ---
-printf '| eng-grom | Engineer | cc | pkg/** | 1 |\n| rev-uther | Reviewer | cx | - | 1 |\n| git-gazlowe | Git | cc | - | 1 |\n| eng-grom | de novo | | | |\n' >> .claude/specs/equipe.md
-printf '| digit-foo | Armadilha |
+# --- conectados: nome do roster como palavra inteira, sem diferenciar maiúsculas; terminal e equipe.md ---
+# git-gazlowe é o formato antigo (v0.1.0): ainda conta. GROM repete Grom. digit-foo e Grommash são armadilhas.
+printf '| Grom | Engineer | cc | pkg/** | 1 |\n| Uther | Reviewer | cx | - | 1 |\n| git-gazlowe | Git Manager | cc | - | 1 |\n| GROM | de novo | | | |\n' >> .claude/specs/equipe.md
+printf '| digit-foo | Grommash | Armadilha |
 ' >> .claude/specs/equipe.md
-assert_eq "conectados: eng-grom (equipe.md), rev-uther (equipe.md), git-gazlowe (equipe.md)" "$(linha "$(bash $I)" conectados)" "conectados via equipe.md, sem repetir"
-case "$(bash $I)" in *git-foo*) fail "digit-foo casou como git-foo" ;; esac
-printf '#!/bin/sh\n[ "$1" = list ] && printf "arch-alexstrasza\neng-saurfang  claude\n"\nexit 0\n' > $TMP/bin/maestri; chmod +x $TMP/bin/maestri
-assert_eq "conectados: arch-alexstrasza (terminal), eng-saurfang (terminal)" "$(linha "$(bash $I)" conectados)" "maestri list tem precedência"
+assert_eq "conectados: Grom (Engineer, equipe.md), Uther (Reviewer, equipe.md), Gazlowe (Git Manager, equipe.md)" "$(linha "$(bash $I)" conectados)" "conectados via equipe.md, sem repetir"
+printf '#!/bin/sh\n[ "$1" = list ] && printf "Gazlowe  claude\nAlexstrasza\n"\nexit 0\n' > $TMP/bin/maestri; chmod +x $TMP/bin/maestri
+assert_eq "conectados: Gazlowe (Git Manager, terminal), Alexstrasza (Architect, terminal), Grom (Engineer, equipe.md), Uther (Reviewer, equipe.md)" "$(linha "$(bash $I)" conectados)" "terminal primeiro, depois equipe.md sem repetir"
+# nota não é agente: tasks-Gazlowe (hífen) e a seção de notas não rendem nome; You: e agentes rendem
+printf '#!/bin/sh\n[ "$1" = list ] && printf "You: Antonidas\\nAgents:\\n  Mathias (Codex)\\nNotes:\\n  tasks-Gazlowe\\n  Brann\\n"\nexit 0\n' > $TMP/bin/maestri; chmod +x $TMP/bin/maestri
+mv .claude/specs/equipe.md $TMP/equipe.bak
+assert_eq "conectados: Antonidas (Orchestrator, terminal), Mathias (Recon, terminal)" "$(linha "$(bash $I)" conectados)" "notas de maestri list não contam"
+mv $TMP/equipe.bak .claude/specs/equipe.md
 rm $TMP/bin/maestri
+# roster com maiúscula é normalizado (cópia da skill em $TMP, o roster real fica intacto)
+cp -R $SK $TMP/sk; jq '.eng[0] = "Grom"' $SK/roster.json > $TMP/sk/roster.json
+assert_contains "$(linha "$(bash $TMP/sk/scripts/inventario.sh)" conectados)" "Grom (Engineer, equipe.md)" "roster normalizado em minúsculas"
 
 # --- dry-run ---
 printf 'import argparse\np = argparse.ArgumentParser()\np.add_argument("--dry-run")\n' > pkg/cli.py
@@ -131,10 +139,10 @@ assert_contains "$out" "mapa: ausente · esqueleto: nenhum · testes: não · dr
 assert_contains "$out" "presets: nenhum · codex: não" "novo sem presets"
 assert_contains "$out" "eng_max: 3" "novo com eng_max"
 mkdir -p .claude/specs; echo '{"presets":{"cx":{"family":"codex","tier":"capaz"}},"config":{"eng_max":1}}' > .claude/specs/karazhan.json
-printf '| arch-alexstrasza | Architect |\n' > .claude/specs/equipe.md
+printf '| Alexstrasza | Architect |\n' > .claude/specs/equipe.md
 out=$(bash $I)
 assert_contains "$out" "presets: cx=codex/capaz · codex: não" "novo lê presets"
-assert_contains "$out" "conectados: arch-alexstrasza" "novo lê equipe.md"
+assert_contains "$out" "conectados: Alexstrasza (Architect, equipe.md)" "novo lê equipe.md"
 assert_contains "$out" "eng_max: 1" "novo lê eng_max"
 
 # --- repo git sem código nem pacote: também novo ---

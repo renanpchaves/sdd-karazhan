@@ -31,7 +31,7 @@ Níveis de contrato: 0 (diff de uma frase: sem skill), 1 (Pequena: spec de 1 pá
 
 ## Papéis
 
-Cada role fica em `agents/<arquivo>.md`.
+Cada role fica em `agents/<arquivo>.md`. Nome do agente: o personagem (`Grom`); no Maestri, o badge mostra o papel. Prefixo é só a chave do pool no `pick-name.sh`.
 
 | Papel | Prefixo | Faz |
 |---|---|---|
