@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# wp-check.sh WP-NN [--base <ref>=main] [--tasks <arquivo>]
+# wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]
+# Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
+# senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
 # Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, dry-run, diff, fora-dos-paths.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
 # o rodapé "== resumo" repete uma linha por etapa.
@@ -10,9 +12,9 @@
 . "$ROOT/lib/tasks.sh"
 need git
 
-AJUDA="uso: wp-check.sh WP-NN [--base <ref>=main] [--tasks <arquivo>]"
+AJUDA="uso: wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]"
 wp=""
-base="main"
+base=""
 tasks=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -61,8 +63,25 @@ done <<EOT
 $globs
 EOT
 
-# Base: ref pedido, ou o primeiro commit se o ref não existir.
-base_nota=""
+# Base: --base; senão feat/<slug> (slug do caminho do tasks.md) se existir; senão main;
+# se o ref não existir, o primeiro commit.
+if [ -z "$base" ]; then
+  slug=""
+  case "/$tasks" in
+    */.claude/specs/current/*/tasks.md)
+      slug="/$tasks"
+      slug="${slug#*/.claude/specs/current/}"
+      slug="${slug%/tasks.md}"
+      ;;
+  esac
+  case "$slug" in */*) slug="" ;; esac
+  if [ -n "$slug" ] && git rev-parse --verify -q "feat/$slug^{commit}" >/dev/null 2>&1; then
+    base="feat/$slug"
+  else
+    base="main"
+  fi
+fi
+base_nota=" (base $base)"
 if ! git rev-parse --verify -q "$base^{commit}" >/dev/null 2>&1; then
   primeiro="$(git rev-list --max-parents=0 HEAD | tail -1)"
   [ -n "$primeiro" ] || die "repositório sem commits"
@@ -102,7 +121,9 @@ fi
 # testes
 if [ -d tests ] && command -v pytest >/dev/null 2>&1; then
   roda pytest -q
-  etapa testes "$([ "$rc" -eq 0 ] && echo ok || echo falha)" "$saida"
+  # exit 5 = nenhum teste coletado: não há evidência, não é falha.
+  case "$rc" in 0) st=ok ;; 5) st=ausente ;; *) st=falha ;; esac
+  etapa testes "$st" "$saida"
 elif [ -d tests ]; then
   etapa testes ausente "tests/ existe, mas pytest não foi encontrado"
 elif [ -f package.json ] && command -v npm >/dev/null 2>&1 \
@@ -132,12 +153,14 @@ etapa diff "$([ "$rc" -eq 0 ] && echo ok || echo falha)" "$saida" "$base_nota"
 
 # fora-dos-paths
 fora=""
-roda git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD"
+rc=0
+saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" 2>/dev/null)" || rc=$?
 if [ "$rc" -ne 0 ]; then
   etapa fora-dos-paths falha "$saida"
 else
   while IFS= read -r f; do
     [ -n "$f" ] || continue
+    case "$f" in .claude/*) continue ;; esac
     dentro=0
     while IFS= read -r g; do
       [ -n "$g" ] || continue
