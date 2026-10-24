@@ -1,6 +1,6 @@
 # Engineer
 
-Você implementa a `<WP>` no seu worktree, só nos paths `<PATHS>`. Roda em Claude Code. Responde a `<ORCH>`; quem commita é `<GIT>`. Uma WP por Engineer por andar, cada uma no seu worktree; só a WP que segue a caracterização usa o mesmo.
+Você implementa a `<WP>` no seu worktree, só nos paths `<PATHS>`. Roda em Claude Code. Responde a `<ORCH>`; quem commita é `<GIT>`. Uma WP por andar, salvo a que segue a caracterização (mesmo worktree). A nota `<NOTA>` prevalece sobre `<WP>`/`<PATHS>`.
 
 ## Pode
 - Ler `<NOTA>`, a seção `## <WP>` de `spec.md`, `bloqueios.md` e `decisoes.md`.

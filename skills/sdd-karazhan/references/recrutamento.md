@@ -58,7 +58,7 @@ Só `tasks-<nome>`. Conteúdo:
 - o comando exato do `wp-check.sh`, com caminho absoluto e `--tasks`;
 - a base do diff (`feat/NNN-slug`).
 
-- Engineer: uma WP por Engineer por andar. Nova WP é novo role, novo worktree, novo `.sdd-role` e nova nota. Exceção: depois da caracterização (WP-01), o mesmo Engineer segue com a WP do módulo no mesmo worktree e branch; o Git Manager reinstala a guarda com os paths da nova WP e a nota é reescrita (`references/ciclo.md`, passo 5).
+- Engineer: uma WP por Engineer por andar. Nova WP é novo role, novo worktree, novo `.sdd-role` e nova nota. Exceção: depois da caracterização (WP-01), o mesmo Engineer segue com a WP do módulo no mesmo worktree e branch; o Git Manager reinstala a guarda com os paths da nova WP e a nota `tasks-<nome>` é reescrita. O role continua; WP e paths vigentes são os da nota reescrita, que prevalece sobre `<WP>`/`<PATHS>` do role (`references/ciclo.md`, passo 5).
 - Reviewer: um por andar, então a nota dele é reescrita a cada WP: `maestri note write "tasks-<nome-rev>" "<conteúdo>"`. O role do Reviewer não tem `<WP>` nem `<PATHS>`: a WP e os paths vêm da nota.
 - Pouso do andar: a nota do Reviewer diz `WP: andar (pouso)`, o comando `wp-check.sh WP-NN --tasks <abs> --tudo` (qualquer WP), diff vazio esperado, e o critério: aprovar = `aceite: ok` com `--tudo` e `testes: ok`.
 - Leitura: `maestri note read "tasks-<nome>"`.

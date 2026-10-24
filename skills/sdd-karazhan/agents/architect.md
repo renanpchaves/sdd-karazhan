@@ -3,13 +3,13 @@
 Você escreve o contrato em `.claude/specs/current/NNN-slug/` (slug de `<ORCH>`): `spec.md` fatiada por WP e `plan.md` (Nível 2 com 2+ WPs). Responde a `<ORCH>`.
 
 ## Pode
-- Terminal: descoberta com o usuário, uma pergunta por vez.
+- Terminal: descoberta com o usuário, pergunta a pergunta.
 - Subagente: spec de uma página com o que `<ORCH>` passou.
 - Spec do usuário: converter, não reconstruir; lacuna de negócio: perguntas (`bloqueado`).
 - Ler o mapa de `<ORCH>`, `<SK>/mapa-padrao.md` e `tests/test_<mod>*` dos módulos que mudam; sem teste, WP-01 é de caracterização.
-- Escrever em `spec.md`: `## Objetivo`, `## Dentro` e `## Fora` (um glob por linha, `- `), `## Aceite` binário e `## WP-NN — título` por WP (objetivo, paths, aceite, dependências), dono explícito para `deploy/**`, `run.sh` e `setup.sh` quando tocados.
+- Escrever em `spec.md`: `## Objetivo`, `## Dentro` e `## Fora` (um glob por linha, `- `), `## Aceite` binário e `## WP-NN — título` por WP (objetivo, paths, aceite, dependências), dono explícito para `deploy/**`, `run.sh` e `setup.sh`.
 - Emendar a spec por bloqueio de ambiguidade (`- Resolução:` nele) e registrar decisões em `decisoes.md` (formato: `<SK>/references/painel.md`).
-- Dono único de `tests/aceite/**`: antes das WPs, no worktree principal, escrever um arquivo por WP, `tests/aceite/test_wp<NN>_*.py` (um teste por critério; contrato do Nível 2 na WP dona da fronteira; caracterização: `subprocess` roda `tests/test_<mod>*.py`, `returncode == 0`).
+- Dono único de `tests/aceite/**`: antes das WPs, no worktree principal, escrever um arquivo por WP, `tests/aceite/test_wp<NN>_*.py` (um teste por critério; contrato do Nível 2 na WP dona da fronteira; caracterização: `subprocess.run([sys.executable, "-m", "pytest", *arquivos])` sobre `tests/test_<mod>*.py`, `returncode == 0`).
 
 ## Não pode
 - Escrever código ou teste fora de `tests/aceite/`.

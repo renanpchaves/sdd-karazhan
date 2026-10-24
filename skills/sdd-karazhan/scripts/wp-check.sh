@@ -3,7 +3,7 @@
 # Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
 # senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
 # Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, aceite, dry-run, diff, fora-dos-paths, aceite-intacto.
-# aceite roda tests/aceite/test_wp<NN>_*.py da WP e das WPs aprovado/pronto (sem nenhum test_wp*,
+# aceite roda tests/aceite/test_wp<NN>_*.py da WP e das WPs pronto, já integradas (sem nenhum test_wp*,
 # tests/aceite inteiro); --tudo força o inteiro (pouso).
 # ruff e pytest vêm do .venv do repo, se existir; senão do PATH.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
@@ -159,7 +159,7 @@ fi
 # aceite: o oráculo precisa rodar de verdade; skip, xfail ou nada coletado é falha.
 # Skip e xfail só contam na linha de resumo do pytest (-rsx), não num caminho com "xfail".
 # Por WP: tests/aceite/test_wp<nn>_*.py (nn = dois dígitos de WP-NN), mais os das WPs com
-# lane aprovado ou pronto (regressão). Nenhum test_wp* no diretório: tests/aceite inteiro.
+# lane pronto, já integradas em feat/<slug> (regressão). Nenhum test_wp* no diretório: tests/aceite inteiro.
 # Há test_wp*, mas nenhum desta WP: falha. --tudo: tests/aceite inteiro (pouso do andar).
 
 # arquivos_da_wp <WP-NN>: os tests/aceite/test_wp<nn>_*.py existentes, um por linha.
@@ -185,7 +185,7 @@ elif [ -d tests/aceite ]; then
     cab=" (--tudo: tests/aceite inteiro)"
   elif [ "$algum" -eq 0 ]; then
     alvo=(tests/aceite)
-    cab=" (sem arquivo da WP: rodando tests/aceite inteiro)"
+    cab=" (nenhum test_wp* em tests/aceite: rodando o diretório inteiro)"
   else
     while IFS= read -r f; do
       if [ -n "$f" ]; then alvo+=("$f"); fi
@@ -197,7 +197,7 @@ EOT
       for w in $(wp_list "$tasks"); do
         [ "$w" != "$wp" ] || continue
         lane="$(wp_field "$tasks" "$w" Lane 2>/dev/null | tr -d '`')" || lane=""
-        case "$lane" in aprovado*|pronto*) ;; *) continue ;; esac
+        case "$lane" in pronto*) ;; *) continue ;; esac
         achou=0
         while IFS= read -r f; do
           if [ -n "$f" ]; then alvo+=("$f"); achou=1; fi

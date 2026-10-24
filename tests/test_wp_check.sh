@@ -76,7 +76,7 @@ out=$(bash $W WP-01 --tasks $T || true)
 assert_contains "$out" "aceite-intacto: falha" "aceite-intacto falha"
 if command -v pytest >/dev/null 2>&1; then
   assert_contains "$out" "aceite: ok" "oráculo roda e passa"
-  assert_contains "$out" "== aceite (sem arquivo da WP: rodando tests/aceite inteiro)" "sem arquivo da WP: diretório inteiro, avisado"
+  assert_contains "$out" "== aceite (nenhum test_wp* em tests/aceite: rodando o diretório inteiro)" "sem test_wp*: diretório inteiro, avisado"
 fi
 assert_contains "$out" "tests/aceite/test_x.py" "arquivo de aceite listado"
 assert_exit 1 bash $W WP-01 --tasks $T
@@ -166,7 +166,8 @@ if command -v pytest >/dev/null 2>&1; then
   assert_contains "$out" "== aceite (WP-10; regressão: WP-01)" "cabeçalho lista a regressão"
   tarefas aprovado > $T
   out=$(bash $W WP-10 --tasks $T || true)
-  assert_contains "$out" "aceite: falha" "WP-01 aprovado também entra"
+  assert_contains "$out" "aceite: ok" "WP-01 aprovado (ainda não integrada) não entra"
+  case "$out" in *"regressão: WP-01"*) fail "aprovado entrou na regressão: $out" ;; esac
   git checkout -q -- $T
 fi
 # spec cita tests/aceite, mas o diretório não existe: falha, não ausente
