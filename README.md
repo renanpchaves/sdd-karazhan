@@ -123,6 +123,14 @@ claude plugin install sdd-karazhan@sdd-karazhan
 
 Dentro do Claude Code: `/plugin marketplace add renanpchaves/sdd-karazhan` e `/plugin install sdd-karazhan@sdd-karazhan`.
 
+Ou, para Claude Code, Codex, Cursor e outros agentes:
+
+```
+npx skills add renanpchaves/sdd-karazhan
+```
+
+Instala a skill (roles, referências, scripts). Não registra o hook `path-guard`: a guarda de paths fica só no `pre-commit` e no `wp-check`. Para o Reviewer em Codex é o caminho normal.
+
 Requer `git` e `jq`. `maestri` para o modo completo. `codex` para o Reviewer. `coreutils` no macOS (`brew install coreutils`) para o timeout.
 
 Outro plugin com os mesmos gatilhos (Maestri, partitura, andar)? Desative um deles com `claude plugin disable <nome>`.
