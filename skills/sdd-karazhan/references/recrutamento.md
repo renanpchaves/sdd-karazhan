@@ -65,19 +65,20 @@ maestri arrange "<nome atual do You:>" --name "Antonidas"
 
 Avise o usuário numa linha. Se a resposta disser que o nome foi trocado (`Antonidas #2`, nome tomado), use o nome devolvido. Só `--name`: ícone e cor do terminal do Orchestrator são do usuário.
 
-O Maestri recusa `role assign` em si mesmo (`Cannot perform this action on yourself`). Garanta o role global `Orchestrator` (seção Roles). Se o seu terminal ainda não tem esse role, peça ao usuário, uma vez por sessão, que o atribua pelo app ("Editar responsabilidade"), de preferência antes de começar o trabalho ou entre sessões, porque reinicia o terminal. Recusou ou adiou: não insista. Sem o role, siga normalmente.
+O Maestri recusa `role assign` em si mesmo (`Cannot perform this action on yourself`). Garanta o role global `Orchestrator` (seção Roles). Não dependa do formato de `maestri list` para saber se o seu terminal já o tem: confira `.claude/specs/equipe.md`. Se houver a linha `Orchestrator: <seu nome atual> — role Orchestrator atribuído (usuário, <data>)`, não pergunte. Senão, peça ao usuário, uma vez, que o atribua pelo app ("Editar responsabilidade"), de preferência antes de começar o trabalho ou entre sessões, porque reinicia o terminal. Quando ele disser que atribuiu, acrescente essa linha ao fim de `equipe.md` (fora da tabela). Recusou ou adiou: não insista nesta sessão, nem registre. Sem o role, siga normalmente.
 
 ## Comandos (modo Maestri)
 
-Por agente: nota, recruta com o role do papel, ícone e cor do papel, conecta. Architect `Alexstrasza` (terminal) e Builder `Grom`:
+Por agente: recruta com o role, ícone e cor do papel; lê o nome final na resposta (pode vir `<Nome> #2`); cria a nota com o nome final; conecta. Architect `Alexstrasza` (terminal) e Builder `Grom`:
 
 ```bash
-maestri note create --name "tasks-Alexstrasza" "<conteúdo da nota>"
 maestri recruit "Alexstrasza" --preset "<preset>" --role "Architect" --dir "<raiz do repo>" --icon pencil.and.ruler --color purple
+# nome final na resposta (ex.: Alexstrasza, ou Alexstrasza #2): use-o abaixo
+maestri note create --name "tasks-Alexstrasza" "<conteúdo da nota>"
 maestri connect "Alexstrasza" "tasks-Alexstrasza"
 
-maestri note create --name "tasks-Grom" "<conteúdo da nota>"
 maestri recruit "Grom" --preset "<preset>" --role "Builder" --dir "<worktree da WP>" --icon hammer --color orange
+maestri note create --name "tasks-Grom" "<conteúdo da nota>"
 maestri connect "Grom" "tasks-Grom"
 ```
 
@@ -91,7 +92,7 @@ maestri connect "Grom" "tasks-Grom"
 | Git Manager | `gearshape` | `cyan` |
 | Recon (só se um dia for terminal; hoje é subagente) | `eye` | `green` |
 
-Nunca reestilize terminal que já estava no canvas (nem o seu) sem pedido do usuário; se pedir: `maestri arrange "<Nome>" --icon <ícone> --color <cor>`. Nome de agente já tomado vira `#2`: use o nome devolvido nos comandos seguintes e em `equipe.md`.
+Nunca reestilize terminal que já estava no canvas (nem o seu) sem pedido do usuário; se pedir: `maestri arrange "<Nome>" --icon <ícone> --color <cor>`. O nome final (com `#2`, se tomado) vale para `tasks-<nome>`, `connect`, `equipe.md` e a delegação.
 
 - `--dir`: Builder no worktree da WP; Reviewer no worktree desanexado `../<repo>-rev`, único no andar; Architect e Git Manager (Grande) na raiz do repo.
 - Preset: o da linha `Presets:` da folha. Builder sempre em preset `claude`; Reviewer sempre em preset `codex`.

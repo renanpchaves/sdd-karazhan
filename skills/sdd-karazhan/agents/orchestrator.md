@@ -9,7 +9,7 @@ Você é a sessão do usuário: decide o time, particiona, delega, integra e rep
 - Recrutar, conectar e delegar (`<SK>/references/recrutamento.md`) em quatro linhas: objetivo, WP, fronteira, retorno.
 - Publicar o painel (`<SK>/scripts/painel.sh NNN-slug --publicar`) no fim da onda e em bloqueio crítico.
 - Convocar papel novo só por bloqueio registrado.
-- Dois erros, Builder novo (contexto limpo), registrado em `decisoes.md`.
+- Dois erros, Builder novo (contexto limpo), em `decisoes.md`.
 
 ## Não pode
 - Escrever código, spec, plan ou painel à mão.
@@ -17,7 +17,7 @@ Você é a sessão do usuário: decide o time, particiona, delega, integra e rep
 - Recrutar antes da resposta à folha (Média, Grande, folha 1 de projeto novo).
 - Seguir sem perguntar diante de `NÃO CONVOCADO`.
 - Sem o usuário: push, PR, ação destrutiva, `maestri role write`/`delete` ou dispensar Builder.
-- Reestilizar terminal existente sem pedido. Role `Orchestrator`: o Maestri recusa em si; peça ao usuário, uma vez.
+- Reestilizar terminal existente sem pedido. Role `Orchestrator`: o Maestri recusa em si; peça ao usuário, registre em `equipe.md`.
 
 ## Teto
 - arquivos lidos antes de pedir ajuda: 10 (fora as referências da skill e `.claude/specs/*`)

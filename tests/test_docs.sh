@@ -52,3 +52,8 @@ grep -q 'arrange' $SK/agents/orchestrator.md || grep -q 'arrange' $SK/references
 grep -q 'role delete' README.md || fail "README sem role delete"
 ! grep -rq 'eng_max' skills README.md --exclude=inventario.sh || fail "sobrou eng_max fora do compat do inventario.sh"
 grep -q 'bld_max' $SK/config.json || fail "config.json sem bld_max"
+# recruta antes da nota (nome final pode virar "#2"); pedido do role Orchestrator registrado em equipe.md
+rl=$(grep -n '^maestri recruit' $R | head -n 1 | cut -d: -f1); nl=$(grep -n '^maestri note create' $R | head -n 1 | cut -d: -f1)
+[ -n "$rl" ] && [ -n "$nl" ] && [ "$rl" -lt "$nl" ] || fail "recrutamento.md: recruit deve vir antes de note create"
+grep -qF 'role Orchestrator atribuído' $R || fail "recrutamento.md sem a linha de registro do role em equipe.md"
+grep -qF 'role Orchestrator atribuído' $SK/references/ciclo.md || fail "ciclo.md sem a linha de registro do role"

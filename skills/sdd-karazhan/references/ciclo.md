@@ -13,7 +13,7 @@ scripts/pick-name.sh orch        # só se o You: não é nome do pool orch; no M
 
 - Preset sem entrada em `.claude/specs/karazhan.json`: faça a pergunta única (`references/recrutamento.md`) antes de convocar.
 - O script só coleta fatos. Não lê o pedido nem decide o time.
-- Nome e role do Orchestrator (`references/recrutamento.md`): se o `You:` de `maestri list` já é um nome do pool `orch` (sem diferenciar maiúsculas), use-o; senão sorteie com `pick-name.sh orch` e, no Maestri, renomeie-se com `maestri arrange "<nome atual>" --name "<Nome>"` (sem reinício), avisando o usuário numa linha e usando o nome devolvido se vier `#2`. Garanta o role global `Orchestrator` (criação: seção Roles); se o seu terminal não o tem, peça ao usuário, uma vez, que o atribua pelo app (o Maestri recusa em si mesmo; reinicia o terminal). Sem o role, siga. Modo subagente: só o sorteio.
+- Nome e role do Orchestrator (`references/recrutamento.md`): se o `You:` de `maestri list` já é um nome do pool `orch` (sem diferenciar maiúsculas), use-o; senão sorteie com `pick-name.sh orch` e, no Maestri, renomeie-se com `maestri arrange "<nome atual>" --name "<Nome>"` (sem reinício), avisando o usuário numa linha e usando o nome devolvido se vier `#2`. Garanta o role global `Orchestrator` (criação: seção Roles). Sem a linha `Orchestrator: <Nome> — role Orchestrator atribuído (usuário, <data>)` em `.claude/specs/equipe.md`, peça ao usuário, uma vez, que atribua o role pelo app (o Maestri recusa em si mesmo; reinicia o terminal) e registre a linha quando ele disser que atribuiu. Com a linha, não pergunte. Sem o role, siga. Modo subagente: só o sorteio.
 
 ## 2. Decidir
 
