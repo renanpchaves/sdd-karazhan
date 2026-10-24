@@ -1,6 +1,6 @@
 ---
 name: sdd-karazhan
-description: Orquestra times de agentes de IA no Maestri com a spec em markdown como contrato. Convoca só o time que a missão precisa, por script, com Engineer em Claude Code e Reviewer em Codex. Use SEMPRE que o usuário mencionar Maestri, Modo Maestro, partitura, andar, recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
+description: Orquestra times de agentes de IA no Maestri com a spec em markdown como contrato. Convoca só o time que a missão precisa, por script, com Engineer em Claude Code e Reviewer em Codex. Use quando o usuário mencionar Maestri, Modo Maestro, partitura, andar (do Maestri), recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
 ---
 
 # sdd-karazhan
@@ -21,7 +21,7 @@ Detalhe em `references/ciclo.md`. Scripts em `scripts/`.
 
 1. Inventariar: `mapa-check.sh`, `pick-name.sh`.
 2. Convocar: `convocar.sh`. Mostre a folha e espere o "vai".
-3. Contratar: `scaffold.sh`, depois Architect (e Recon, se a folha pedir).
+3. Contratar: Recon (se a folha pedir), `scaffold.sh`, Architect.
 4. Particionar: `donos.sh` precisa sair 0.
 5. Recrutar: Git Manager, Engineers e Reviewer (`references/recrutamento.md`).
 6. Delegar: quatro linhas por WP. Evidência com `wp-check.sh`.

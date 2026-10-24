@@ -6,7 +6,7 @@
 
 **Spec primeiro. Time mínimo. Codex julga o Claude.**
 
-Plugin do Claude Code para orquestrar agentes no [Maestri](https://maestri.dev). Mais magro e mais calibrado.
+Plugin do Claude Code para orquestrar agentes no [Maestri](https://maestri.dev).
 
 ---
 
@@ -19,9 +19,9 @@ Plugin do Claude Code para orquestrar agentes no [Maestri](https://maestri.dev).
 
 ## Por que existe
 
-O sdd-maestri funciona. Mas monta time grande para feature pequena, cria duas notas por agente, pergunta preset toda onda e redige painel à mão. Caro. Lento. Dava preguiça de chamar.
+Time grande para feature pequena custa caro. Nota e painel escritos à mão gastam token. Pergunta de preset toda hora cansa. Orquestração assim dá preguiça de chamar.
 
-Aqui: script dimensiona, script cria notas, script gera painel, script sorteia nome. O Orchestrator só decide.
+A resposta: script dimensiona, script cria notas, script gera painel, script sorteia nome. O Orchestrator só decide.
 
 ## Quem vem à festa
 
@@ -110,6 +110,8 @@ claude plugin install sdd-karazhan@sdd-karazhan
 Dentro do Claude Code: `/plugin marketplace add renanpchaves/sdd-karazhan` e `/plugin install sdd-karazhan@sdd-karazhan`.
 
 Requer `git` e `jq`. `maestri` para o modo completo. `codex` para o Reviewer.
+
+Outro plugin com os mesmos gatilhos (Maestri, partitura, andar)? Desative um deles com `claude plugin disable <nome>`.
 
 Primeira sessão num workspace cria `.claude/specs/karazhan.json` com uma única pergunta: família e tier de cada preset.
 
