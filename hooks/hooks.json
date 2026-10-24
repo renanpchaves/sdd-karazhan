@@ -3,11 +3,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/skills/sdd-karazhan/hooks/path-guard.sh\"",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/skills/sdd-karazhan/hooks/path-guard.sh\"",
             "timeout": 10
           }
         ]

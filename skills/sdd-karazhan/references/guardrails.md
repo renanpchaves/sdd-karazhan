@@ -30,7 +30,7 @@ root=<raiz da skill>
 
 ## `path-guard.sh` (Claude Code)
 
-Hook `PreToolUse` do plugin para `Edit`, `Write` e `MultiEdit` (`hooks/hooks.json`).
+Hook `PreToolUse` do plugin para `Edit`, `Write`, `MultiEdit` e `NotebookEdit` (`hooks/hooks.json`).
 
 - Ativa pelo cwd da sessão: só age se a raiz do worktree do cwd tiver `.sdd-role`. Por isso o Engineer nasce com `--dir` no seu worktree.
 - `role=eng`: bloqueia escrita fora dos paths da WP, fora do worktree e em `.sdd-role`.

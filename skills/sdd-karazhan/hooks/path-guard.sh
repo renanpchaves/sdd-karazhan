@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hook PreToolUse do Claude Code (Edit|Write|MultiEdit). Lê o JSON do stdin.
+# Hook PreToolUse do Claude Code (Edit|Write|MultiEdit|NotebookEdit). Lê o JSON do stdin.
 # Age só se existir .sdd-role na raiz do worktree do cwd. Bloquear = exit 2 com o motivo em stderr.
 # Autocontido: usa ../lib/tasks.sh a partir de si mesmo, sem depender do root= do .sdd-role.
 
@@ -25,7 +25,7 @@ entrada="$(cat)"
 campo_json() { printf '%s' "$entrada" | jq -r "$1 // empty" 2>/dev/null | tr -d '\r'; }
 
 tool="$(campo_json .tool_name)"
-case "$tool" in Edit|Write|MultiEdit) ;; *) exit 0 ;; esac
+case "$tool" in Edit|Write|MultiEdit|NotebookEdit) ;; *) exit 0 ;; esac
 
 cwd="$(norm "$(campo_json .cwd)")"
 [ -n "$cwd" ] || exit 0
@@ -56,7 +56,10 @@ fi
 wp="$(campo wp)"
 paths="$(campo paths)"
 
-arq="$(norm "$(campo_json .tool_input.file_path)")"
+arq="$(campo_json .tool_input.file_path)"
+# NotebookEdit traz o caminho em notebook_path.
+[ -n "$arq" ] || arq="$(campo_json .tool_input.notebook_path)"
+arq="$(norm "$arq")"
 [ -n "$arq" ] || exit 0
 # Relativo vale a partir do cwd.
 case "$arq" in
@@ -73,6 +76,7 @@ case "$arq" in
     fi
     ;;
 esac
+rel="${rel#./}"
 
 if [ "$rel" = ".sdd-role" ]; then
   echo "path-guard: .sdd-role é protegido" >&2

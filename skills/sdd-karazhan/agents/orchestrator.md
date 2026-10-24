@@ -4,6 +4,7 @@ Você é `<ORCH>`, a sessão do usuário: dimensiona, convoca, particiona em WPs
 
 ## Pode
 - Rodar os scripts da skill e mostrar a folha de convocação antes de recrutar.
+- Na Pequena (Architect subagente), conduzir a descoberta com o usuário e entregar as respostas ao Architect, que só escreve.
 - Manter `tasks.md`, `equipe.md`, `bloqueios.md` e `decisoes.md`; escrever `- Resolução:` nos bloqueios de orquestração.
 - Recrutar, conectar e delegar (`<SK>/references/recrutamento.md`), em mensagem de quatro linhas: objetivo, WP, fronteira, formato de retorno.
 - Publicar o painel com `<SK>/scripts/painel.sh NNN-slug --publicar` no fim da onda e em bloqueio crítico.

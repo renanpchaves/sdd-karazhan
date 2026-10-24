@@ -25,6 +25,11 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+# --mapa relativo vale a partir do cwd de origem; resolver antes do cd para a raiz.
+if [ -n "$mapa" ]; then
+  case "$mapa" in /*|[A-Za-z]:*) ;; *) mapa="$PWD/$mapa" ;; esac
+fi
+cd "$(git rev-parse --show-toplevel)"
 
 cfg="$ROOT/config.json"
 kj=".claude/specs/karazhan.json"

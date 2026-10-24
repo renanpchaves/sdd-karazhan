@@ -52,5 +52,16 @@ assert_contains "$(bash $C "corrigir bug no script")" "Subagentes: rec-" "recon 
 R3=$(fixture_repo padrao); cd $R3; printf 'x = 1\n' > pkg/deploy.py; git add -A; git commit -qm deploy
 bash $SK/scripts/scaffold.sh 001-z >/dev/null
 out=$(bash $C "ajustar deploy"); assert_contains "$out" "módulos=1 (deploy)" "deploy sem duplicar"; assert_contains "$out" "Nível: Pequena" "deploy é 1 área"
+# pedido sem palavra alfanumérica: contagens 0, empate vira feature, sem ruído em stderr
+for p in "???" "..."; do
+  out=$(bash $C "$p" 2>$TMP/err); code=$?
+  assert_eq 0 $code "exit 0 com '$p'"
+  assert_contains "$out" "tipo=feature" "empate com '$p' vira feature"
+  assert_eq "" "$(cat $TMP/err)" "stderr vazio com '$p'"
+done
+# quebra de linha no pedido vira espaço: folha segue com sete linhas
+out=$(bash $C "$(printf 'ajuste no\nrelatorio')")
+assert_eq 7 "$(printf '%s\n' "$out" | wc -l | tr -d ' ')" "folha de sete linhas"
+assert_contains "$out" "Pedido: ajuste no relatorio" "pedido em uma linha"
 cd pkg; assert_contains "$(bash $C "ajuste no relatorio")" "módulos=1 (relatorio)" "subdiretório usa a raiz"; cd ..
 echo '{quebrado' > .claude/specs/karazhan.json; assert_exit 2 bash $C "ajuste no relatorio"

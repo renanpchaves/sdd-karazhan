@@ -47,12 +47,13 @@ Papel diz o trabalho. Nome dá identidade. Não precisa saber lore.
 O script lê o repo e mostra a folha de convocação:
 
 ```
-Pedido: "adicionar filtro por empresa no relatório"
+Pedido: adicionar filtro por empresa no relatório
 Sinais: módulos=1 (relatorio) · spec=não · mapa=ok · testes=sim · tipo=feature
 Nível: Pequena
-Terminais: eng-grom (claude) · rev-uther (codex)
-Subagentes: arch-ysera (spec curta) · git-gazlowe
-Não convocar: recon (mapa válido)
+Terminais: eng-grom (claude/medio) · rev-uther (codex/capaz)
+Subagentes: arch-alexstrasza (spec curta) · git-gazlowe
+Não convocar: recon (mapa válido, esqueleto padrão)
+Presets: arch-alexstrasza=cc eng-grom=cc rev-uther=cx git-gazlowe=cc-mini
 ```
 
 Você diz "vai". Pronto.
@@ -89,7 +90,7 @@ Mínimo é 3. Quem orquestra não implementa. Quem implementa não revisa. Dois 
 |---|---|
 | `convocar.sh` | Dimensiona o pedido. Imprime a folha. |
 | `pick-name.sh eng` | Sorteia nome livre do elenco. |
-| `scaffold.sh 003-slug` | Cria specs, tasks, notas. |
+| `scaffold.sh 003-slug` | Cria specs e tasks. |
 | `mapa-check.sh` | Mapa ainda vale? Idade e impressão digital da árvore. |
 | `donos.sh 003-slug` | Arquivo no escopo sem dono? Lista. |
 | `wp-check.sh WP-03` | Lint, pytest, `--dry-run` real, diff restrito aos paths, arquivo fora do path. |
@@ -109,7 +110,7 @@ claude plugin install sdd-karazhan@sdd-karazhan
 
 Dentro do Claude Code: `/plugin marketplace add renanpchaves/sdd-karazhan` e `/plugin install sdd-karazhan@sdd-karazhan`.
 
-Requer `git` e `jq`. `maestri` para o modo completo. `codex` para o Reviewer.
+Requer `git` e `jq`. `maestri` para o modo completo. `codex` para o Reviewer. `coreutils` no macOS (`brew install coreutils`) para o timeout.
 
 Outro plugin com os mesmos gatilhos (Maestri, partitura, andar)? Desative um deles com `claude plugin disable <nome>`.
 

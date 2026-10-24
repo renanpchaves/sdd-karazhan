@@ -18,7 +18,8 @@ SCRIPTS="$(cd "$(dirname "$0")" && pwd)"
 cd "$(git rev-parse --show-toplevel)"
 kj=".claude/specs/karazhan.json"
 if [ -f "$kj" ]; then jq empty "$kj" 2>/dev/null || die "karazhan.json inválido: $kj"; fi
-pedido="$1"
+# Quebras de linha viram espaço: a folha mantém uma linha por campo.
+pedido="$(printf '%s' "$1" | tr '\r\n' '  ')"
 shift
 
 # --- argumentos nominais ---
@@ -102,7 +103,12 @@ if [ -d tests ] || [ -f pytest.ini ] || { [ -f pyproject.toml ] && grep -qF '[to
 fi
 
 # tipo: correcao só quando há mais palavras de correção que de feature; padrão feature.
-conta() { jqr ".palavras.$1[]" "$cfg" | normalizar_fluxo | grep -cxF -f "$tmpd/pedido" || true; }
+# Pedido sem palavra deixa o arquivo de padrões vazio e o grep não imprime nada: vale 0.
+conta() {
+  local n
+  n="$(jqr ".palavras.$1[]" "$cfg" | normalizar_fluxo | grep -cxF -f "$tmpd/pedido" || true)"
+  echo "${n:-0}"
+}
 tipo=feature
 [ "$(conta correcao)" -le "$(conta feature)" ] || tipo=correcao
 

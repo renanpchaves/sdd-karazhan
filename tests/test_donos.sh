@@ -19,7 +19,7 @@ out=$(bash $S 001-x || true)
 assert_contains "$out" "orfaos: 4" "init, envio, relatorio, run.sh sem dono"
 assert_contains "$out" "run.sh" "run.sh órfão"
 assert_exit 1 bash $S 001-x
-sed -i 's|pkg/coleta.py, pkg/cli.py|pkg/**, run.sh|' .claude/specs/current/001-x/tasks.md
+sed_i 's|pkg/coleta.py, pkg/cli.py|pkg/**, run.sh|' .claude/specs/current/001-x/tasks.md
 assert_exit 0 bash $S 001-x
 printf '### WP-03 — dup\n- Dono: eng-baine\n- Possui: pkg/cli.py\n' >> .claude/specs/current/001-x/tasks.md
 assert_contains "$(bash $S 001-x || true)" "duplicados: 1" "dois donos"
@@ -86,3 +86,6 @@ printf '## Dentro\n- docs/**\n' > $D/spec.md
 printf '### WP-01 — x\n- Possui: pkg/**\n' > $D/tasks.md
 out=$(bash $S 001-x || true)
 assert_contains "$out" "  docs/relatório.md" "acento literal na lista de órfãos"
+
+# subdiretório: mesma saída que na raiz
+assert_eq "$out" "$(cd pkg && bash $S 001-x || true)" "subdiretório usa a raiz"

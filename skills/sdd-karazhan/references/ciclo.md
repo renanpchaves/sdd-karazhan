@@ -35,7 +35,7 @@ scripts/scaffold.sh NNN-slug     # NNN = próximo número livre em current/ e ar
 ```
 
 - Architect terminal (2+ módulos, chamada nominal ou Grande): conduz a descoberta e escreve `spec.md` e `plan.md`.
-- Architect subagente (demais casos): escreve a spec curta com o que o Orchestrator passar.
+- Architect subagente (demais casos): escreve a spec curta com o que o Orchestrator passar. Na Pequena, a conversa de descoberta com o usuário é do Orchestrator, que entrega as respostas ao subagente; o Architect só escreve.
 - Checkpoint: o usuário aprova a spec. O Orchestrator nunca escreve spec.
 
 ## 4. Particionar
@@ -52,7 +52,7 @@ Lanes: `planejado` → `fazendo` → `revisão` → `aprovado` → `pronto` (int
 
 ## 5. Recrutar
 
-- Git Manager primeiro: branch `feat/NNN-slug`, um worktree por WP da onda e um único worktree do Reviewer no andar, desanexado, com guarda (`agents/git-manager.md`):
+- Git Manager primeiro: branch `feat/NNN-slug`, um worktree por WP da onda (com `setup.sh` rodado nele, se existir) e um único worktree do Reviewer no andar, desanexado, com guarda (`agents/git-manager.md`):
 
 ```bash
 git worktree add ../<repo>-WP-NN -b feat/NNN-slug-WP-NN feat/NNN-slug

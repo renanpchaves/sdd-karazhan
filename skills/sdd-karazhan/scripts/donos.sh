@@ -14,6 +14,7 @@ case "${1:-}" in
 esac
 need git
 git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
+cd "$(git rev-parse --show-toplevel)"
 slug="$1"
 dir=".claude/specs/current/$slug"
 spec="$dir/spec.md"

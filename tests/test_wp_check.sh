@@ -19,6 +19,10 @@ case "$out" in *run.sh*|*test_cli.py*) fail "arquivos do preparo vazaram para a 
 # --base explícito vence
 out=$(bash $W WP-01 --tasks $T --base main)
 assert_contains "$out" "== diff (base main)" "--base explícito"
+# --tasks com barras invertidas (caminho Windows) ainda dá base feat/<slug>
+if command -v cygpath >/dev/null 2>&1; then TW=$(cygpath -w "$R/$T"); else TW=$(printf '%s' "$R/$T" | tr '/' '\\'); fi
+case "$TW" in *'\'*) ;; *) fail "caminho de teste sem barra invertida: $TW" ;; esac
+assert_contains "$(bash $W WP-01 --tasks "$TW" || true)" "== diff (base feat/001-x)" "--tasks Windows"
 # .claude/ é ignorado em fora-dos-paths
 echo "- nota" >> $T; git add -f $T; git commit -qm orquestrador
 out=$(bash $W WP-01 --tasks $T); code=$?
@@ -32,3 +36,24 @@ assert_exit 2 bash $W WP-09 --tasks $T
 [ "$(printf '%s\n' "$out" | sed -n '/== resumo/,$p' | wc -l)" -le 21 ] || fail "resumo > 20 linhas"
 # tasks por padrão: único feature dir
 assert_exit 1 bash $W WP-01
+# ruff e pytest do .venv do repo vencem os do PATH
+mkdir -p .venv/bin
+printf '#!/bin/sh\necho ruff-do-venv\n' > .venv/bin/ruff
+printf '#!/bin/sh\necho pytest-do-venv\n' > .venv/bin/pytest
+chmod +x .venv/bin/ruff .venv/bin/pytest
+out=$(bash $W WP-01 --tasks $T || true)
+assert_contains "$out" "ruff-do-venv" "ruff do .venv"; assert_contains "$out" "lint: ok" "lint pelo .venv"
+assert_contains "$out" "pytest-do-venv" "pytest do .venv"; assert_contains "$out" "testes: ok" "testes pelo .venv"
+rm -rf .venv
+# sem timeout nem gtimeout: dry-run sem limite, avisado no cabeçalho; gtimeout entra se existir
+mkdir -p "$TMP/semto"
+for c in git dirname tr tail head grep awk sed cat; do
+  p=$(command -v $c); printf '#!/bin/sh\nexec "%s" "$@"\n' "$p" > "$TMP/semto/$c"; chmod +x "$TMP/semto/$c"
+done
+out=$(PATH="$TMP/semto" "$BASH" $W WP-01 --tasks $T || true)
+assert_contains "$out" "== dry-run (sem timeout)" "sem timeout avisado"
+assert_contains "$out" "dry-run: ok" "dry-run sem timeout roda"
+printf '#!/bin/sh\necho via-gtimeout\nshift\nexec "$@"\n' > "$TMP/semto/gtimeout"; chmod +x "$TMP/semto/gtimeout"
+out=$(PATH="$TMP/semto" "$BASH" $W WP-01 --tasks $T || true)
+assert_contains "$out" "via-gtimeout" "gtimeout usado"
+case "$out" in *"(sem timeout)"*) fail "gtimeout presente, mas cabeçalho diz sem timeout" ;; esac

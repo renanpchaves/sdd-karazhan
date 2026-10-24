@@ -3,6 +3,7 @@
 # Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
 # senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
 # Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, dry-run, diff, fora-dos-paths.
+# ruff e pytest vêm do .venv do repo, se existir; senão do PATH.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
 # o rodapé "== resumo" repete uma linha por etapa.
 # Exit 0 se nenhuma etapa falhou e nada está fora dos paths, 1 caso contrário,
@@ -31,7 +32,9 @@ done
 
 top="$(git rev-parse --show-toplevel 2>/dev/null)" || die "não é um repositório git"
 # --tasks relativo vale a partir do cwd de origem; resolver antes do cd.
+# Barras invertidas (caminho Windows) viram "/" para o slug sair do caminho.
 if [ -n "$tasks" ]; then
+  tasks="$(printf '%s' "$tasks" | tr '\\' '/')"
   case "$tasks" in /*|[A-Za-z]:*) ;; *) tasks="$PWD/$tasks" ;; esac
 fi
 cd "$top"
@@ -111,17 +114,30 @@ roda() {
   saida="$("$@" 2>&1)" || rc=$?
 }
 
+# ferramenta <nome>: a do .venv do repo, se existir; senão a do PATH; vazio se nenhuma.
+ferramenta() {
+  if [ -x ".venv/bin/$1" ]; then
+    echo ".venv/bin/$1"
+  elif [ -x ".venv/Scripts/$1.exe" ]; then
+    echo ".venv/Scripts/$1.exe"
+  elif command -v "$1" >/dev/null 2>&1; then
+    echo "$1"
+  fi
+}
+ruff_bin="$(ferramenta ruff)"
+pytest_bin="$(ferramenta pytest)"
+
 # lint
-if command -v ruff >/dev/null 2>&1; then
-  roda ruff check .
+if [ -n "$ruff_bin" ]; then
+  roda "$ruff_bin" check .
   etapa lint "$([ "$rc" -eq 0 ] && echo ok || echo falha)" "$saida"
 else
   etapa lint ausente "ruff não encontrado"
 fi
 
 # testes
-if [ -d tests ] && command -v pytest >/dev/null 2>&1; then
-  roda pytest -q
+if [ -d tests ] && [ -n "$pytest_bin" ]; then
+  roda "$pytest_bin" -q
   # exit 5 = nenhum teste coletado: não há evidência, não é falha.
   case "$rc" in 0) st=ok ;; 5) st=ausente ;; *) st=falha ;; esac
   etapa testes "$st" "$saida"
@@ -137,13 +153,18 @@ fi
 
 # dry-run
 if [ -f run.sh ] && grep -rq -- '--dry-run' run.sh *.py */*.py 2>/dev/null; then
+  # timeout (GNU), gtimeout (coreutils no macOS) ou sem limite, avisado no cabeçalho.
+  cab=""
   if command -v timeout >/dev/null 2>&1; then
     roda timeout 120 ./run.sh --dry-run
+  elif command -v gtimeout >/dev/null 2>&1; then
+    roda gtimeout 120 ./run.sh --dry-run
   else
     roda ./run.sh --dry-run
+    cab=" (sem timeout)"
   fi
   etapa dry-run "$([ "$rc" -eq 0 ] && echo ok || echo falha)" "${saida:+$saida
-}exit=$rc"
+}exit=$rc" "$cab"
 else
   etapa dry-run ausente "sem run.sh com --dry-run"
 fi

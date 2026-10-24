@@ -10,6 +10,9 @@ case "${1:-}" in -h|--help) usage "$AJUDA" ;; esac
 [ $# -eq 1 ] || die "$AJUDA"
 slug="$1"
 [[ "$slug" =~ ^[0-9]{3}-[a-z0-9-]+$ ]] || die "slug inválido: $slug (use NNN-slug, ex.: 001-login)"
+need git
+git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
+cd "$(git rev-parse --show-toplevel)"
 
 # criar <arquivo> <conteúdo>: grava só se o arquivo não existe; imprime criado: / mantido:
 criar() {

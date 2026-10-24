@@ -32,6 +32,9 @@ assert_exit() { # <código> <cmd...>
   [ "$rc" -eq "$esperado" ] || fail "exit $rc, esperado $esperado: $*"
 }
 
+# sed_i <expr> <arquivo>: edição in-place portátil (sem sed -i, que difere entre GNU e BSD).
+sed_i() { sed "$1" "$2" > "$2.tmp" && mv "$2.tmp" "$2"; }
+
 # fixture_repo [padrao|plano] -> cria repo git em $TMP, com commit inicial; imprime o caminho
 fixture_repo() {
   local tipo="${1:-padrao}" dir
@@ -42,6 +45,8 @@ fixture_repo() {
     git config user.email "teste@example.com"
     git config user.name "Teste"
     git config core.autocrlf false
+    # Commits de teste sem assinatura, mesmo com commit.gpgsign global.
+    git config commit.gpgsign false
     case "$tipo" in
       padrao)
         mkdir -p pkg tests deploy config
