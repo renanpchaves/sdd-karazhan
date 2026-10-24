@@ -98,6 +98,16 @@ for cfg in pytest.toml .pytest.toml; do
   assert_contains "$out" "aceite-intacto: falha" "$cfg vigiado"
   assert_contains "$out" "$cfg" "$cfg listado"
 done
+# pyproject.toml: dependência nova não reprova; config do pytest reprova
+git checkout -qb feat/001-x-pyproj-dep feat/001-x
+printf '[project]\nname = "x"\ndependencies = ["requests"]\n' > pyproject.toml; git add pyproject.toml; git commit -qm dep
+out=$(bash $W WP-01 --tasks $T || true)
+assert_contains "$out" "aceite-intacto: ok" "dependência no pyproject.toml não reprova"
+git checkout -qb feat/001-x-pyproj-pytest feat/001-x
+printf '[tool.pytest.ini_options]\naddopts = "-q"\n' > pyproject.toml; git add pyproject.toml; git commit -qm pytest-cfg
+out=$(bash $W WP-01 --tasks $T || true)
+assert_contains "$out" "aceite-intacto: falha" "config do pytest no pyproject.toml reprova"
+assert_contains "$(printf '%s\n' "$out" | sed -n '/== aceite-intacto/,/aceite-intacto:/p')" "pyproject.toml" "pyproject.toml listado"
 # oráculo com skip não vale
 if command -v pytest >/dev/null 2>&1; then
   git checkout -qb feat/001-x-WP-04 feat/001-x

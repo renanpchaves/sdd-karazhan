@@ -282,8 +282,19 @@ fi
 
 # aceite-intacto: tests/aceite é do Architect; qualquer mudança na WP reprova.
 # Config do pytest também: conftest e arquivos de config poderiam neutralizar o oráculo.
+# pyproject.toml, setup.cfg e tox.ini só reprovam se os hunks tocam config do pytest
+# (dependência nova não reprova).
 rc=0
-saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite tests/conftest.py conftest.py pytest.ini pytest.toml .pytest.toml pyproject.toml setup.cfg tox.ini 2>&1)" || rc=$?
+saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite tests/conftest.py conftest.py pytest.ini pytest.toml .pytest.toml 2>&1)" || rc=$?
+if [ "$rc" -eq 0 ]; then
+  for f in pyproject.toml setup.cfg tox.ini; do
+    hunks="$(git diff --no-renames "$base...HEAD" -- "$f" 2>/dev/null || true)"
+    if printf '%s\n' "$hunks" | grep -Eq '^[+-].*(pytest|testpaths|addopts|conftest)'; then
+      saida="${saida:+$saida
+}$f"
+    fi
+  done
+fi
 if [ "$rc" -eq 0 ] && [ -z "$saida" ]; then
   etapa aceite-intacto ok ""
 else

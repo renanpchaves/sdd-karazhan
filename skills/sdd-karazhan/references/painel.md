@@ -27,6 +27,8 @@ Conteúdo: tabela de WPs (WP, lane, dono, possui), bloqueios abertos e equipe. P
 
 O `painel.sh` considera aberto todo bloco sem linha `- Resolução:`.
 
+Qualquer agente abre entrada, inclusive o Git Manager num conflito de integração; o Orchestrator resolve e escreve a `- Resolução:` (nos de contrato, o Architect).
+
 ```md
 ## 2026-10-24 · eng-grom · aceite do WP-02 não diz o fuso do relatório
 - Escopo: WP-02 (pkg/relatorio.py)

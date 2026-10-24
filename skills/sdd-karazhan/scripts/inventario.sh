@@ -73,6 +73,9 @@ for d in .claude/specs/current/*/; do
         v="$(cat "$tmpd/lane")"
         case "$v" in aprovado|pronto) ;; *) estado="em curso"; break ;; esac
       done
+    elif [ -n "$(wp_list "$d/tasks-done.md" 2>/dev/null || true)" ]; then
+      # Pousada: as WPs já foram para tasks-done.md.
+      estado="aprovada"
     fi
   fi
   specs="${specs:+$specs

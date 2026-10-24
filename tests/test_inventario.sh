@@ -63,6 +63,9 @@ printf '### WP-01 — sem lane
 - Dono: x
 ' > .claude/specs/current/005-v/tasks.md
 assert_eq "specs: 001-x (aprovada), 002-y (em curso), 003-z (vazia), 004-w (em curso), 005-v (em curso)" "$(linha "$(bash $I)" specs)" "estados das specs, WP sem Lane lida"
+# pousada: tasks.md sem WP e WPs em tasks-done.md é aprovada, não vazia
+printf '### WP-01 — a\n- Lane: pronto\n' >> .claude/specs/current/003-z/tasks-done.md
+assert_contains "$(linha "$(bash $I)" specs)" "003-z (aprovada)" "feature pousada é aprovada"
 
 # --- conectados: equipe.md e maestri ---
 printf '| eng-grom | Engineer | cc | pkg/** | 1 |\n| rev-uther | Reviewer | cx | - | 1 |\n| git-gazlowe | Git | cc | - | 1 |\n| eng-grom | de novo | | | |\n' >> .claude/specs/equipe.md

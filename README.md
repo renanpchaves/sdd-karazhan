@@ -48,8 +48,8 @@ O `inventario.sh` imprime oito linhas de fatos: módulos, áreas, specs, mapa, p
 
 ```
 Pedido: "adicionar filtro por empresa no relatório"
-Sinais: módulos=1 (relatorio) · spec=não · mapa=ok · testes=sim · nível 1
-Tamanho: Pequena — um módulo, sem regra de negócio nova
+Sinais: áreas=1 (relatorio) · spec=não · mapa=ok · testes=sim · nível 1
+Tamanho: Pequena — 1 área, sem regra de negócio nova
 Terminais: eng-grom (claude/medio) — relatorio · rev-uther (codex/capaz) — Codex, contexto limpo
 Subagentes: arch-ysera — spec curta de 1 página · git-gazlowe (reaproveitado)
 Não convocar: recon — mapa válido, esqueleto padrão
@@ -71,7 +71,7 @@ Vem só quem você chamou. Engineer exige Git Manager; Reviewer exige Engineer. 
 | Nível | Quando | Contrato | Time |
 |---|---|---|---|
 | **0** | O diff cabe numa frase | Nenhum. O Orchestrator avisa que não vai usar a skill e para: você faz direto e roda pytest. | Você |
-| **1** | Pequena: uma área | Spec de 1 página com comandos de aceitação | 1 Engineer · Reviewer · Architect subagente |
+| **1** | Pequena: uma área | Spec de 1 página com comandos de aceitação | 1 Engineer · Reviewer · Architect subagente · Git Manager subagente |
 | **2** | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2 a `eng_max` Engineers. Grande: mais áreas que `eng_max`, Architect e Git Manager em terminal |
 
 Pequena: 2 terminais executores (Engineer + Reviewer) mais o seu. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
@@ -97,7 +97,7 @@ Projeto novo: duas folhas. A primeira (Git Manager faz `git init`, Architect esc
 | `scaffold.sh 003-slug` | Cria specs e tasks. |
 | `mapa-check.sh` | Mapa ainda vale? Idade e impressão digital da árvore. |
 | `donos.sh 003-slug` | Arquivo no escopo sem dono? Lista. |
-| `wp-check.sh WP-03` | Lint, pytest, `--dry-run` real, diff restrito aos paths, arquivo fora do path. |
+| `wp-check.sh WP-03` | Lint, pytest, `aceite` (oráculo da WP), `--dry-run` real, diff restrito aos paths, arquivo fora do path, `aceite-intacto`. `--regressao` soma o aceite das WPs prontas; `--tudo`, o `tests/aceite/` inteiro. |
 | `painel.sh 003-slug` | Gera o painel do `tasks.md`. |
 | `guard-install.sh` | Instala `.sdd-role` e `pre-commit` no worktree. |
 

@@ -26,7 +26,7 @@ Nome: `pick-name.sh <prefixo>`. Preset: família e tier em `presets`; sem o tier
 
 Projeto novo: duas folhas. Folha 1 (git + arch, `Tamanho: a definir (até o plan.md)`) sempre espera uma palavra: Git Manager subagente (`git init -b main`, `.gitignore`, commit vazio); Architect: subagente se o usuário trouxe spec (converter, não reconstruir), terminal se trouxe ideia. Folha 2, depois do `plan.md`: uma área por fronteira (módulo ou pacote do `plan.md`, não arquivo), regras normais; onda 1 = esqueleto em série (um Engineer, `mapa-padrao.md`).
 
-Brownfield: o Architect confere `tests/test_<mod>*`; sem teste, a WP-01 é o teste de caracterização (fixture em `tests/fixtures/`, teste em `tests/`), feita em série pelo Engineer do módulo, no mesmo worktree, antes da WP dele, e revisada antes das outras; não muda o tamanho.
+Brownfield: o Architect confere `tests/test_<mod>*`; sem teste, a WP-01 é o teste de caracterização (fixture em `tests/fixtures/`, teste em `tests/`), feita em série pelo Engineer do módulo, no mesmo worktree, antes da WP dele, e revisada antes da WP do módulo; não muda o tamanho.
 
 Folha: sete linhas, porquê inline. Pequena: mostre e siga; terminais só nascem após o checkpoint da spec (passo 3), e `para` ajusta o time. Média e Grande: espere uma palavra. `NÃO CONVOCADO` ou nominal inválida: mostre o motivo e espere.
 
