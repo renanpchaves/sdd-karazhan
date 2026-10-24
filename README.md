@@ -25,18 +25,16 @@ A resposta: script inventaria o repo, script cria notas, script gera painel, scr
 
 ## Quem vem à festa
 
-| Papel | Prefixo | Faz | Elenco |
-|---|---|---|---|
-| **Orchestrator** | `orch` | Rege. Não codifica. | Magos de Dalaran: `antonidas`, `jaina`, `aethas`, `khadgar`, `aegwynn`, `kelthuzad` |
-| **Architect** | `arch` | Descoberta, `spec.md`, `plan.md`, aceite como teste. | Dragões: `alexstrasza`, `nozdormu`, `ysera`, `kalecgos`, `wrathion`, `ebyssian`, `vyranoth`, `merithra`, `krasus` |
-| **Recon** | `rec` | Entra, mapeia o repo, sai. Subagente. | Batedores: `garona`, `valeera`, `mathias`, `shandris`, `nathanos`, `rexxar` |
-| **Engineer** | `eng` | Implementa no worktree dele. **Claude Code.** | Linha de frente: `grom`, `saurfang`, `durotan`, `orgrim`, `cairne`, `baine`, `thrall`, `varian`, `muradin`, `magni`, `tyrande`, `malfurion`, `illidan` |
-| **Reviewer** | `rev` | Roda teste, lê diff, aprova ou devolve. **Codex.** | Julgadores: `uther`, `tirion`, `turalyon`, `bolvar`, `liadrin`, `alleria`, `arthas` |
-| **Git Manager** | `git` | Worktree, hook, commit, PR. Dono do git. | Goblins e gnomos: `gazlowe`, `gallywix`, `mekkatorque`, `thermaplugg`, `brann`, `sprocket` |
+| Papel | Prefixo | Faz |
+|---|---|---|
+| **Orchestrator** | `orch` | Rege. Não codifica. |
+| **Architect** | `arch` | Descoberta, `spec.md`, `plan.md`, aceite como teste em `tests/aceite/`. |
+| **Recon** | `rec` | Entra, mapeia o repo, sai. Subagente. |
+| **Engineer** | `eng` | Implementa no worktree dele. **Claude Code.** |
+| **Reviewer** | `rev` | Roda teste, lê diff, aprova ou devolve. **Codex.** |
+| **Git Manager** | `git` | Worktree, hook, commit, PR. Dono do git. |
 
-Nome no canvas: `prefixo-personagem`. `eng-grom` implementa. `rev-arthas` devolve a WP inteira por um defeito. `git-gazlowe` cobra barato.
-
-Papel diz o trabalho. Nome dá identidade. Não precisa saber lore.
+Nome no canvas: `prefixo-personagem`, sorteado de um elenco de Warcraft (`roster.json`, editável). Papel diz o trabalho. Nome dá identidade. Não precisa saber lore.
 
 ## Como usar
 
@@ -87,6 +85,17 @@ Projeto novo: duas folhas. A primeira (Git Manager faz `git init`, Architect esc
 3. Nada destrutivo ou externo sem você dizer sim. Merge, deploy, PR, deletar nó do canvas.
 4. Handoff é por arquivo. Chat não é contrato.
 5. Quem produz não aprova. Reviewer em Codex, em outro terminal, lendo diff.
+6. Teste de aceite é do Architect, em `tests/aceite/`, um arquivo por WP. Engineer não toca. Hook, `pre-commit` e `wp-check` garantem.
+
+## Ciclo que não gera retrabalho
+
+- Reviewer só reprova por correção ou requisito. Estilo vai em `observações` e não reprova.
+- Segunda reprovação da mesma WP: Engineer novo, contexto limpo.
+- Mesmo erro em duas features: vira teste, linha no `mapa-padrao.md` ou no `CLAUDE.md` do repo. Registrado como `lição`.
+- Cada WP deixa a branch mergeável. 30 a 90 minutos. Maior que isso, divide.
+- Antes de cada revisão, o Git Manager integra a feature na branch da WP. Regressão das WPs prontas roda no Reviewer.
+
+Por que assim: [`docs/pesquisa/2026-10-24-praticas-agentes.md`](docs/pesquisa/2026-10-24-praticas-agentes.md), levantamento de campo com fontes.
 
 ## Scripts (o que não gasta token)
 
