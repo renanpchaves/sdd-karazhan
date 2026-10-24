@@ -4,6 +4,7 @@ set -eu
 
 PWD_PLUGIN="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export PWD_PLUGIN
+cd "$PWD_PLUGIN"
 TMP="$(mktemp -d)"
 export TMP
 trap 'rm -rf "$TMP"' EXIT
@@ -37,7 +38,7 @@ fixture_repo() {
   dir="$(mktemp -d "$TMP/repo.XXXXXX")"
   (
     cd "$dir"
-    git init -q
+    git init -q -b main
     git config user.email "teste@example.com"
     git config user.name "Teste"
     git config core.autocrlf false
@@ -53,6 +54,7 @@ fixture_repo() {
         printf '#!/usr/bin/env bash\npython -m pkg.cli\n' > run.sh
         printf '#!/usr/bin/env bash\npip install -r requirements.txt\n' > setup.sh
         printf 'DEBUG = False\n' > config/settings.py
+        chmod +x run.sh setup.sh
         ;;
       plano)
         printf 'print("ola")\n' > script.py
@@ -61,7 +63,7 @@ fixture_repo() {
       *) echo "fixture_repo: tipo desconhecido '$tipo'" >&2; exit 2 ;;
     esac
     git add -A
-    git commit -q -m "inicial"
+    git -c commit.gpgsign=false commit -q -m "inicial"
   )
   echo "$dir"
 }

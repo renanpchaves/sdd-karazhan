@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Roda cada tests/test_*.sh a partir da raiz do plugin.
-set -u
+set -eu
 cd "$(dirname "$0")/.."
+. skills/sdd-karazhan/lib/common.sh
+need jq git
 total=0
 falhas=0
 for t in tests/test_*.sh; do
