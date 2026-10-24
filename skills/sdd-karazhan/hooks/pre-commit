@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# pre-commit do sdd-karazhan. Sem .sdd-role na raiz do worktree, não faz nada.
+# Bloqueia (1) arquivo staged fora dos paths da WP e (2) commit sem SDD_GIT_MANAGER.
+top="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+role_file="$top/.sdd-role"
+[ -f "$role_file" ] || exit 0
+
+# campo <chave>: valor de "chave=valor" no .sdd-role, sem CR.
+campo() { grep "^$1=" "$role_file" | head -n 1 | cut -d= -f2- | tr -d '\r'; }
+role="$(campo role)"
+wp="$(campo wp)"
+paths="$(campo paths)"
+root="$(campo root)"
+
+staged="$(git -c core.quotepath=off diff --cached --name-only)"
+
+if [ "$role" = "rev" ]; then
+  if [ -n "$staged" ]; then
+    echo "bloqueado: Reviewer não commita" >&2
+    exit 1
+  fi
+else
+  if [ ! -f "$root/lib/tasks.sh" ]; then
+    echo "pre-commit: lib/tasks.sh não encontrado em root=$root (.sdd-role)" >&2
+    exit 1
+  fi
+  . "$root/lib/tasks.sh"
+  globs="$(printf '%s\n' "$paths" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' || true)"
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    ok=1
+    while IFS= read -r g; do
+      [ -n "$g" ] || continue
+      if glob_match "$g" "$f"; then ok=0; break; fi
+    done <<EOT
+$globs
+EOT
+    if [ "$ok" -ne 0 ]; then
+      echo "bloqueado: $f fora dos paths da $wp" >&2
+      exit 1
+    fi
+  done <<EOT
+$staged
+EOT
+fi
+
+if [ -z "${SDD_GIT_MANAGER:-}" ]; then
+  echo "commit só pelo Git Manager (SDD_GIT_MANAGER)" >&2
+  exit 1
+fi
+exit 0
