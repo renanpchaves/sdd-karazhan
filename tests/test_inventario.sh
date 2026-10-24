@@ -46,14 +46,30 @@ jq 'del(.config.eng_max) | .presets={}' .claude/specs/karazhan.json > k && mv k 
 assert_contains "$(bash $I)" "presets: nenhum · codex: não" "sem presets"
 
 # --- specs: aprovada, em curso, vazia ---
-bash $SK/scripts/scaffold.sh 002-y >/dev/null; bash $SK/scripts/scaffold.sh 003-z >/dev/null
+for s in 002-y 003-z 004-w 005-v; do bash $SK/scripts/scaffold.sh $s >/dev/null; done
 printf '### WP-01 — a\n- Lane: aprovado\n### WP-02 — b\n- Lane: pronto\n' > .claude/specs/current/001-x/tasks.md
-printf '### WP-01 — a\n- Lane: aprovado\n### WP-02 — b\n- Lane: em andamento\n### WP-03 — sem lane\n- Dono: x\n' > .claude/specs/current/002-y/tasks.md
-assert_eq "specs: 001-x (aprovada), 002-y (em curso), 003-z (vazia)" "$(linha "$(bash $I)" specs)" "estados das specs"
+printf '### WP-01 — a
+- Lane: aprovado
+### WP-02 — b
+- Lane: em andamento
+' > .claude/specs/current/002-y/tasks.md
+# WP sem Lane lida de fato: depois de uma WP aprovada, e como primeira WP
+printf '### WP-01 — a
+- Lane: aprovado
+### WP-02 — sem lane
+- Dono: x
+' > .claude/specs/current/004-w/tasks.md
+printf '### WP-01 — sem lane
+- Dono: x
+' > .claude/specs/current/005-v/tasks.md
+assert_eq "specs: 001-x (aprovada), 002-y (em curso), 003-z (vazia), 004-w (em curso), 005-v (em curso)" "$(linha "$(bash $I)" specs)" "estados das specs, WP sem Lane lida"
 
 # --- conectados: equipe.md e maestri ---
 printf '| eng-grom | Engineer | cc | pkg/** | 1 |\n| rev-uther | Reviewer | cx | - | 1 |\n| git-gazlowe | Git | cc | - | 1 |\n| eng-grom | de novo | | | |\n' >> .claude/specs/equipe.md
+printf '| digit-foo | Armadilha |
+' >> .claude/specs/equipe.md
 assert_eq "conectados: eng-grom (equipe.md), rev-uther (equipe.md), git-gazlowe (equipe.md)" "$(linha "$(bash $I)" conectados)" "conectados via equipe.md, sem repetir"
+case "$(bash $I)" in *git-foo*) fail "digit-foo casou como git-foo" ;; esac
 printf '#!/bin/sh\n[ "$1" = list ] && printf "arch-alexstrasza\neng-saurfang  claude\n"\nexit 0\n' > $TMP/bin/maestri; chmod +x $TMP/bin/maestri
 assert_eq "conectados: arch-alexstrasza (terminal), eng-saurfang (terminal)" "$(linha "$(bash $I)" conectados)" "maestri list tem precedência"
 rm $TMP/bin/maestri
@@ -71,6 +87,16 @@ assert_contains "$out" "novo" "módulo novo listado"
 
 # --- subdiretório usa a raiz do repo ---
 cd pkg; assert_contains "$(bash $I)" "áreas: pacote, deploy, config, tests" "subdiretório usa a raiz"; cd ..
+
+# --- deploy: run.sh ou setup.sh sem deploy/ também formam a área ---
+R4=$(fixture_repo padrao); cd $R4; rm -rf deploy; git add -A
+assert_contains "$(bash $I)" "áreas: pacote, deploy, config, tests" "run.sh e setup.sh sem deploy/ valem deploy"
+rm setup.sh; git add -A
+assert_contains "$(bash $I)" "áreas: pacote, deploy, config, tests" "run.sh sem deploy/ vale deploy"
+rm run.sh; printf '#!/usr/bin/env bash\n' > setup.sh; git add -A
+assert_contains "$(bash $I)" "áreas: pacote, deploy, config, tests" "setup.sh sem deploy/ vale deploy"
+rm setup.sh; git add -A
+assert_contains "$(bash $I)" "áreas: pacote, config, tests" "sem deploy/, run.sh nem setup.sh"
 
 # --- plano: esqueleto fora ---
 R2=$(fixture_repo plano); cd $R2

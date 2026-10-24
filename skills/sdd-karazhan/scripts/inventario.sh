@@ -50,7 +50,7 @@ add_area() { areas="${areas:+$areas
 }$1"; }
 if [ "$novo" -eq 0 ]; then
   if [ "$pacote" -eq 1 ]; then add_area pacote; fi
-  if [ -d deploy ]; then add_area deploy; fi
+  if [ -d deploy ] || [ -f run.sh ] || [ -f setup.sh ]; then add_area deploy; fi
   if [ -d config ]; then add_area config; fi
   if [ -d tests ]; then add_area tests; fi
 fi
@@ -110,14 +110,17 @@ if awk -F'\t' '$2 == "codex" { achou = 1 } END { exit !achou }' "$tmpd/presets" 
 fi
 presets="$(awk -F'\t' '{ printf "%s%s=%s/%s", (NR > 1 ? " " : ""), $1, $2, $3 }' "$tmpd/presets")"
 
+# nomes_em (stdin): nomes de agente (prefixo-nome), um por linha. A âncora evita casar digit-foo como git-foo.
+nomes_em() { grep -oE '(^|[^a-z-])(orch|arch|rec|eng|rev|git)-[a-z]+' | sed 's/^[^a-z]//'; }
+
 # --- conectados: maestri list, senão equipe.md ---
 conectados=""
 if command -v maestri >/dev/null 2>&1; then
-  nomes="$(maestri list 2>/dev/null | tr -d '\r' | grep -oE '(orch|arch|rec|eng|rev|git)-[a-z]+' | awk '!v[$0]++' || true)"
+  nomes="$(maestri list 2>/dev/null | tr -d '\r' | nomes_em | awk '!v[$0]++' || true)"
   conectados="$(printf '%s\n' "$nomes" | grep -v '^$' | sed 's/$/ (terminal)/' || true)"
 fi
 if [ -z "$conectados" ] && [ -f .claude/specs/equipe.md ]; then
-  nomes="$(tr -d '\r' < .claude/specs/equipe.md | grep -oE '(orch|arch|rec|eng|rev|git)-[a-z]+' | awk '!v[$0]++' || true)"
+  nomes="$(tr -d '\r' < .claude/specs/equipe.md | nomes_em | awk '!v[$0]++' || true)"
   conectados="$(printf '%s\n' "$nomes" | grep -v '^$' | sed 's/$/ (equipe.md)/' || true)"
 fi
 
