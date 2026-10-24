@@ -1,0 +1,51 @@
+# Mapa padrão — esqueleto Python + launchd
+
+Vale para repo com esqueleto padrão (`mapa-check.sh` diz `esqueleto=padrao`: `deploy/*.plist`, `tests/` e um pacote na raiz). Automações Python que rodam no macOS via launchd ou Cowork. Repo fora disso pede Recon.
+
+## Organização
+
+- `<pacote>/` na raiz, com o nome do repo (`relatorios/`, `sincronia/`, `auditoria/`, `termos/`; `src/` nos mais antigos). Módulos típicos:
+  - entrada e configuração: `cli.py`, `config.py`, `logging_setup.py`
+  - clientes externos: `graph_client.py` ou `cliente.py` (Microsoft Graph, helpdesk, monitoramento)
+  - coleta: `coleta.py` ou `coletor.py`
+  - transformação: `transformar.py` ou `normalizar.py`
+  - envio: `envio.py`, `outbox.py` ou `mailer.py`
+  - relatório: `relatorio.py` ou `report.py`
+  - estado: `estado.py` ou `db.py`; guardas de execução: `guardas.py`
+- `tests/`: `conftest.py`, `fabrica.py` ou `fakes.py`, `fixtures/*.json`, `test_<modulo>.py` (pytest).
+- `deploy/`: `com.exemplo.<nome>.plist` e `ARMAR.md`; às vezes `rotina-nuvem-SKILL.md` para Cowork.
+- Raiz: `run.sh`, `setup.sh`, `.env.example`, `pyproject.toml` ou `requirements.txt`, `README.md`, `DECISOES.md`.
+- Às vezes: `alembic/` (migrações), `backups/`, `historico/`, `logs/.gitkeep`, `.claude/specs/` herdado do sdd-maestri.
+
+## Convenções
+
+- CLI com `--dry-run`: executa tudo sem enviar e-mail nem gravar estado real. É o que o `wp-check.sh` roda.
+- Logs em stderr; saída em JSON no stdout.
+- Outbox antes de enviar: a mensagem é gravada e só então enviada.
+- Segredos só em `.env`; `.env.example` lista as chaves sem valor.
+- E-mail e SharePoint via Microsoft Graph.
+- Testes com `fixtures/*.json` e fakes (`fabrica.py` ou `fakes.py`) no lugar dos clientes externos.
+
+## Onde o pedido toca
+
+Casar as palavras do pedido com os nomes dos módulos do pacote (o `convocar.sh` já faz isso). Mudança em CLI, `config.py` ou cliente externo pode tocar também `.env.example` e `README.md`: confira e dê dono.
+
+## Onde é perigoso
+
+- Arquivo executado pelo launchd: `run.sh` e o `.plist`. Erro aqui para a rotina em produção sem aviso.
+- Estado em disco: `backups/`, `historico/`, SQLite. Apagar ou migrar perde histórico.
+- Migração alembic: mexe no banco em produção; exige aceite próprio e caminho de volta.
+- Tudo que envia e-mail ou escreve em sistema externo: só testar com `--dry-run`.
+- `.env`: agente não lê, não copia e não commita.
+
+## Fronteiras sugeridas de WP
+
+| WP | Possui |
+|---|---|
+| coleta | `<pacote>/coleta*.py`, clientes externos, `tests/test_coleta*.py`, fixtures da coleta |
+| transformação | `<pacote>/transformar.py` ou `normalizar.py`, testes correspondentes |
+| envio | `<pacote>/envio.py`, `outbox.py`, `mailer.py`, testes correspondentes |
+| relatório | `<pacote>/relatorio.py` ou `report.py`, testes correspondentes |
+| deploy | `deploy/**`, `run.sh`, `setup.sh` — sempre com dono explícito quando tocados |
+
+`cli.py`, `config.py` e `.env.example` ficam com a WP que muda a interface; nunca com duas.
