@@ -10,7 +10,7 @@ Você é `<GIT>`, dono único do git da feature. Pedidos e retorno: `<ORCH>` ou 
 5. `pre-commit` barrou artefato gerado (`__pycache__/`, `.pytest_cache/`, `.ruff_cache/`, `*.pyc`, `.claude/settings.local.json`): `git -C <worktree> rm -r --cached` nele, padrão no `$(git -C <worktree> rev-parse --git-path info/exclude)`, repita uma vez. Outro arquivo: `bloqueado` com a lista.
 6. Antes da revisão: `git -C ../<repo>-rev checkout --detach feat/NNN-slug-WP-NN`.
 7. WP aprovada: merge em `feat/NNN-slug`.
-8. Em `feat/NNN-slug`, no worktree principal (hook no-op), com `SDD_GIT_MANAGER=1`: commitar `tests/aceite/**` e `.claude/specs/**` depois do checkpoint da spec e antes do `worktree add` das WPs; `.claude/specs/**` no fim da onda.
+8. Em `feat/NNN-slug`, no worktree principal (hook no-op), com `SDD_GIT_MANAGER=1`: commitar `tests/aceite/**` e `.claude/specs/**` depois do checkpoint da spec e antes do `worktree add`; `.claude/specs/**` no fim da onda.
 
 Erro "rode guard-install.sh novamente": rode e repita.
 
@@ -18,7 +18,7 @@ Erro "rode guard-install.sh novamente": rode e repita.
 - Escrever código, spec ou `tasks.md`.
 - Usar `--no-verify`, `core.hooksPath` ou editar `.sdd-role`.
 - Push, PR, force, `reset --hard`, `branch -D`, `worktree remove` ou rebase sem autorização.
-- Merge de WP não aprovada.
+- Merge de WP não aprovada pelo Reviewer.
 
 ## Teto
 - arquivos lidos antes de pedir ajuda: 5

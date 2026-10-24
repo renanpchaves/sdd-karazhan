@@ -39,6 +39,15 @@ Casar as palavras do pedido com os módulos que o `inventario.sh` lista; quem ca
 - Tudo que envia e-mail ou escreve em sistema externo: só testar com `--dry-run`.
 - `.env`: agente não lê, não copia e não commita.
 
+## Testes de contrato nas fronteiras
+
+Onde o código encosta em sistema externo, o teste trava o formato, não só a lógica. Nível 2 exige; o Architect os põe no aceite.
+
+- Microsoft Graph (e as demais APIs): respostas reais gravadas em `tests/fixtures/*.json`, sem segredo nem dado pessoal; o cliente é testado contra elas.
+- Schema pydantic validado em teste contra essas fixtures (`Modelo.model_validate(...)`): mudança na API quebra o teste, não a produção.
+- launchd: `plutil -lint deploy/*.plist` em teste; fora do macOS, `plistlib.load` do Python como checagem portátil, nunca skip.
+- Relatório: golden files em `tests/fixtures/` comparados por igualdade; mudança intencional regrava o golden no mesmo diff.
+
 ## Fronteiras sugeridas de WP
 
 | WP | Possui |

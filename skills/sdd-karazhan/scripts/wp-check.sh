@@ -152,14 +152,17 @@ else
 fi
 
 # aceite: o oráculo precisa rodar de verdade; skip, xfail ou nada coletado é falha.
+# Skip e xfail só contam na linha de resumo do pytest (-rsx), não num caminho com "xfail".
 if [ -d tests/aceite ] && [ -n "$pytest_bin" ]; then
   roda "$pytest_bin" tests/aceite -rsx -p no:cacheprovider
   st=ok
   [ "$rc" -eq 0 ] || st=falha
-  case "$saida" in *SKIPPED*|*XFAIL*|*xfail*) st=falha ;; esac
+  if printf '%s\n' "$saida" | grep -Eq '^(SKIPPED|XFAIL)( |\[)'; then st=falha; fi
   etapa aceite "$st" "$saida"
 elif [ -d tests/aceite ]; then
   etapa aceite ausente "tests/aceite existe, mas pytest não foi encontrado"
+elif grep -q 'tests/aceite' "$(dirname "$tasks")/spec.md" 2>/dev/null; then
+  etapa aceite falha "oráculo declarado na spec mas ausente"
 else
   etapa aceite ausente "sem tests/aceite"
 fi
@@ -218,7 +221,7 @@ fi
 # aceite-intacto: tests/aceite é do Architect; qualquer mudança na WP reprova.
 # Config do pytest também: conftest e arquivos de config poderiam neutralizar o oráculo.
 rc=0
-saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite tests/conftest.py conftest.py pytest.ini pyproject.toml setup.cfg tox.ini 2>&1)" || rc=$?
+saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite tests/conftest.py conftest.py pytest.ini pytest.toml .pytest.toml pyproject.toml setup.cfg tox.ini 2>&1)" || rc=$?
 if [ "$rc" -eq 0 ] && [ -z "$saida" ]; then
   etapa aceite-intacto ok ""
 else

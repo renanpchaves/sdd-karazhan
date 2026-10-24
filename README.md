@@ -74,7 +74,7 @@ Vem só quem você chamou. Engineer exige Git Manager; Reviewer exige Engineer. 
 | **1** | Pequena: uma área | Spec de 1 página com comandos de aceitação | 1 Engineer · Reviewer · Architect subagente |
 | **2** | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2 a `eng_max` Engineers. Grande: mais áreas que `eng_max`, Architect e Git Manager em terminal |
 
-Mínimo é 3 terminais. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
+Pequena: 2 terminais executores (Engineer + Reviewer) mais o seu. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
 
 Nível e tamanho são eixos separados: uma área com integração ou banco (inclusive migração) é Pequena com contrato Nível 2.
 

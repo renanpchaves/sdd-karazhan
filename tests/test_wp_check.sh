@@ -74,7 +74,7 @@ mkdir -p tests/aceite; printf 'def test_x():\n    assert True\n' > tests/aceite/
 git add tests/aceite/test_x.py; git commit -qm aceite
 out=$(bash $W WP-01 --tasks $T || true)
 assert_contains "$out" "aceite-intacto: falha" "aceite-intacto falha"
-assert_contains "$out" "aceite: ok" "oráculo roda e passa"
+if command -v pytest >/dev/null 2>&1; then assert_contains "$out" "aceite: ok" "oráculo roda e passa"; fi
 assert_contains "$out" "tests/aceite/test_x.py" "arquivo de aceite listado"
 assert_exit 1 bash $W WP-01 --tasks $T
 # config do pytest vigiada
@@ -84,6 +84,13 @@ out=$(bash $W WP-01 --tasks $T || true)
 assert_contains "$out" "aceite-intacto: falha" "conftest vigiado"
 assert_contains "$out" "tests/conftest.py" "conftest listado"
 assert_exit 1 bash $W WP-01 --tasks $T
+for cfg in pytest.toml .pytest.toml; do
+  git checkout -qb "feat/001-x-cfg$cfg" feat/001-x
+  printf '[pytest]\n' > $cfg; git add -f $cfg; git commit -qm "$cfg"
+  out=$(bash $W WP-01 --tasks $T || true)
+  assert_contains "$out" "aceite-intacto: falha" "$cfg vigiado"
+  assert_contains "$out" "$cfg" "$cfg listado"
+done
 # oráculo com skip não vale
 if command -v pytest >/dev/null 2>&1; then
   git checkout -qb feat/001-x-WP-04 feat/001-x
@@ -99,4 +106,25 @@ if command -v pytest >/dev/null 2>&1; then
   git add tests/aceite/helper.py; git commit -qm vazio
   out=$(bash $W WP-01 --tasks $T || true)
   assert_contains "$out" "aceite: falha" "nada coletado é falha"
+  # "xfail" no caminho não é xfail: só a linha de resumo do pytest conta
+  git checkout -qb feat/001-x-WP-06 feat/001-x
+  mkdir -p tests/aceite; printf 'def test_regra():\n    assert True\n' > tests/aceite/test_xfail_regra.py
+  git add tests/aceite/test_xfail_regra.py; git commit -qm xfail-no-nome
+  out=$(bash $W WP-01 --tasks $T || true)
+  assert_contains "$out" "aceite: ok" "xfail no caminho não é falha"
+  # xfail de verdade continua falha
+  git checkout -qb feat/001-x-WP-07 feat/001-x
+  mkdir -p tests/aceite
+  printf 'import pytest\n\n\n@pytest.mark.xfail(reason="x")\ndef test_b():\n    assert False\n' > tests/aceite/test_b.py
+  git add tests/aceite/test_b.py; git commit -qm xfail
+  out=$(bash $W WP-01 --tasks $T || true)
+  assert_contains "$out" "aceite: falha" "xfail no oráculo é falha"
 fi
+# spec cita tests/aceite, mas o diretório não existe: falha, não ausente
+git checkout -qb feat/001-x-WP-08 feat/001-x
+rm -rf tests/aceite  # sobras não rastreadas (__pycache__) dos ramos anteriores
+printf '\nAceite em `tests/aceite/test_001_x.py`.\n' >>.claude/specs/current/001-x/spec.md
+out=$(bash $W WP-01 --tasks $T || true)
+assert_contains "$out" "aceite: falha" "oráculo da spec ausente é falha"
+assert_contains "$out" "oráculo declarado na spec mas ausente" "motivo da falha"
+assert_exit 1 bash $W WP-01 --tasks $T

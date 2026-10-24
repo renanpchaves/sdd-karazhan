@@ -58,7 +58,7 @@ Só `tasks-<nome>`. Conteúdo:
 - o comando exato do `wp-check.sh`, com caminho absoluto e `--tasks`;
 - a base do diff (`feat/NNN-slug`).
 
-- Engineer: uma WP por Engineer por andar. Nova WP é novo role, novo worktree, novo `.sdd-role` e nova nota.
+- Engineer: uma WP por Engineer por andar. Nova WP é novo role, novo worktree, novo `.sdd-role` e nova nota. Exceção: depois da caracterização (WP-01), o mesmo Engineer recebe a WP do módulo, ainda com tudo novo (`references/ciclo.md`, passo 5).
 - Reviewer: um por andar, então a nota dele é reescrita a cada WP: `maestri note write "tasks-<nome-rev>" "<conteúdo>"`. O role do Reviewer não tem `<WP>` nem `<PATHS>`: a WP e os paths vêm da nota.
 - Leitura: `maestri note read "tasks-<nome>"`.
 

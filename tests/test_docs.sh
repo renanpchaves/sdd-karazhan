@@ -15,8 +15,16 @@ grep -q '^name: sdd-karazhan' $SK/SKILL.md || fail "frontmatter"
 grep -qi 'maestri' $SK/SKILL.md || fail "gatilho"
 C=$SK/references/convocacao.md
 [ -f $C ] || fail "falta ref convocacao"
-[ "$(wc -w < $C)" -le 650 ] || fail "convocacao.md > 650 palavras"
+[ "$(wc -w < $C)" -le 800 ] || fail "convocacao.md > 800 palavras"
 for p in Orchestrator Architect Recon Engineer Reviewer 'Git Manager' 'Nível 0' 'projeto novo' 'caracterização'; do
   grep -q "$p" $C || fail "convocacao.md sem '$p'"
 done
 ! grep -rq 'convocar\.sh' skills README.md || fail "sobrou menção a convocar.sh"
+for p in correção requisito observações; do grep -q "$p" $SK/agents/reviewer.md || fail "reviewer.md sem '$p'"; done
+for p in 'Engineer novo' lição mergeável; do grep -q "$p" $SK/references/ciclo.md || fail "ciclo.md sem '$p'"; done
+grep -q 'Engineer novo' $SK/agents/orchestrator.md || fail "orchestrator.md sem 'Engineer novo'"
+grep -q 'lição' $C || fail "convocacao.md sem 'lição'"
+grep -q 'plutil' $SK/mapa-padrao.md || fail "mapa-padrao sem plutil"
+! grep -rq 'checkpoint da spec (passo 5)' $SK || fail "checkpoint da spec é o passo 3"
+grep -q 'pelo Reviewer' $SK/agents/git-manager.md || fail "git-manager sem 'pelo Reviewer'"
+! grep -q 'Mínimo é 3 terminais' README.md || fail "README ainda diz 3 terminais"
