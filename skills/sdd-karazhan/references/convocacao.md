@@ -4,7 +4,14 @@ Entrada: pedido + `inventario.sh`; o Orchestrator decide em três passos: conta 
 
 ## 1. Área
 
-Parte do repo que um Builder assume sozinho: um módulo citado no pedido (`coleta`, `relatorio`) ou uma área do inventário (`deploy` = plist, launchd, `run.sh`, `setup.sh`; `config`; `migracoes` = alembic). Migração leva junto `models`, `db` e `schemas`: tudo isso conta como UMA área.
+Grupo de arquivos que um Builder muda sozinho, sem tocar nos de outro. Grupos (do inventário):
+
+- cada módulo do pacote, com o teste dele: `coleta.py` + `tests/test_coleta.py`;
+- `deploy`: `deploy/*.plist`, `run.sh`, `setup.sh`;
+- `config`: `config/`, `.env.example`;
+- `migracoes`: `alembic/` junto com `models`, `db` e `schemas`.
+
+Arquivos que precisam mudar juntos para a mudança fazer sentido são UMA área, mesmo em módulos diferentes (ex.: `graph_client.py` + `coleta.py` para ler um campo novo). A contagem é de áreas que o pedido **muda**, não das que ele só lê.
 
 ## 2. Tamanho (o time)
 

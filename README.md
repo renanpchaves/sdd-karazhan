@@ -66,7 +66,16 @@ Vem só quem você chamou. Builder exige Git Manager; Reviewer exige Builder. Fa
 
 Duas perguntas separadas: **quantas pessoas** (tamanho) e **quanto contrato** (nível).
 
-**Área** é uma parte do repo que um Builder assume sozinho: um módulo (`coleta`, `relatorio`), `deploy` (plist, `run.sh`, `setup.sh`), `config` ou `migracoes` (alembic, com `models`/`db`/`schemas` juntos). O Orchestrator conta quantas o pedido toca.
+**Área** é um grupo de arquivos que um Builder muda sozinho, no worktree dele, sem esbarrar no de outro Builder. Uma área = um Builder possível.
+
+| Área | Arquivos |
+|---|---|
+| um módulo | `coleta.py` + `tests/test_coleta.py` (cada módulo do pacote é uma área) |
+| `deploy` | `deploy/*.plist`, `run.sh`, `setup.sh` |
+| `config` | `config/`, `.env.example` |
+| `migracoes` | `alembic/` + `models`, `db`, `schemas` |
+
+Arquivos que precisam mudar juntos contam como uma área só, mesmo em módulos diferentes: ler um campo novo do Graph mexe em `graph_client.py` e `coleta.py`, e isso é uma área. Conta o que o pedido **muda**, não o que ele só lê.
 
 **Tamanho = o time.**
 
