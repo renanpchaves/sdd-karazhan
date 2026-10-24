@@ -15,6 +15,9 @@ need jq git
 git rev-parse --show-toplevel >/dev/null 2>&1 || die "não é um repositório git"
 
 SCRIPTS="$(cd "$(dirname "$0")" && pwd)"
+cd "$(git rev-parse --show-toplevel)"
+kj=".claude/specs/karazhan.json"
+if [ -f "$kj" ]; then jq empty "$kj" 2>/dev/null || die "karazhan.json inválido: $kj"; fi
 pedido="$1"
 shift
 
@@ -47,7 +50,7 @@ trap 'rm -rf "$tmpd"' EXIT
 # iconv, se existir, translitera o resto (no macOS/Git Bash deixa marcas como ' e ~, removidas no tr).
 normalizar_fluxo() {
   sed 's/á/a/g;s/à/a/g;s/â/a/g;s/ã/a/g;s/é/e/g;s/ê/e/g;s/í/i/g;s/ó/o/g;s/ô/o/g;s/õ/o/g;s/ú/u/g;s/ç/c/g;s/Á/A/g;s/À/A/g;s/Â/A/g;s/Ã/A/g;s/É/E/g;s/Ê/E/g;s/Í/I/g;s/Ó/O/g;s/Ô/O/g;s/Õ/O/g;s/Ú/U/g;s/Ç/C/g' |
-    if command -v iconv >/dev/null 2>&1; then iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null || true; else cat; fi |
+    if command -v iconv >/dev/null 2>&1; then iconv -c -f utf-8 -t ascii//TRANSLIT 2>/dev/null || true; else cat; fi |
     tr -d "'\"\`^~" | tr '[:upper:]' '[:lower:]'
 }
 normalizar() { printf '%s' "$1" | normalizar_fluxo; }
@@ -60,7 +63,6 @@ palavras "$pedido" > "$tmpd/pedido"
 tem_palavra() { grep -qxF "$1" "$tmpd/pedido"; }
 
 cfg="$ROOT/config.json"
-kj=".claude/specs/karazhan.json"
 
 # --- sinais ---
 # módulos: stems de *.py versionados fora de tests/, sem dunder, que aparecem como palavra no pedido.
@@ -71,7 +73,8 @@ modulos="$areas"
 deploy=0
 if printf '%s' "$norm" | grep -qE 'deploy|plist|launchd|run\.sh|setup\.sh'; then
   deploy=1
-  areas="$(printf '%s\n%s' "$areas" deploy | grep -v '^$')"
+  # um módulo deploy.py e a área deploy são a mesma área.
+  areas="$(printf '%s\n%s' "$areas" deploy | grep -v '^$' | awk '!v[$0]++')"
 fi
 n_areas="$(printf '%s\n' "$areas" | grep -c . || true)"
 
