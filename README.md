@@ -52,7 +52,7 @@ Não convocar: recon — mapa válido, esqueleto padrão
 Presets: Grom=cc (medio → cc, sem preset medio) Uther=cx Ysera=cc Gazlowe=cc-mini
 ```
 
-Pequena: a folha aparece e o trabalho segue sem esperar; os terminais só nascem depois que você aprova a spec. Para mudar o time, responda `para`. Média e Grande: você diz "vai". Sem Codex, ou chamada nominal inválida: o Orchestrator pergunta antes.
+Pequena: a folha aparece e o trabalho segue sem esperar; os terminais só nascem depois que você aprova a spec. Para mudar o time, responda `para`. Média e Grande: o time só é montado depois que você aprova a folha. Sem Codex, ou chamada nominal inválida: o Orchestrator pergunta antes.
 
 Já sabe quem quer? Chama pelo nome:
 
@@ -70,11 +70,11 @@ Duas perguntas separadas: **quantas pessoas** (tamanho) e **quanto contrato** (n
 
 **Tamanho = o time.**
 
-| Tamanho | Áreas | Builders | Architect | Git Manager | Espera seu "vai"? |
+| Tamanho | Áreas | Builders | Architect | Git Manager | Aprovação do time |
 |---|---|---|---|---|---|
-| **Pequena** | 1 | 1 | subagente | subagente | não |
-| **Média** | 2 a `bld_max` (3) | 1 por área | terminal | subagente | sim |
-| **Grande** | mais que `bld_max` | `bld_max`, áreas agrupadas | terminal | terminal | sim |
+| **Pequena** | 1 | 1 | subagente | subagente | automática |
+| **Média** | 2 a `bld_max` (3) | 1 por área | terminal | subagente | você aprova |
+| **Grande** | mais que `bld_max` | `bld_max`, áreas agrupadas | terminal | terminal | você aprova |
 
 Reviewer: sempre um, em Codex. Pequena = 2 terminais executores (Builder + Reviewer) mais o seu. Quem orquestra não implementa. Quem implementa não revisa.
 

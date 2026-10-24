@@ -8,11 +8,11 @@ Parte do repo que um Builder assume sozinho: um módulo citado no pedido (`colet
 
 ## 2. Tamanho (o time)
 
-| Tamanho | Áreas tocadas | Builders | Architect | Git Manager | Espera "vai"? |
+| Tamanho | Áreas tocadas | Builders | Architect | Git Manager | Aprovação do time |
 |---|---|---|---|---|---|
-| Pequena | 1 | 1 | subagente | subagente | não |
-| Média | 2 a `bld_max` | 1 por área | terminal | subagente | sim |
-| Grande | mais que `bld_max`, ou `grande` | `bld_max`, áreas agrupadas por dependência | terminal | terminal | sim |
+| Pequena | 1 | 1 | subagente | subagente | automática |
+| Média | 2 a `bld_max` | 1 por área | terminal | subagente | o usuário aprova |
+| Grande | mais que `bld_max`, ou `grande` | `bld_max`, áreas agrupadas por dependência | terminal | terminal | o usuário aprova |
 
 Reviewer: um, em Codex, em qualquer tamanho.
 
