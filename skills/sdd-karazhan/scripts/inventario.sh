@@ -138,7 +138,7 @@ if [ -f .claude/specs/equipe.md ]; then
 fi
 conectados="$(awk -F'\t' '
   BEGIN { papel["orch"] = "Orchestrator"; papel["arch"] = "Architect"; papel["rec"] = "Recon"
-          papel["eng"] = "Engineer"; papel["rev"] = "Reviewer"; papel["git"] = "Git Manager" }
+          papel["bld"] = "Builder"; papel["rev"] = "Reviewer"; papel["git"] = "Git Manager" }
   NR == FNR { pool[$1] = $2; next }
   ($2 in pool) && !v[$2]++ { printf "%s%s (%s, %s)\n", toupper(substr($2, 1, 1)), substr($2, 2), papel[pool[$2]], $1 }
 ' "$tmpd/roster" "$tmpd/vistos")"

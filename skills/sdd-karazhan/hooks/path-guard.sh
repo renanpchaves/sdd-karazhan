@@ -52,6 +52,7 @@ role_file="$top/.sdd-role"
 
 campo() { grep "^$1=" "$role_file" | head -n 1 | cut -d= -f2- | tr -d '\r'; }
 role="$(campo role)"
+# role=bld (ou o legado role=eng): qualquer role que não seja rev segue as regras do Builder.
 
 if [ "$role" = "rev" ]; then
   echo "Reviewer não edita arquivos" >&2
@@ -95,7 +96,7 @@ if [ "$rel" = ".sdd-role" ]; then
   exit 2
 fi
 
-# tests/aceite é do Architect: o Engineer não escreve ali, mesmo que paths case.
+# tests/aceite é do Architect: o Builder não escreve ali, mesmo que paths case.
 aceite="$(campo aceite)"
 if [ -n "$aceite" ] && glob_match "$(printf '%s' "$aceite" | tr 'A-Z' 'a-z')" "$(printf '%s' "$rel" | tr 'A-Z' 'a-z')"; then
   echo "path-guard: $rel — tests/aceite é do Architect" >&2

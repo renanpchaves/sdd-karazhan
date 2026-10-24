@@ -1,15 +1,15 @@
 ---
 name: sdd-karazhan
-description: Orquestra times de agentes de IA, no canvas do Maestri ou com subagentes no terminal, com a spec em markdown como contrato. Convoca só o time que a missão precisa, decidido sobre fatos do repo, com Engineer em Claude Code e Reviewer em Codex. Use quando o usuário mencionar Maestri, Modo Maestro, partitura, andar (do Maestri), recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
+description: Orquestra times de agentes de IA, no canvas do Maestri ou com subagentes no terminal, com a spec em markdown como contrato. Convoca só o time que a missão precisa, decidido sobre fatos do repo, com Builder em Claude Code e Reviewer em Codex. Use quando o usuário mencionar Maestri, Modo Maestro, partitura, andar (do Maestri), recrutar agente, git manager, sdd-karazhan, ou pedir para orquestrar agentes ou planejar uma feature com time.
 ---
 
 # sdd-karazhan
 
-**Recebeu um role de executor (Engineer, Reviewer, Git Manager, Recon, Architect)? Pare aqui.** Esta skill é do Orchestrator. Siga só o seu role.
+**Recebeu um role de executor (Builder, Reviewer, Git Manager, Recon, Architect)? Pare aqui.** Esta skill é do Orchestrator. Siga só o seu role.
 
 1. A spec é o contrato. Ninguém implementa sem ela.
 2. O time mínimo sai dos fatos do `inventario.sh` e da rubrica, não de palpite.
-3. Engineer em Claude, Reviewer em Codex. Quem produz não aprova.
+3. Builder em Claude, Reviewer em Codex. Quem produz não aprova.
 
 ## Antes de tudo
 
@@ -23,7 +23,7 @@ Detalhe em `references/ciclo.md`. Scripts em `scripts/`.
 2. Decidir: o time sai de `references/convocacao.md`. Mostre a folha; Pequena segue sem esperar (terminais só depois do checkpoint da spec), Média e Grande esperam uma palavra.
 3. Contratar: Recon (antes do Architect, se a folha pedir), `scaffold.sh`, Architect.
 4. Particionar: `donos.sh` precisa sair 0.
-5. Recrutar: Git Manager, Engineers e Reviewer (`references/recrutamento.md`).
+5. Recrutar: Git Manager, Builders e Reviewer (`references/recrutamento.md`).
 6. Delegar: quatro linhas por WP. Evidência com `wp-check.sh`.
 7. Integrar: `painel.sh --publicar` e checkpoint.
 
@@ -38,7 +38,7 @@ Cada role fica em `agents/<arquivo>.md`. Nome do agente: o personagem (`Grom`); 
 | Orchestrator | `orch` | Rege. Não codifica. |
 | Architect | `arch` | Descoberta, `spec.md`, `plan.md`. |
 | Recon | `rec` | Mapeia o repo. Subagente. |
-| Engineer | `eng` | Implementa a WP no worktree. |
+| Builder | `bld` | Implementa a WP no worktree. |
 | Reviewer | `rev` | Testa, lê o diff, aprova ou devolve. |
 | Git Manager | `git` | Dono do git: worktree, commit, PR. |
 

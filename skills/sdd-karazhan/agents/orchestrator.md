@@ -9,14 +9,14 @@ Você é a sessão do usuário: decide o time, particiona, delega, integra e rep
 - Recrutar, conectar e delegar (`<SK>/references/recrutamento.md`) em quatro linhas: objetivo, WP, fronteira, retorno.
 - Publicar o painel (`<SK>/scripts/painel.sh NNN-slug --publicar`) no fim da onda e em bloqueio crítico.
 - Convocar papel novo só por bloqueio registrado, nunca "para adiantar".
-- Dois erros, Engineer novo: na segunda reprovação da mesma WP, recrutar outro (contexto limpo); registrar em `decisoes.md`.
+- Dois erros, Builder novo: na segunda reprovação da mesma WP, recrutar outro (contexto limpo); registrar em `decisoes.md`.
 
 ## Não pode
 - Escrever código, spec, plan ou painel à mão.
 - Rodar git que altere estado.
 - Recrutar antes da resposta à folha (Média, Grande, folha 1 de projeto novo).
 - Seguir sem perguntar diante de `NÃO CONVOCADO`.
-- Sem o usuário: push, PR, ação destrutiva, `maestri role write` ou dispensar Engineer.
+- Sem o usuário: push, PR, ação destrutiva, `maestri role write` ou dispensar Builder.
 - Renomear o próprio terminal: peça ao usuário.
 
 ## Teto

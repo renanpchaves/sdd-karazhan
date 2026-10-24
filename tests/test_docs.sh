@@ -1,5 +1,5 @@
 . "$(dirname "$0")/lib.sh"; SK=skills/sdd-karazhan
-for f in orchestrator architect recon engineer reviewer git-manager; do
+for f in orchestrator architect recon builder reviewer git-manager; do
   [ -f $SK/agents/$f.md ] || fail "falta $f"
   [ "$(wc -w < $SK/agents/$f.md)" -le 250 ] || fail "$f > 250 palavras"
   grep -q '^## Retorno' $SK/agents/$f.md || fail "$f sem Retorno"
@@ -16,13 +16,13 @@ grep -qi 'maestri' $SK/SKILL.md || fail "gatilho"
 C=$SK/references/convocacao.md
 [ -f $C ] || fail "falta ref convocacao"
 [ "$(wc -w < $C)" -le 900 ] || fail "convocacao.md > 900 palavras"
-for p in Orchestrator Architect Recon Engineer Reviewer 'Git Manager' 'Nível 0' 'projeto novo' 'caracterização'; do
+for p in Orchestrator Architect Recon Builder Reviewer 'Git Manager' 'Nível 0' 'projeto novo' 'caracterização'; do
   grep -q "$p" $C || fail "convocacao.md sem '$p'"
 done
 ! grep -rq 'convocar\.sh' skills README.md || fail "sobrou menção a convocar.sh"
 for p in correção requisito observações; do grep -q "$p" $SK/agents/reviewer.md || fail "reviewer.md sem '$p'"; done
-for p in 'Engineer novo' lição mergeável; do grep -q "$p" $SK/references/ciclo.md || fail "ciclo.md sem '$p'"; done
-grep -q 'Engineer novo' $SK/agents/orchestrator.md || fail "orchestrator.md sem 'Engineer novo'"
+for p in 'Builder novo' lição mergeável; do grep -q "$p" $SK/references/ciclo.md || fail "ciclo.md sem '$p'"; done
+grep -q 'Builder novo' $SK/agents/orchestrator.md || fail "orchestrator.md sem 'Builder novo'"
 grep -q 'lição' $C || fail "convocacao.md sem 'lição'"
 grep -q 'plutil' $SK/mapa-padrao.md || fail "mapa-padrao sem plutil"
 ! grep -rq 'checkpoint da spec (passo 5)' $SK || fail "checkpoint da spec é o passo 3"
@@ -32,6 +32,13 @@ grep -q 'pelo Reviewer' $SK/agents/git-manager.md || fail "git-manager sem 'pelo
 for f in $SK/agents/*.md; do
   ! grep -qE '<(WP|PATHS|NOTA|ORCH|GIT)>' $f || fail "$f ainda tem placeholder de agente"
 done
-grep -qF -- '--role "Engineer"' $SK/references/recrutamento.md || fail "recrutamento.md sem --role \"Engineer\""
+grep -qF -- '--role "Builder"' $SK/references/recrutamento.md || fail "recrutamento.md sem --role \"Builder\""
 grep -qF -- '--scope global' $SK/references/recrutamento.md || fail "recrutamento.md sem --scope global"
 ! grep -rqE 'eng-grom|rev-uther|arch-ysera|git-gazlowe|orch-antonidas' skills README.md || fail "sobrou nome no formato antigo"
+# papel Engineer vira Builder (chave bld)
+[ -f $SK/agents/builder.md ] || fail "falta agents/builder.md"
+[ ! -e $SK/agents/engineer.md ] || fail "agents/engineer.md deveria ter virado builder.md"
+! grep -rniE 'engineer' skills README.md .claude-plugin | grep -v 'references/recrutamento.md' | grep -q . || fail "sobrou Engineer fora da linha de compat do recrutamento.md"
+[ "$(grep -ci 'engineer' $SK/references/recrutamento.md)" -le 1 ] || fail "recrutamento.md cita Engineer em mais de uma linha"
+! grep -rw 'eng' --include='*.md' skills README.md | grep -v 'role=eng' | grep -q . || fail "sobrou a chave eng na prosa (agora bld)"
+! grep -rqE 'pick-name\.sh eng|guard-install\.sh .* eng( |$)' skills README.md || fail "sobrou comando com eng"

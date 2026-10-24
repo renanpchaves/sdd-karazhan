@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# guard-install.sh <worktree> <eng|rev> <WP-NN> <paths-csv>
+# guard-install.sh <worktree> <bld|rev> <WP-NN> <paths-csv>
 # Grava <worktree>/.sdd-role, instala o hook pre-commit e esconde .sdd-role no info/exclude.
 # O hook vai para o hooks/ comum do repo (worktrees compartilham): instalar uma vez vale para
 # todos, e é no-op onde não há .sdd-role. Exit 2 se core.hooksPath já estiver definido.
 . "$(dirname "$0")/../lib/common.sh"
 
-AJUDA="uso: guard-install.sh <worktree> <eng|rev> <WP-NN> <paths-csv>"
+AJUDA="uso: guard-install.sh <worktree> <bld|rev> <WP-NN> <paths-csv>"
 case "${1:-}" in
   -h|--help) usage "$AJUDA" ;;
 esac
@@ -15,7 +15,7 @@ worktree="$1"
 role="$2"
 wp="$3"
 paths="$4"
-case "$role" in eng|rev) ;; *) die "role inválido: $role (use eng ou rev)" ;; esac
+case "$role" in bld|rev) ;; *) die "role inválido: $role (use bld ou rev)" ;; esac
 [ -d "$worktree" ] || die "worktree não encontrado: $worktree"
 worktree="$(cd "$worktree" && pwd)"
 top="$(git -C "$worktree" rev-parse --show-toplevel 2>/dev/null)" || die "não é um repositório git: $worktree"

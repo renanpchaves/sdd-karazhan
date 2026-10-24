@@ -69,12 +69,12 @@ assert_contains "$(linha "$(bash $I)" specs)" "003-z (aprovada)" "feature pousad
 
 # --- conectados: nome do roster como palavra inteira, sem diferenciar maiúsculas; terminal e equipe.md ---
 # git-gazlowe é o formato antigo (v0.1.0): ainda conta. GROM repete Grom. digit-foo e Grommash são armadilhas.
-printf '| Grom | Engineer | cc | pkg/** | 1 |\n| Uther | Reviewer | cx | - | 1 |\n| git-gazlowe | Git Manager | cc | - | 1 |\n| GROM | de novo | | | |\n' >> .claude/specs/equipe.md
+printf '| Grom | Builder | cc | pkg/** | 1 |\n| Uther | Reviewer | cx | - | 1 |\n| git-gazlowe | Git Manager | cc | - | 1 |\n| GROM | de novo | | | |\n' >> .claude/specs/equipe.md
 printf '| digit-foo | Grommash | Armadilha |
 ' >> .claude/specs/equipe.md
-assert_eq "conectados: Grom (Engineer, equipe.md), Uther (Reviewer, equipe.md), Gazlowe (Git Manager, equipe.md)" "$(linha "$(bash $I)" conectados)" "conectados via equipe.md, sem repetir"
+assert_eq "conectados: Grom (Builder, equipe.md), Uther (Reviewer, equipe.md), Gazlowe (Git Manager, equipe.md)" "$(linha "$(bash $I)" conectados)" "conectados via equipe.md, sem repetir"
 printf '#!/bin/sh\n[ "$1" = list ] && printf "Gazlowe  claude\nAlexstrasza\n"\nexit 0\n' > $TMP/bin/maestri; chmod +x $TMP/bin/maestri
-assert_eq "conectados: Gazlowe (Git Manager, terminal), Alexstrasza (Architect, terminal), Grom (Engineer, equipe.md), Uther (Reviewer, equipe.md)" "$(linha "$(bash $I)" conectados)" "terminal primeiro, depois equipe.md sem repetir"
+assert_eq "conectados: Gazlowe (Git Manager, terminal), Alexstrasza (Architect, terminal), Grom (Builder, equipe.md), Uther (Reviewer, equipe.md)" "$(linha "$(bash $I)" conectados)" "terminal primeiro, depois equipe.md sem repetir"
 # nota não é agente: tasks-Gazlowe (hífen) e a seção de notas não rendem nome; You: e agentes rendem
 printf '#!/bin/sh\n[ "$1" = list ] && printf "You: Antonidas\\nAgents:\\n  Mathias (Codex)\\nNotes:\\n  tasks-Gazlowe\\n  Brann\\n"\nexit 0\n' > $TMP/bin/maestri; chmod +x $TMP/bin/maestri
 mv .claude/specs/equipe.md $TMP/equipe.bak
@@ -82,8 +82,8 @@ assert_eq "conectados: Antonidas (Orchestrator, terminal), Mathias (Recon, termi
 mv $TMP/equipe.bak .claude/specs/equipe.md
 rm $TMP/bin/maestri
 # roster com maiúscula é normalizado (cópia da skill em $TMP, o roster real fica intacto)
-cp -R $SK $TMP/sk; jq '.eng[0] = "Grom"' $SK/roster.json > $TMP/sk/roster.json
-assert_contains "$(linha "$(bash $TMP/sk/scripts/inventario.sh)" conectados)" "Grom (Engineer, equipe.md)" "roster normalizado em minúsculas"
+cp -R $SK $TMP/sk; jq '.bld[0] = "Grom"' $SK/roster.json > $TMP/sk/roster.json
+assert_contains "$(linha "$(bash $TMP/sk/scripts/inventario.sh)" conectados)" "Grom (Builder, equipe.md)" "roster normalizado em minúsculas"
 
 # --- dry-run ---
 printf 'import argparse\np = argparse.ArgumentParser()\np.add_argument("--dry-run")\n' > pkg/cli.py

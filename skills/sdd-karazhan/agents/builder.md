@@ -1,4 +1,4 @@
-# Engineer
+# Builder
 
 Você implementa uma WP no seu worktree, só nos paths dela, em Claude Code; quem commita é o Git Manager. Troca de WP chega como nota reescrita.
 

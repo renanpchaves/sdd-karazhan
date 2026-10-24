@@ -6,7 +6,7 @@
 # (prefixo-nome, da v0.1.0) também conta. SDD_SEED definido => primeiro nome livre na ordem do roster (determinístico).
 . "$(dirname "$0")/../lib/common.sh"
 
-AJUDA="uso: pick-name.sh <orch|arch|rec|eng|rev|git> [--em-uso <arquivo>]..."
+AJUDA="uso: pick-name.sh <orch|arch|rec|bld|rev|git> [--em-uso <arquivo>]..."
 case "${1:-}" in -h|--help) usage "$AJUDA" ;; esac
 
 need jq
@@ -14,8 +14,8 @@ prefixo="${1:-}"
 [ -n "$prefixo" ] || die "$AJUDA" 2
 shift
 case "$prefixo" in
-  orch|arch|rec|eng|rev|git) ;;
-  *) die "prefixo inválido: $prefixo (use orch|arch|rec|eng|rev|git)" 2 ;;
+  orch|arch|rec|bld|rev|git) ;;
+  *) die "prefixo inválido: $prefixo (use orch|arch|rec|bld|rev|git)" 2 ;;
 esac
 
 fontes=()
