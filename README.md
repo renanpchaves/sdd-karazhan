@@ -68,7 +68,7 @@ Vem só quem você chamou. Builder exige Git Manager; Reviewer exige Builder. Fa
 |---|---|---|---|
 | **0** | O diff cabe numa frase | Nenhum. O Orchestrator avisa que não vai usar a skill e para: você faz direto e roda pytest. | Você |
 | **1** | Pequena: uma área | Spec de 1 página com comandos de aceitação | 1 Builder · Reviewer · Architect subagente · Git Manager subagente |
-| **2** | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2 a `eng_max` Builders. Grande: mais áreas que `eng_max`, Architect e Git Manager em terminal |
+| **2** | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger | Média: 2 a `bld_max` Builders. Grande: mais áreas que `bld_max`, Architect e Git Manager em terminal |
 
 Pequena: 2 terminais executores (Builder + Reviewer) mais o seu. Quem orquestra não implementa. Quem implementa não revisa. Dois pares de olhos, sempre.
 
@@ -136,7 +136,7 @@ Outro plugin com os mesmos gatilhos (Maestri, partitura, andar)? Desative um del
 
 Primeira sessão num workspace cria `.claude/specs/karazhan.json` com uma única pergunta: família e tier de cada preset.
 
-No Maestri, o plugin cria na máquina até cinco roles globais, um por papel: `Architect`, `Builder`, `Reviewer`, `Git Manager` e `Orchestrator`. Valem para todos os projetos. Para remover: liste com `maestri role list` e apague pela interface do Maestri.
+No Maestri, o plugin cria na máquina até cinco roles globais, um por papel: `Architect`, `Builder`, `Reviewer`, `Git Manager` e `Orchestrator`. Valem para todos os projetos. O Orchestrator se renomeia sozinho (`maestri arrange`), mas o Maestri não deixa um terminal atribuir role a si mesmo: ele pede, uma vez, que você atribua `Orchestrator` ao terminal dele pelo app ("Editar responsabilidade"), de preferência entre sessões, porque reinicia o terminal. Os terminais que ele recruta ganham ícone e cor por papel. Para remover um role (de versão anterior, por exemplo): `maestri role list` e `maestri role delete "<Nome>"`. Cuidado: é destrutivo, e o Orchestrator só pergunta, nunca apaga sozinho.
 
 Testes: `bash tests/run.sh`
 

@@ -145,16 +145,30 @@ assert_exit 0 hook Edit "$R/tests/./test_cli.py"
 
 # --- compat: .sdd-role antigo (role=eng, escrito à mão) vale como Builder ---
 cd "$R"
-printf 'role=eng\nwp=WP-01\npaths=pkg/coleta.py,deploy/**\nroot=%s\naceite=tests/aceite/**\n' "$SK" > .sdd-role
+printf 'role=eng\nwp=WP-01\npaths=pkg/coleta.py,tests/**\nroot=%s\naceite=tests/aceite/**\n' "$SK" > .sdd-role
 assert_exit 0 hook Edit "$R/pkg/coleta.py"
 assert_exit 2 hook Edit "$R/pkg/envio.py"
 assert_exit 2 hook Edit "$R/tests/aceite/x.py"
+assert_contains "$(hook Edit "$R/tests/aceite/x.py" 2>&1 || true)" "tests/aceite é do Architect" "aceite vale para role=eng (hook)"
 git reset -q; echo "# legado" >> pkg/envio.py; git add pkg/envio.py
 assert_exit 1 env SDD_GIT_MANAGER=1 git commit -qm t
 git reset -q pkg/envio.py; git checkout -q pkg/envio.py
 mkdir -p tests/aceite; echo "# a" > tests/aceite/x.py; git add tests/aceite/x.py
 assert_exit 1 env SDD_GIT_MANAGER=1 git commit -qm t
+assert_contains "$(SDD_GIT_MANAGER=1 git commit -qm t 2>&1 || true)" "tests/aceite é do Architect" "aceite vale para role=eng (pre-commit)"
 git reset -q tests/aceite/x.py; rm -rf tests/aceite
+# role normalizado: espaço, CR e maiúsculas ainda são Reviewer (tudo bloqueado)
+for v in 'rev ' 'REV' 'Rev' ' rev'; do
+  printf 'role=%s\nwp=WP-01\npaths=pkg/coleta.py,tests/**\nroot=%s\naceite=tests/aceite/**\n' "$v" "$SK" > .sdd-role
+  assert_exit 2 hook Edit "$R/pkg/coleta.py"
+  assert_contains "$(hook Edit "$R/pkg/coleta.py" 2>&1 || true)" "Reviewer não edita arquivos" "role='$v' é Reviewer (hook)"
+  echo "# n" >> pkg/coleta.py; git add pkg/coleta.py
+  assert_exit 1 env SDD_GIT_MANAGER=1 git commit -qm t
+  assert_contains "$(SDD_GIT_MANAGER=1 git commit -qm t 2>&1 || true)" "Reviewer não commita" "role='$v' é Reviewer (pre-commit)"
+  git reset -q pkg/coleta.py; git checkout -q pkg/coleta.py
+done
+printf 'role=REV\r\nwp=WP-01\r\npaths=pkg/coleta.py\r\nroot=%s\r\n' "$SK" > .sdd-role
+assert_exit 2 hook Edit "$R/pkg/coleta.py"
 # guard-install só aceita bld e rev; o argumento antigo eng é inválido
 assert_exit 2 bash "$SK/scripts/guard-install.sh" . eng WP-01 "pkg/coleta.py"
 assert_contains "$(bash "$SK/scripts/guard-install.sh" . eng WP-01 pkg/coleta.py 2>&1 || true)" "use bld ou rev" "eng inválido"

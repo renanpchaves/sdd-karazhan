@@ -41,7 +41,7 @@ O role diz só o papel. Tudo que é do agente (WP, paths, Orchestrator, Git Mana
 | `Reviewer` | `agents/reviewer.md` |
 | `Git Manager` | `agents/git-manager.md` |
 
-Se `maestri role list` mostrar um role global `Engineer`, criado por versão anterior do plugin, avise o usuário que ele pode ser removido pela interface do Maestri; não remova sozinho.
+Roles de versão anterior que `maestri role list` ainda mostrar (global `Engineer`; por agente, no formato antigo `<papel>-<nome>`, da v0.1.0): liste-os ao usuário e pergunte. Só com o ok dele, `maestri role delete "<Nome>"` (destrutivo; nunca sozinho, nunca com `--force` por conta própria).
 
 Subagente (o Recon sempre) não usa role do Maestri. `SK` vale só na chamada do shell em que foi definido: defina-o junto com os comandos que o usam.
 
@@ -55,25 +55,43 @@ maestri role create "Builder" "$(sed "s|<SK>|$SK|g" "$SK/agents/builder.md")" --
 
 Listado: reaproveite, não crie de novo. Antes de recrutar, confira se o texto está em dia: compare o `maestri role show "<Papel>"` inteiro com a saída de `sed "s|<SK>|$SK|g" "$SK/agents/<arquivo>.md"` (texto diferente: plugin atualizado, raiz mudou ou role de outra origem). O role é global, então nunca rode `maestri role write` sem o usuário: mostre o diff dos dois textos e pergunte. Recomende reescrever só quando `maestri list` não mostrar recruta vivo com aquele role, porque reescrever pode reiniciá-lo. Com o sim do usuário: `maestri role write "<Papel>" "$(sed "s|<SK>|$SK|g" "$SK/agents/<arquivo>.md")"`. Sem o sim, não recrute com esse role: o usuário decide (entrada em `bloqueios.md`).
 
-## Nome do Orchestrator
+## Nome e role do Orchestrator
 
-O nome do Orchestrator é estável entre sessões: se o `You:` de `maestri list` já é um nome do pool `orch` de `roster.json` (sem diferenciar maiúsculas), use-o; só sorteie com `pick-name.sh orch` se não for.
+Só no modo Maestri. O nome do Orchestrator é estável entre sessões: se o `You:` de `maestri list` já é um nome do pool `orch` de `roster.json` (sem diferenciar maiúsculas), use-o. Senão sorteie com `pick-name.sh orch` e renomeie o próprio terminal, sem reinício:
 
-O Orchestrator não renomeia o próprio terminal: `role assign` e `recruit --replace` só agem sobre recrutas, e `--replace` reiniciaria a sessão. Na primeira sessão em que sortear o nome, peça ao usuário, uma vez, que renomeie o terminal dele para esse nome (ex.: `Antonidas`) pela interface do Maestri. Atribuir o role `Orchestrator` ao terminal pode reiniciar a sessão: peça que o usuário faça isso entre sessões, não no meio de uma onda. As duas coisas são opcionais: sem elas, o Orchestrator só assina notas e entradas com o nome.
+```bash
+maestri arrange "<nome atual do You:>" --name "Antonidas"
+```
+
+Avise o usuário numa linha. Se a resposta disser que o nome foi trocado (`Antonidas #2`, nome tomado), use o nome devolvido. Só `--name`: ícone e cor do terminal do Orchestrator são do usuário.
+
+O Maestri recusa `role assign` em si mesmo (`Cannot perform this action on yourself`). Garanta o role global `Orchestrator` (seção Roles). Se o seu terminal ainda não tem esse role, peça ao usuário, uma vez por sessão, que o atribua pelo app ("Editar responsabilidade"), de preferência antes de começar o trabalho ou entre sessões, porque reinicia o terminal. Recusou ou adiou: não insista. Sem o role, siga normalmente.
 
 ## Comandos (modo Maestri)
 
-Por agente: nota, recruta com o role do papel, conecta. Architect `Alexstrasza` (terminal) e Builder `Grom`:
+Por agente: nota, recruta com o role do papel, ícone e cor do papel, conecta. Architect `Alexstrasza` (terminal) e Builder `Grom`:
 
 ```bash
 maestri note create --name "tasks-Alexstrasza" "<conteúdo da nota>"
-maestri recruit "Alexstrasza" --preset "<preset>" --role "Architect" --dir "<raiz do repo>"
+maestri recruit "Alexstrasza" --preset "<preset>" --role "Architect" --dir "<raiz do repo>" --icon pencil.and.ruler --color purple
 maestri connect "Alexstrasza" "tasks-Alexstrasza"
 
 maestri note create --name "tasks-Grom" "<conteúdo da nota>"
-maestri recruit "Grom" --preset "<preset>" --role "Builder" --dir "<worktree da WP>"
+maestri recruit "Grom" --preset "<preset>" --role "Builder" --dir "<worktree da WP>" --icon hammer --color orange
 maestri connect "Grom" "tasks-Grom"
 ```
+
+Ícone e cor por papel, só no terminal que o plugin cria (regra do Maestri: estilize o que você cria):
+
+| Papel | `--icon` | `--color` |
+|---|---|---|
+| Architect | `pencil.and.ruler` | `purple` |
+| Builder | `hammer` | `orange` |
+| Reviewer | `shield.checkered` | `red` |
+| Git Manager | `gearshape` | `cyan` |
+| Recon (só se um dia for terminal; hoje é subagente) | `eye` | `green` |
+
+Nunca reestilize terminal que já estava no canvas (nem o seu) sem pedido do usuário; se pedir: `maestri arrange "<Nome>" --icon <ícone> --color <cor>`. Nome de agente já tomado vira `#2`: use o nome devolvido nos comandos seguintes e em `equipe.md`.
 
 - `--dir`: Builder no worktree da WP; Reviewer no worktree desanexado `../<repo>-rev`, único no andar; Architect e Git Manager (Grande) na raiz do repo.
 - Preset: o da linha `Presets:` da folha. Builder sempre em preset `claude`; Reviewer sempre em preset `codex`.

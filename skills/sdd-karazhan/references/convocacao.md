@@ -10,13 +10,13 @@ Entrada: pedido + `inventario.sh`; o Orchestrator decide. Área tocada: módulo 
 | 1 | Pequena | Spec de 1 página: objetivo, arquivos e interfaces, fora de escopo, comandos de aceitação. `plan.md` opcional |
 | 2 | Média, Grande, projeto novo, integração nova ou banco (inclusive migração) | Spec curta, testes de contrato e fixtures aprovados antes, ledger (`tasks.md`, `decisoes.md`) |
 
-Tamanho: Pequena = 1 área; Média = 2 a `eng_max`; Grande = mais que `eng_max`, ou `grande`. Tamanho e contrato são eixos separados: 1 área com integração ou banco (inclusive migração, que já leva `models`/`db`/`schemas`) = Pequena + Nível 2 (Architect subagente: spec curta + testes de contrato exigidos; `plan.md` só com 2+ WPs).
+Tamanho: Pequena = 1 área; Média = 2 a `bld_max`; Grande = mais que `bld_max`, ou `grande`. Tamanho e contrato são eixos separados: 1 área com integração ou banco (inclusive migração, que já leva `models`/`db`/`schemas`) = Pequena + Nível 2 (Architect subagente: spec curta + testes de contrato exigidos; `plan.md` só com 2+ WPs).
 
 ## Papéis
 
 - **Architect** (claude/capaz): terminal com 2+ áreas, nominal `arch` ou Grande; senão subagente de spec curta.
 - **Recon** (claude/barato): subagente antes do Architect se `mapa` ≠ `ok` ou `esqueleto: fora`; nunca em `repo: novo`.
-- **Builder**: terminal Claude Code, um por área, até `eng_max`; com mais áreas que `eng_max`, agrupe por dependência (ex.: relatorio+envio num Builder). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
+- **Builder**: terminal Claude Code, um por área, até `bld_max`; com mais áreas que `bld_max`, agrupe por dependência (ex.: relatorio+envio num Builder). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
 - **Reviewer** (codex/capaz): terminal. Sem Codex: no Maestri, `Reviewer: NÃO CONVOCADO (sem Codex)` em `Terminais:` e pergunte; fora dele, subagente Claude noutro preset, degradação em `decisoes.md`.
 - **Git Manager** (claude/barato): subagente na Pequena e Média, terminal na Grande. Reaproveita o Git Manager de `conectados` só com origem `terminal`.
 
@@ -64,7 +64,7 @@ Presets: Nozdormu=cc Saurfang=cc Thrall=cc Tirion=cx Gallywix=cc-mini
 ```
 Pedido: "migração alembic do centro de custo + sincronização incremental + relatório e envio do fechamento"
 Sinais: áreas=4 (migracoes+db+schemas, sync, relatorio, envio) · spec=não · mapa=ok · testes=sim · nível 2
-Tamanho: Grande — 4 áreas > eng_max 3
+Tamanho: Grande — 4 áreas > bld_max 3
 Terminais: Architect Kalecgos (claude/capaz) — Grande · Builder Durotan (claude/capaz) — migracoes+db+schemas, uma área · Builder Cairne (claude/medio) — sync · Builder Baine (claude/medio) — relatorio+envio, por dependência · Reviewer Bolvar (codex/capaz) — revisão · Git Manager Mekkatorque (claude/barato) — Grande
 Subagentes: nenhum
 Não convocar: recon — mapa válido, esqueleto padrão

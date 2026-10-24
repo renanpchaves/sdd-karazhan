@@ -100,12 +100,13 @@ else
   if [ -f run.sh ] && grep -rq -- '--dry-run' run.sh *.py */*.py 2>/dev/null; then dry=sim; fi
 fi
 
-# --- presets, codex, eng_max ---
-eng_max="$(jqr '.eng_max' "$cfg")"
+# --- presets, codex, bld_max ---
+bld_max="$(jqr '.bld_max' "$cfg")"
 : > "$tmpd/presets"
 if [ -f "$kj" ]; then
-  over="$(jqr '.config.eng_max // empty' "$kj")"
-  [ -z "$over" ] || eng_max="$over"
+  # config.eng_max é o nome legado: vale só sem config.bld_max
+  over="$(jqr '.config.bld_max // .config.eng_max // empty' "$kj")"
+  [ -z "$over" ] || bld_max="$over"
   jqr '(.presets // {}) | to_entries[] | "\(.key)\t\(.value.family)\t\(.value.tier)"' "$kj" > "$tmpd/presets"
 fi
 codex=não
@@ -155,4 +156,4 @@ echo "specs: $(lista "$specs" nenhuma)"
 echo "mapa: $mapa · esqueleto: $esqueleto · testes: $testes · dry-run: $dry"
 echo "presets: ${presets:-nenhum} · codex: $codex"
 echo "conectados: $(lista "$conectados" nenhum)"
-echo "eng_max: $eng_max"
+echo "bld_max: $bld_max"

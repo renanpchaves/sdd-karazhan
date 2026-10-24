@@ -42,3 +42,13 @@ grep -qF -- '--scope global' $SK/references/recrutamento.md || fail "recrutament
 [ "$(grep -ci 'engineer' $SK/references/recrutamento.md)" -le 1 ] || fail "recrutamento.md cita Engineer em mais de uma linha"
 ! grep -rw 'eng' --include='*.md' skills README.md | grep -v 'role=eng' | grep -q . || fail "sobrou a chave eng na prosa (agora bld)"
 ! grep -rqE 'pick-name\.sh eng|guard-install\.sh .* eng( |$)' skills README.md || fail "sobrou comando com eng"
+# Maestri atual: arrange, ícone/cor por papel, role delete com ok do usuário, bld_max
+R=$SK/references/recrutamento.md
+for p in 'maestri arrange' '--icon' '--color' 'role delete' 'pencil.and.ruler' hammer 'shield.checkered' gearshape; do
+  grep -qF -- "$p" $R || fail "recrutamento.md sem '$p'"
+done
+grep -q 'arrange' $SK/agents/orchestrator.md || grep -q 'arrange' $SK/references/ciclo.md || fail "nem orchestrator.md nem ciclo.md citam arrange"
+! grep -rqiE 'renomeie o terminal|renomear o próprio terminal|não renomeia o próprio terminal' skills README.md || fail "ainda pede ao usuário para renomear o terminal"
+grep -q 'role delete' README.md || fail "README sem role delete"
+! grep -rq 'eng_max' skills README.md --exclude=inventario.sh || fail "sobrou eng_max fora do compat do inventario.sh"
+grep -q 'bld_max' $SK/config.json || fail "config.json sem bld_max"

@@ -51,7 +51,7 @@ role_file="$top/.sdd-role"
 [ -f "$role_file" ] || exit 0
 
 campo() { grep "^$1=" "$role_file" | head -n 1 | cut -d= -f2- | tr -d '\r'; }
-role="$(campo role)"
+role="$(campo role | tr -d '[:space:]' | tr 'A-Z' 'a-z')"  # sem espaços/CR, minúsculas
 # role=bld (ou o legado role=eng): qualquer role que não seja rev segue as regras do Builder.
 
 if [ "$role" = "rev" ]; then

@@ -1,6 +1,6 @@
 {
   "mapa_max_dias": 30,
-  "eng_max": 3,
+  "bld_max": 3,
   "esqueleto": {
     "plist": "deploy/*.plist",
     "tests": "tests",

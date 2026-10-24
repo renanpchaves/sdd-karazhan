@@ -28,9 +28,9 @@ assert_eq "specs: 001-x (vazia)" "$(linha "$out" specs)" "spec sem WP é vazia"
 assert_eq "mapa: ok · esqueleto: padrao · testes: sim · dry-run: não" "$(linha "$out" mapa)" "linha do mapa"
 assert_eq "presets: cc=claude/capaz cc-mini=claude/barato cx=codex/capaz · codex: não" "$(linha "$out" presets)" "presets sem codex no PATH"
 assert_eq "conectados: nenhum" "$(linha "$out" conectados)" "sem conectados"
-assert_eq "eng_max: 3" "$(linha "$out" eng_max)" "eng_max do plugin"
+assert_eq "bld_max: 3" "$(linha "$out" bld_max)" "bld_max do plugin"
 # a ordem das linhas é fixa
-assert_eq "repo módulos áreas specs mapa presets conectados eng_max" "$(printf '%s\n' "$out" | sed 's/:.*//' | tr '\n' ' ' | sed 's/ $//')" "ordem das linhas"
+assert_eq "repo módulos áreas specs mapa presets conectados bld_max" "$(printf '%s\n' "$out" | sed 's/:.*//' | tr '\n' ' ' | sed 's/ $//')" "ordem das linhas"
 
 # --- codex: preset codex E binário ---
 printf '#!/bin/sh\nexit 0\n' > $TMP/bin/codex; chmod +x $TMP/bin/codex
@@ -39,10 +39,16 @@ jq '.presets={"cc":{"family":"claude","tier":"capaz"}}' .claude/specs/karazhan.j
 assert_contains "$(bash $I)" "presets: cc=claude/capaz · codex: não" "binário sem preset codex"
 rm $TMP/bin/codex
 
-# --- eng_max do karazhan.json vence o do plugin ---
-jq '.config.eng_max=2' .claude/specs/karazhan.json > k && mv k .claude/specs/karazhan.json
-assert_contains "$(bash $I)" "eng_max: 2" "eng_max sobrescrito"
-jq 'del(.config.eng_max) | .presets={}' .claude/specs/karazhan.json > k && mv k .claude/specs/karazhan.json
+# --- bld_max do karazhan.json vence o do plugin ---
+jq '.config.bld_max=2' .claude/specs/karazhan.json > k && mv k .claude/specs/karazhan.json
+assert_contains "$(bash $I)" "bld_max: 2" "bld_max sobrescrito"
+# compat: karazhan.json antigo com config.eng_max (sem bld_max) ainda vale; bld_max vence se houver os dois
+jq 'del(.config.bld_max) | .config.eng_max=4' .claude/specs/karazhan.json > k && mv k .claude/specs/karazhan.json
+assert_contains "$(bash $I)" "bld_max: 4" "eng_max legado lido como bld_max"
+jq '.config.bld_max=2' .claude/specs/karazhan.json > k && mv k .claude/specs/karazhan.json
+assert_contains "$(bash $I)" "bld_max: 2" "bld_max vence eng_max"
+jq 'del(.config.eng_max)' .claude/specs/karazhan.json > k && mv k .claude/specs/karazhan.json
+jq 'del(.config.bld_max) | .presets={}' .claude/specs/karazhan.json > k && mv k .claude/specs/karazhan.json
 assert_contains "$(bash $I)" "presets: nenhum · codex: não" "sem presets"
 
 # --- specs: aprovada, em curso, vazia ---
@@ -137,13 +143,13 @@ assert_eq "repo: novo" "$(printf '%s\n' "$out" | sed -n 1p)" "repo novo na prime
 assert_eq "módulos: nenhum" "$(linha "$out" módulos)" "novo sem módulos"
 assert_contains "$out" "mapa: ausente · esqueleto: nenhum · testes: não · dry-run: não" "novo: linha do mapa"
 assert_contains "$out" "presets: nenhum · codex: não" "novo sem presets"
-assert_contains "$out" "eng_max: 3" "novo com eng_max"
-mkdir -p .claude/specs; echo '{"presets":{"cx":{"family":"codex","tier":"capaz"}},"config":{"eng_max":1}}' > .claude/specs/karazhan.json
+assert_contains "$out" "bld_max: 3" "novo com bld_max"
+mkdir -p .claude/specs; echo '{"presets":{"cx":{"family":"codex","tier":"capaz"}},"config":{"bld_max":1}}' > .claude/specs/karazhan.json
 printf '| Alexstrasza | Architect |\n' > .claude/specs/equipe.md
 out=$(bash $I)
 assert_contains "$out" "presets: cx=codex/capaz · codex: não" "novo lê presets"
 assert_contains "$out" "conectados: Alexstrasza (Architect, equipe.md)" "novo lê equipe.md"
-assert_contains "$out" "eng_max: 1" "novo lê eng_max"
+assert_contains "$out" "bld_max: 1" "novo lê bld_max"
 
 # --- repo git sem código nem pacote: também novo ---
 G=$(mktemp -d "$TMP/vazio.XXXXXX"); cd $G; git init -q -b main; printf '# x\n' > README.md; git add -A; git -c commit.gpgsign=false -c user.email=t@e -c user.name=T commit -qm i
