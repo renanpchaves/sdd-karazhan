@@ -116,3 +116,19 @@ assert_exit 0 env SDD_GIT_MANAGER=1 git commit -qm t
 cd "$R3"
 echo "# m" >> pkg/envio.py; git add pkg/envio.py
 assert_exit 0 git commit -qm t   # sem .sdd-role no worktree principal: no-op
+
+# --- tests/aceite é oráculo do Architect: o Engineer não toca, mesmo com paths=tests/** ---
+cd "$R"
+bash "$SK/scripts/guard-install.sh" . eng WP-01 "tests/**" >/dev/null
+assert_contains "$(cat .sdd-role)" "aceite=tests/aceite/**" "sdd-role aceite"
+assert_exit 2 hook Edit "$R/tests/aceite/x.py"
+assert_exit 2 hook Write "tests/aceite/sub/y.py"
+assert_exit 2 hook MultiEdit "$R/tests/aceite/x.py"
+assert_contains "$(hook Edit "$R/tests/aceite/x.py" 2>&1 || true)" "tests/aceite é do Architect" "mensagem hook aceite"
+assert_exit 0 hook Edit "$R/tests/test_cli.py"
+mkdir -p tests/aceite; echo "# a" > tests/aceite/x.py; git add tests/aceite/x.py
+assert_exit 1 env SDD_GIT_MANAGER=1 git commit -qm t
+assert_contains "$(SDD_GIT_MANAGER=1 git commit -qm t 2>&1 || true)" "bloqueado: tests/aceite/x.py — tests/aceite é do Architect" "mensagem pre-commit aceite"
+git reset -q tests/aceite/x.py; rm -rf tests/aceite
+echo "# t" >> tests/test_cli.py; git add tests/test_cli.py
+assert_exit 0 env SDD_GIT_MANAGER=1 git commit -qm t

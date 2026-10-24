@@ -46,7 +46,7 @@ mkdir -p "$hooks_dir"
 cp "$fonte" "$destino"
 chmod +x "$destino"
 
-printf 'role=%s\nwp=%s\npaths=%s\nroot=%s\n' "$role" "$wp" "$paths" "$ROOT" > "$worktree/.sdd-role"
+printf 'role=%s\nwp=%s\npaths=%s\nroot=%s\naceite=tests/aceite/**\n' "$role" "$wp" "$paths" "$ROOT" > "$worktree/.sdd-role"
 
 exclude="$(git_path info/exclude)"
 mkdir -p "$(dirname "$exclude")"

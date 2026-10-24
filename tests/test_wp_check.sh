@@ -57,3 +57,21 @@ printf '#!/bin/sh\necho via-gtimeout\nshift\nexec "$@"\n' > "$TMP/semto/gtimeout
 out=$(PATH="$TMP/semto" "$BASH" $W WP-01 --tasks $T || true)
 assert_contains "$out" "via-gtimeout" "gtimeout usado"
 case "$out" in *"(sem timeout)"*) fail "gtimeout presente, mas cabeçalho diz sem timeout" ;; esac
+
+# --- aceite-intacto ---
+git checkout -q feat/001-x-WP-01 2>/dev/null || true
+git checkout -qb feat/001-x-WP-02 feat/001-x
+printf '### WP-01 — coleta\n- Dono: eng-grom\n- Possui: pkg/coleta.py, tests/**\n' > $T
+git add -f $T; git commit -qm tasks2
+git branch -f feat/001-x
+echo "# c2" >> pkg/coleta.py; git commit -qam coleta2
+out=$(bash $W WP-01 --tasks $T); code=$?
+assert_eq 0 $code "aceite intacto: exit 0"
+assert_contains "$out" "aceite-intacto: ok" "aceite-intacto ok"
+assert_eq 6 "$(printf '%s\n' "$out" | sed -n '/== resumo/,$p' | tail -n +2 | wc -l | tr -d ' ')" "resumo com 6 linhas"
+mkdir -p tests/aceite; printf 'def test_x():\n    assert True\n' > tests/aceite/test_x.py
+git add tests/aceite/test_x.py; git commit -qm aceite
+out=$(bash $W WP-01 --tasks $T || true)
+assert_contains "$out" "aceite-intacto: falha" "aceite-intacto falha"
+assert_contains "$out" "tests/aceite/test_x.py" "arquivo de aceite listado"
+assert_exit 1 bash $W WP-01 --tasks $T

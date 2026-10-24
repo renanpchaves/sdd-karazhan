@@ -83,6 +83,13 @@ if [ "$rel" = ".sdd-role" ]; then
   exit 2
 fi
 
+# tests/aceite é do Architect: o Engineer não escreve ali, mesmo que paths case.
+aceite="$(campo aceite)"
+if [ -n "$aceite" ] && glob_match "$aceite" "$rel"; then
+  echo "path-guard: $rel — tests/aceite é do Architect" >&2
+  exit 2
+fi
+
 # Absoluto restante (fora do worktree) ou com ".." não é confiável: bloqueia.
 permitido=1
 case "$rel" in

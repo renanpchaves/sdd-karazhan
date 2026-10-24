@@ -2,7 +2,7 @@
 # wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]
 # Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
 # senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
-# Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, dry-run, diff, fora-dos-paths.
+# Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, dry-run, diff, fora-dos-paths, aceite-intacto.
 # ruff e pytest vêm do .venv do repo, se existir; senão do PATH.
 # Cada etapa imprime "== <etapa>", a saída (últimas 30 linhas) e "<etapa>: ok|falha|ausente";
 # o rodapé "== resumo" repete uma linha por etapa.
@@ -200,6 +200,15 @@ EOT
   else
     etapa fora-dos-paths falha "$fora"
   fi
+fi
+
+# aceite-intacto: tests/aceite é do Architect; qualquer mudança na WP reprova.
+rc=0
+saida="$(git -c core.quotepath=off diff --name-only --no-renames "$base...HEAD" -- tests/aceite 2>&1)" || rc=$?
+if [ "$rc" -eq 0 ] && [ -z "$saida" ]; then
+  etapa aceite-intacto ok ""
+else
+  etapa aceite-intacto falha "$saida"
 fi
 
 echo "== resumo"

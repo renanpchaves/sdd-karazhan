@@ -11,6 +11,7 @@ campo() { grep "^$1=" "$role_file" | head -n 1 | cut -d= -f2- | tr -d '\r'; }
 role="$(campo role)"
 wp="$(campo wp)"
 paths="$(campo paths)"
+aceite="$(campo aceite)"
 root="$(campo root)"
 
 staged="$(git -c core.quotepath=off diff --cached --name-only --no-renames)"
@@ -29,6 +30,10 @@ else
   globs="$(printf '%s\n' "$paths" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' || true)"
   while IFS= read -r f; do
     [ -n "$f" ] || continue
+    if [ -n "$aceite" ] && glob_match "$aceite" "$f"; then
+      echo "bloqueado: $f — tests/aceite é do Architect" >&2
+      exit 1
+    fi
     ok=1
     while IFS= read -r g; do
       [ -n "$g" ] || continue

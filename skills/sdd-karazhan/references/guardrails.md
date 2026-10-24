@@ -11,6 +11,7 @@ role=eng
 wp=WP-01
 paths=pkg/coleta.py, tests/test_coleta.py
 root=<raiz da skill>
+aceite=tests/aceite/**
 ```
 
 - Quem roda: o Git Manager, um worktree por WP (`eng`) e um único worktree desanexado do Reviewer por andar (`rev`; ali WP e paths não restringem nada, o `pre-commit` bloqueia todo commit).
@@ -40,7 +41,14 @@ Hook `PreToolUse` do plugin para `Edit`, `Write`, `MultiEdit` e `NotebookEdit` (
 
 ## `wp-check.sh`
 
-`scripts/wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]` roda lint, testes, dry-run real, diff e fora-dos-paths contra a base (padrão `feat/<slug>`), ignorando `.claude/`. Arquivo commitado fora dos paths da WP é `falha`, independente de quem commitou.
+`scripts/wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>]` roda lint, testes, dry-run real, diff, fora-dos-paths e aceite-intacto contra a base (padrão `feat/<slug>`), ignorando `.claude/`. Arquivo commitado fora dos paths da WP é `falha`, independente de quem commitou.
+
+## Oráculo de aceite
+
+- O quê: `tests/aceite/test_<slug>.py` traz os comandos de aceitação da spec como testes executáveis. É a prática com mais respaldo contra retrabalho: o implementador roda o teste, mas não o edita.
+- Quem: só o Architect escreve ali, antes das WPs começarem (subagente: no worktree principal). Engineer e Reviewer não.
+- Como o ambiente garante: `.sdd-role` leva `aceite=tests/aceite/**`. Com `role=eng`, o `path-guard.sh` nega escrita ali (`tests/aceite é do Architect`) antes de olhar os paths, e o `pre-commit` nega stage (`bloqueado: <path> — tests/aceite é do Architect`), mesmo com `paths=tests/**`. O `wp-check.sh` fecha: `aceite-intacto: falha` se a WP mudou algo em `tests/aceite/` contra a base, e o Reviewer reprova.
+- Limite: como o resto, não cobre Bash; o `aceite-intacto` pega o que for commitado.
 
 ## Codex (verificação da Task 6)
 

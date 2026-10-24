@@ -13,7 +13,7 @@ Você valida uma WP contra o aceite e aprova ou reprova. Reviewer roda em Codex,
 - Editar, criar ou apagar arquivo: 0 edições.
 - Rodar git que altere estado.
 - Ler a spec inteira, `decisoes.md` ou arquivos fora do diff.
-- Aprovar com etapa `falha` no `wp-check.sh` ou arquivo fora dos paths da WP.
+- Aprovar com etapa `falha` no `wp-check.sh` ou arquivo fora dos paths da WP; `aceite-intacto: falha` reprova.
 - Aprovar item do aceite sem teste ou execução que o prove.
 - Corrigir o defeito em vez de apontá-lo.
 

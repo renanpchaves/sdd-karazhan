@@ -37,6 +37,7 @@ scripts/scaffold.sh NNN-slug     # NNN = próximo número livre em current/ e ar
 - Nível 1: spec de 1 página com comandos de aceitação; `plan.md` opcional. Nível 2: spec curta, testes de contrato e fixtures aprovados pelo usuário antes das WPs de implementação, `plan.md` obrigatório. Pequena + Nível 2: spec curta + lista dos testes de contrato exigidos; `plan.md` só com mais de uma WP.
 - Brownfield: o Architect confere `tests/test_<mod>*` dos módulos que mudam. Sem teste, a WP-01 é o teste de caracterização (fixture gravada em `tests/fixtures/`, teste em `tests/`), escrita pelo Engineer e revisada antes das outras WPs.
 - Projeto novo: onda 1 é o esqueleto, em série, por um Engineer seguindo `mapa-padrao.md`; depois, paralelo.
+- Architect escreve `tests/aceite/test_<slug>.py` (um teste por critério de aceite; Nível 2 também contrato e fixtures) antes das WPs começarem: oráculo que o Engineer não edita (`references/guardrails.md`).
 - Checkpoint: o usuário aprova a spec. O Orchestrator nunca escreve spec.
 
 ## 4. Particionar
@@ -75,7 +76,7 @@ scripts/wp-check.sh WP-NN --tasks <abs>/.claude/specs/current/NNN-slug/tasks.md
 ```
 
   Base padrão `feat/NNN-slug`; arquivos em `.claude/` são ignorados. Antes do commit o diff sai vazio: lint, testes e dry-run valem; o diff vale na rodada do Reviewer.
-- Sequência por WP: Engineer `ok` → Git Manager commita no worktree da WP (`git add -A`, `SDD_GIT_MANAGER=1`), antes da revisão → Git Manager posiciona o worktree do Reviewer (`git -C ../<repo>-rev checkout --detach feat/NNN-slug-WP-NN`) → Reviewer roda `wp-check.sh` e lê o diff → `aprovado` ou volta ao Engineer.
+- Sequência por WP: Engineer `ok` → Git Manager commita no worktree da WP (`git add -A`, `SDD_GIT_MANAGER=1`), antes da revisão → Git Manager posiciona o worktree do Reviewer (`git -C ../<repo>-rev checkout --detach feat/NNN-slug-WP-NN`) → Reviewer roda `wp-check.sh` e lê o diff (`aceite-intacto: falha` reprova) → `aprovado` ou volta ao Engineer.
 - Revisões em série: o worktree `../<repo>-rev` é único, então o Reviewer revisa uma WP por vez. O Orchestrator enfileira os pedidos de revisão e só manda o próximo depois do retorno do anterior.
 - `pre-commit` bloqueou por arquivo fora dos paths: se for artefato gerado conhecido (`__pycache__/`, `.pytest_cache/`, `.ruff_cache/`, `*.pyc`, `.claude/settings.local.json`), o Git Manager tira do stage só esses artefatos (`git -C <worktree> rm -r --cached <artefato>`), acrescenta o padrão a `$(git -C <worktree> rev-parse --git-path info/exclude)` (num worktree ligado `.git` é arquivo, não diretório) e repete o commit uma vez. O hook para no primeiro arquivo barrado: liste todos os artefatos em stage com `git -C <worktree> diff --cached --name-only` antes de tirar. Nenhum outro arquivo sai do stage. Qualquer outro arquivo: o Git Manager devolve `bloqueado` com a lista, e o Orchestrator manda ao Engineer como `falha`. O Engineer remove ou move o que gerou (pode apagar arquivo não rastreado que criou pelo shell) e reporta de novo.
 - Reprovada duas vezes ou Engineer `bloqueado`: registre em `bloqueios.md` (formato em `references/painel.md`) e acione o dono da decisão (Architect para ambiguidade de contrato, usuário para regra de negócio).
