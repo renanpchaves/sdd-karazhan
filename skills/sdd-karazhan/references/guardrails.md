@@ -4,7 +4,7 @@ As regras de git e de path são garantidas pelo ambiente, não pela memória do 
 
 ## `.sdd-role`
 
-Gravado por `scripts/guard-install.sh <worktree> <eng|rev> <WP-NN> <paths-csv>` na raiz do worktree, e escondido do git via `info/exclude`:
+Gravado por `scripts/guard-install.sh <worktree> <eng|rev> <WP-NN> <paths-csv>` na raiz do worktree, e escondido do git via `info/exclude` (caminho real: `git rev-parse --git-path info/exclude`, porque num worktree ligado `.git` é arquivo):
 
 ```
 role=eng
