@@ -19,6 +19,7 @@ case "$role" in bld|rev) ;; *) die "role inválido: $role (use bld ou rev)" ;; e
 [ -d "$worktree" ] || die "worktree não encontrado: $worktree"
 worktree="$(cd "$worktree" && pwd)"
 top="$(git -C "$worktree" rev-parse --show-toplevel 2>/dev/null)" || die "não é um repositório git: $worktree"
+[ -z "$(git -C "$worktree" rev-parse --show-prefix)" ] || die "não é a raiz de um worktree: $1"
 worktree="$top"
 
 fonte="$ROOT/hooks/pre-commit"
@@ -50,7 +51,13 @@ printf 'role=%s\nwp=%s\npaths=%s\nroot=%s\naceite=tests/aceite/**\n' "$role" "$w
 
 exclude="$(git_path info/exclude)"
 mkdir -p "$(dirname "$exclude")"
-grep -qxF '.sdd-role' "$exclude" 2>/dev/null || echo '.sdd-role' >> "$exclude"
-grep -qxF '.worktrees/' "$exclude" 2>/dev/null || echo '.worktrees/' >> "$exclude"
+# add_line <linha>: acrescenta ao exclude sem duplicar e sem colar na última linha sem quebra final.
+add_line() {
+  grep -qxF "$1" "$exclude" 2>/dev/null && return 0
+  [ -z "$(tail -c1 "$exclude" 2>/dev/null)" ] || echo >> "$exclude"
+  echo "$1" >> "$exclude"
+}
+add_line '.sdd-role'
+add_line '.worktrees/'
 
 echo "guarda instalada: $role $wp em $worktree"

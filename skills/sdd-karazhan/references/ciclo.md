@@ -66,8 +66,8 @@ Git Manager primeiro, nesta ordem (`agents/git-manager.md`):
 4. Um worktree por WP da onda, em `.worktrees/WP-NN` (com `setup.sh` rodado nele, se existir), e um único worktree do Reviewer no andar, `.worktrees/rev`, desanexado, com guarda. O `rev` também precisa das dependências: `setup.sh` em `.worktrees/rev` uma vez por andar, se existir, e de novo quando `requirements*`/`pyproject.toml` mudar.
 
 ```bash
-EXC="$(git rev-parse --git-path info/exclude)"               # da raiz do repo
-grep -qxF '.worktrees/' "$EXC" || echo '.worktrees/' >> "$EXC"  # antes de tudo, uma vez
+EXC="$(git rev-parse --git-path info/exclude)"; mkdir -p "$(dirname "$EXC")"  # da raiz do repo
+grep -qxF '.worktrees/' "$EXC" 2>/dev/null || { [ -z "$(tail -c1 "$EXC" 2>/dev/null)" ] || echo >> "$EXC"; echo '.worktrees/' >> "$EXC"; }  # antes de tudo
 git worktree add .worktrees/WP-NN -b feat/NNN-slug-WP-NN feat/NNN-slug
 scripts/guard-install.sh .worktrees/WP-NN bld WP-NN <paths-csv>
 git worktree add --detach .worktrees/rev feat/NNN-slug        # uma vez por andar
@@ -75,7 +75,7 @@ scripts/guard-install.sh .worktrees/rev rev WP-NN <paths-csv> # para rev, WP e p
 ```
 
 - Os comandos rodam na raiz do repo. O `guard-install.sh` também garante a linha `.worktrees/` no exclude, mas só depois do `worktree add`: não substitui o passo 1.
-- Migração: se `git worktree list` mostrar worktrees irmãos de versão anterior (`../<repo>-WP-*`, `../<repo>-rev`), o Orchestrator não mexe neles no meio de um andar; no pouso, propõe ao usuário `git worktree remove` dos que estão limpos e integrados, só com o ok dele.
+- Migração: se `git worktree list` mostrar worktrees irmãos de versão anterior (`../<repo>-WP-*`, `../<repo>-rev`), o Orchestrator não mexe neles no meio de um andar (o Git Manager segue usando os caminhos que o `git worktree list` mostra); no pouso, propõe ao usuário `git worktree remove` dos que estão limpos e integrados, só com o ok dele.
 
 - Uma WP por Builder por andar: nova WP é novo agente, novo worktree, novo `.sdd-role` e nova nota. Única exceção: a caracterização (WP-01) e a WP seguinte do mesmo módulo correm no mesmo worktree e na mesma branch (`feat/NNN-slug-WP-01`), com o mesmo Builder. Aprovada a WP-01, o Git Manager faz o merge dela em `feat/NNN-slug` e roda de novo `scripts/guard-install.sh <worktree> bld WP-02 <paths da WP-02>` (sobrescreve o `.sdd-role`); o Orchestrator delega a WP-02 reescrevendo a nota `tasks-<Nome>`. Sem terminal nem worktree novos: o role é o do papel e não muda; só a nota `tasks-<Nome>` é reescrita. A caracterização fixa só comportamento que deve ser preservado: mudança intencional de comportamento caracterizado é bloqueio, com emenda do Architect, e o arquivo de teste passa ao `Possui` da WP que muda o comportamento.
 - Depois Builders e Reviewer, com os comandos de `references/recrutamento.md`. Registre cada um em `equipe.md`.
@@ -94,7 +94,7 @@ scripts/wp-check.sh WP-NN --tasks <abs>/.claude/specs/current/NNN-slug/tasks.md
 - Revisões em série: o worktree `.worktrees/rev` é único, então o Reviewer revisa uma WP por vez. O Orchestrator enfileira os pedidos de revisão e só manda o próximo depois do retorno do anterior.
 - `pre-commit` bloqueou por arquivo fora dos paths: se for artefato gerado conhecido (`__pycache__/`, `.pytest_cache/`, `.ruff_cache/`, `*.pyc`, `.claude/settings.local.json`), o Git Manager tira do stage só esses artefatos (`git -C <worktree> rm -r --cached <artefato>`), acrescenta o padrão a `$(git -C <worktree> rev-parse --git-path info/exclude)` (num worktree ligado `.git` é arquivo, não diretório) e repete o commit uma vez. O hook para no primeiro arquivo barrado: liste todos os artefatos em stage com `git -C <worktree> diff --cached --name-only` antes de tirar. Nenhum outro arquivo sai do stage. Qualquer outro arquivo: o Git Manager devolve `bloqueado` com a lista, e o Orchestrator manda ao Builder como `falha`. O Builder remove ou move o que gerou (pode apagar arquivo não rastreado que criou pelo shell) e reporta de novo.
 - Builder `bloqueado`, ou segunda reprovação da mesma WP por ambiguidade de contrato ou regra de negócio: registre em `bloqueios.md` (formato em `references/painel.md`) e acione o dono da decisão (Architect para contrato, usuário para regra de negócio).
-- Dois erros, Builder novo: na segunda reprovação da mesma WP por outro motivo, o contexto do Builder já está gasto. Recrute outro Builder (`pick-name.sh bld`, contexto limpo) para a mesma WP, no mesmo worktree e guarda, com a nota e os defeitos do Reviewer. O Orchestrator manda o antigo parar de editar e não lhe manda mais nada; dispensá-lo só com ok do usuário, nunca por conta própria. Registre a troca em `decisoes.md` e em `equipe.md`. Builder novo também com duas reprovações: vira bloqueio em `bloqueios.md`, e o usuário decide.
+- Dois erros, Builder novo: na segunda reprovação da mesma WP por outro motivo, o contexto do Builder já está gasto. Recrute outro Builder (`pick-name.sh bld`, contexto limpo) para a mesma WP, no mesmo worktree e guarda, com a nota e os defeitos do Reviewer. O Orchestrator manda o antigo parar de editar e não lhe manda mais nada; dispensá-lo só com ok do usuário, nunca por conta própria. Registre a troca em `decisoes.md` (por papel e WP, sem nome) e em `equipe.md`. Builder novo também com duas reprovações: vira bloqueio em `bloqueios.md`, e o usuário decide.
 - Atualize a lane em `tasks.md` a cada passagem.
 
 ## 7. Integrar

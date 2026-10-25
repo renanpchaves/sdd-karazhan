@@ -130,7 +130,7 @@ Todo terminal recrutado tem a nota `tasks-<Nome>`, conectada a ele. É a única 
 - Builder: o bloco da WP copiado de `tasks.md` (objetivo, possui, fora de escopo, aceite, evidência), com `Possui:` como os paths; o caminho absoluto de `spec.md` e a âncora `## WP-NN — título` (só essa seção); os caminhos absolutos de `bloqueios.md` e `decisoes.md`; o comando exato `<SK>/scripts/wp-check.sh WP-NN --tasks <abs>/tasks.md`, sem flag (só o aceite da WP); a base do diff (`feat/NNN-slug`).
 - Reviewer: o mesmo, sem `decisoes.md`, com `--regressao` no comando, rodado depois do merge de integração do Git Manager.
 - Architect: o slug `NNN-slug`, o caminho do mapa e os de `bloqueios.md` e `decisoes.md`.
-- Git Manager: o slug, o `<repo>` e as WPs da onda, cada uma com paths (csv) e worktree.
+- Git Manager: o slug e as WPs da onda, cada uma com paths (csv) e worktree.
 
 Exemplo, `tasks-Grom`:
 

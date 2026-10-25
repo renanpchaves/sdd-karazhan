@@ -93,3 +93,16 @@ out=$(bash "$SK/scripts/wp-check.sh" WP-01 --tasks "$R/.claude/specs/current/001
 assert_contains "$out" "== diff (base feat/001-x)" "wp-check: base feat/<slug> no worktree aninhado"
 assert_contains "$out" "pkg/coleta.py" "wp-check: diff da WP"
 assert_contains "$out" "fora-dos-paths: ok" "wp-check: fora-dos-paths ok"
+
+# pasta aninhada que não é worktree: guard-install recusa em vez de guardar o principal
+R2=$(fixture_repo padrao); cd "$R2"
+mkdir -p .worktrees/WP-02
+assert_exit 2 bash "$SK/scripts/guard-install.sh" .worktrees/WP-02 bld WP-02 "pkg/coleta.py"
+[ ! -e .sdd-role ] || fail "guard-install gravou .sdd-role no principal"
+
+# exclude sem \n final: a linha nova não cola na última
+R3=$(fixture_repo padrao); cd "$R3"
+E3="$(git rev-parse --git-path info/exclude)"; mkdir -p "$(dirname "$E3")"; printf '*.log' > "$E3"
+assert_exit 0 bash "$SK/scripts/guard-install.sh" . bld WP-01 "pkg/coleta.py"
+assert_eq 1 "$(grep -cxF '*.log' "$E3")" "padrão do usuário preservado"
+assert_eq 1 "$(grep -cxF '.sdd-role' "$E3")" ".sdd-role em linha própria"

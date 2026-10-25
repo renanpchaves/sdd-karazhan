@@ -8,8 +8,8 @@
 - `mapa-padrao.md` e exemplos da rubrica sem nomes de repos ou serviços internos.
 
 **Migração**
-- Worktrees antigos em `../<repo>-WP-NN` e `../<repo>-rev`: termine o andar atual na versão antiga. No pouso, o Git Manager propõe `git worktree remove` de cada um, só com o seu ok.
-- `.claude/specs/karazhan.json` e `equipe.md` já commitados: `git rm --cached` neles depois de rodar o `scaffold.sh` uma vez.
+- Worktrees antigos em `../<repo>-WP-NN` e `../<repo>-rev`: o andar em curso continua neles (os caminhos saem do `git worktree list`). No pouso, o Orchestrator propõe `git worktree remove` dos que estão limpos e integrados, só com o seu ok.
+- `equipe.md`, `painel.md`, `karazhan.json`, `mapa.md` ou `bloqueios.md` já commitados em `.claude/specs/`: rode o `scaffold.sh` uma vez e `git rm --cached` neles. Guarde antes uma cópia do `karazhan.json`: o `pull` desse commit noutro clone apaga o arquivo local (presets).
 
 ## 0.1.1 — 2026-10-24
 
