@@ -21,7 +21,7 @@ scripts/painel.sh NNN-slug --publicar   # e publica
 - Com `maestri`: escreve na nota `painel-NNN-slug` (cria na primeira vez, substitui nas seguintes).
 - Sem `maestri`: grava `.claude/specs/painel.md`.
 
-Conteúdo: tabela de WPs (WP, lane, dono, possui), bloqueios abertos e equipe. Painel errado se corrige na fonte (`tasks.md`, `bloqueios.md`, `equipe.md`) e se gera de novo.
+Conteúdo: tabela de WPs (WP, lane, dono como está no `tasks.md`, ou seja, o papel; possui), bloqueios abertos e equipe. Painel errado se corrige na fonte (`tasks.md`, `bloqueios.md`, `equipe.md`) e se gera de novo.
 
 ## Formato de `bloqueios.md`
 
@@ -41,10 +41,10 @@ Qualquer agente abre entrada, inclusive o Git Manager num conflito de integraç�
 
 ## Formato de `decisoes.md`
 
-O arquivo é do Orchestrator; o Architect acrescenta as próprias entradas, com ele como autor.
+O arquivo é versionado e é do Orchestrator; o Architect acrescenta as próprias entradas. O autor é o papel (`Orchestrator`, `Architect`), nunca o nome do agente: o nome fica no `equipe.md`, local.
 
 ```md
-## 2026-10-24 · Jaina · Reviewer em subagente Claude (sem Codex)
+## 2026-10-24 · Orchestrator · Reviewer em subagente Claude (sem Codex)
 - Racional: modo subagente, sem terminal Codex disponível
 - Alternativas: configurar preset Codex; seguir sem Reviewer
 - Custo de reverter: baixo, recrutar Reviewer Codex na próxima onda

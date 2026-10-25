@@ -72,3 +72,8 @@ grep -qF '.worktrees/' $SK/agents/git-manager.md || fail "git-manager.md sem .wo
 grep -qF 'info/exclude' $SK/agents/git-manager.md || fail "git-manager.md sem info/exclude"
 ! grep -rnE '<repo>-(WP|rev)' skills README.md | grep -v 'references/ciclo.md:.*Migração' | grep -q . || fail "sobrou worktree irmão (<repo>-WP/-rev) fora da nota de migração"
 [ "$(grep -c '^- Migração' $SK/references/ciclo.md)" -eq 1 ] || fail "ciclo.md sem a nota de migração"
+# v0.1.2: arquivos versionados com papel, não personagem (nomes só em equipe.md, que é local)
+! grep -rqE 'Dono: *(Grom|Uther|Ysera|Gazlowe|Antonidas|Jaina|<Nome>)' skills README.md || fail "Dono com nome de personagem"
+! grep -rqE '## [0-9<][^`]* · (Grom|Uther|Ysera|Gazlowe|Antonidas|Jaina|<orch>) · (decisão|lição|Reviewer)' skills README.md || fail "decisoes.md com nome de personagem como autor"
+grep -qF 'Dono:' $SK/references/ciclo.md && grep -qE 'Dono:.*papel|papel.*Dono' $SK/references/ciclo.md || fail "ciclo.md sem Dono = papel"
+grep -qF '.claude/specs/.gitignore' $SK/references/ciclo.md || fail "ciclo.md sem .claude/specs/.gitignore"

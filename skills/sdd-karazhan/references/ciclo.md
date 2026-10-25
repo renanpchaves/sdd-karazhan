@@ -44,7 +44,8 @@ scripts/scaffold.sh NNN-slug     # NNN = próximo número livre em current/ e ar
 
 ## 4. Particionar
 
-- Escreva uma WP por bloco em `tasks.md`, no formato do template do `scaffold.sh` (`### WP-NN — título`, `- Lane:`, `- Dono:`, `- Possui:`, `- Fora de escopo:`, `- Objetivo:`, `- Aceite:`, `- Evidência:`, `- Depende de:`).
+- Escreva uma WP por bloco em `tasks.md`, no formato do template do `scaffold.sh` (`### WP-NN — título`, `- Lane:`, `- Dono:` (o papel, `Builder`, nunca o nome do agente), `- Possui:`, `- Fora de escopo:`, `- Objetivo:`, `- Aceite:`, `- Evidência:`, `- Depende de:`).
+- O nome do agente fica só em `equipe.md`, que é local: o `scaffold.sh` cria `.claude/specs/.gitignore` com `equipe.md`, `painel.md`, `karazhan.json`, `mapa.md` e `bloqueios.md`. Vão para o git `spec.md`, `plan.md`, `tasks.md`, `tasks-done.md`, `decisoes.md` e `tests/aceite/**`, sem nome de personagem (em `decisoes.md` o autor é o papel).
 - Um dono por path. `deploy/**`, `run.sh` e `setup.sh` têm dono explícito quando tocados.
 - Ondas pelo campo `Depende de`.
 - Cada WP deixa a branch mergeável: depois do merge dela, `feat/NNN-slug` roda e passa nos testes do que já existe, sem nada pela metade. Tamanho de WP: 30 a 90 minutos de trabalho do Builder; maior que isso, divida em duas WPs.
@@ -102,5 +103,5 @@ scripts/wp-check.sh WP-NN --tasks <abs>/.claude/specs/current/NNN-slug/tasks.md
 - `.claude/specs/**` é commitado pelo Git Manager na branch `feat/NNN-slug`, no worktree principal (sem `.sdd-role`, hook no-op), no fim de cada onda.
 - Fim da onda: `scripts/painel.sh NNN-slug --publicar` e checkpoint com o usuário (`references/painel.md`).
 - Push e PR só com autorização explícita do usuário.
-- Erro recorrente vira harness: quando um defeito, bloqueio ou `observações:` repete um problema já visto noutra feature (em `bloqueios.md` ou `decisoes.md`), registre em `decisoes.md` uma entrada `## <data> · <orch> · lição: <problema>` e corrija o harness, não só o código: teste estrutural ou linha no `CLAUDE.md` do repo viram WP com dono (na feature atual ou na próxima); linha no `mapa-padrao.md` da skill, o Orchestrator propõe e o usuário aplica.
+- Erro recorrente vira harness: quando um defeito, bloqueio ou `observações:` repete um problema já visto noutra feature (em `bloqueios.md` ou `decisoes.md`), registre em `decisoes.md` uma entrada `## <data> · Orchestrator · lição: <problema>` e corrija o harness, não só o código: teste estrutural ou linha no `CLAUDE.md` do repo viram WP com dono (na feature atual ou na próxima); linha no `mapa-padrao.md` da skill, o Orchestrator propõe e o usuário aplica.
 - Pouso do andar: o Git Manager posiciona o worktree do Reviewer em `feat/NNN-slug` (`git -C .worktrees/rev checkout --detach feat/NNN-slug`) e o Reviewer roda `scripts/wp-check.sh WP-NN --tasks <abs> --tudo` (qualquer WP; o diff sai vazio; nota de pouso em `references/recrutamento.md`): aprova com `aceite: ok` no `tests/aceite/` inteiro e `testes: ok`; senão volta ao Orchestrator como bloqueio. Depois, mova as WPs `pronto` para `tasks-done.md`, libere os nomes em `equipe.md` (a linha do Orchestrator fica), mova `current/NNN-slug/` para `archive/<dominio>/NNN-slug/` e atualize `archive/INDEX.md`. Remover worktree ou dispensar terminal só com autorização.

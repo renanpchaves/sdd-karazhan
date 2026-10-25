@@ -14,3 +14,34 @@ assert_contains "$out" "criado: .claude/specs/current/002-sub/spec.md" "caminho 
 [ -f $R2/.claude/specs/current/002-sub/spec.md ] || fail "scaffold de subdiretório não criou na raiz"
 [ ! -e $R2/pkg/.claude ] || fail "scaffold de subdiretório criou em pkg/"
 assert_exit 2 bash -c "cd '$TMP' && bash '$S' 003-x"
+
+# --- .claude/specs/.gitignore próprio: estado local fora do git, ledger versionado ---
+LOCAIS="equipe.md painel.md karazhan.json mapa.md bloqueios.md"
+R3=$(fixture_repo padrao); cd "$R3"
+printf '.venv/\n' > .gitignore; git add .gitignore; git commit -qm gi
+GI=.claude/specs/.gitignore
+out=$(bash $S 001-x); assert_contains "$out" "criado: $GI" "cria .gitignore dos specs"
+for f in $LOCAIS; do assert_eq 1 "$(grep -cxF "$f" $GI)" "$f uma vez em $GI"; done
+assert_eq 5 "$(grep -c . $GI)" "só as 5 linhas"
+bash $S 001-x >/dev/null
+for f in $LOCAIS; do assert_eq 1 "$(grep -cxF "$f" $GI)" "$f não duplica"; done
+assert_eq ".venv/" "$(cat .gitignore)" ".gitignore da raiz intocado"
+echo "# estado" > .claude/specs/painel.md; echo "# m" > .claude/specs/mapa.md
+echo "## d" >> .claude/specs/decisoes.md
+status="$(git status --porcelain -uall)"
+for f in $LOCAIS; do case "$status" in *".claude/specs/$f"*) fail "$f aparece no git status: $status" ;; esac; done
+for f in .claude/specs/.gitignore .claude/specs/current/001-x/spec.md .claude/specs/current/001-x/tasks.md .claude/specs/decisoes.md; do
+  assert_contains "$status" "$f" "$f versionável"
+done
+# .gitignore pré-existente com linhas próprias (sem newline final) é preservado; só faltantes entram
+R4=$(fixture_repo plano); cd "$R4"; mkdir -p .claude/specs
+printf 'meu-arquivo.txt\nequipe.md' > $GI
+bash $S 001-x >/dev/null
+assert_eq 1 "$(grep -cxF 'meu-arquivo.txt' $GI)" "linha própria preservada"
+for f in $LOCAIS; do assert_eq 1 "$(grep -cxF "$f" $GI)" "$f uma vez (pré-existente)"; done
+assert_eq 6 "$(grep -c . $GI)" "própria + 5"
+# o ledger não carrega nome de personagem: template com papel, decisoes com autor = papel
+tasks="$(cat .claude/specs/current/001-x/tasks.md)"
+assert_contains "$tasks" "- Dono: Builder" "template com papel"
+case "$tasks" in *"Dono: <Nome>"*) fail "template ainda pede nome" ;; esac
+assert_contains "$(cat .claude/specs/decisoes.md)" "data · papel · decisão" "decisoes com papel como autor"

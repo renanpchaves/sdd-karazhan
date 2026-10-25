@@ -132,7 +132,7 @@ Por que assim: [`docs/pesquisa/2026-10-24-praticas-agentes.md`](docs/pesquisa/20
 |---|---|
 | `inventario.sh` | Lista fatos do repo. O Orchestrator decide o time. |
 | `pick-name.sh bld` | Sorteia nome livre do elenco. |
-| `scaffold.sh 003-slug` | Cria specs e tasks. |
+| `scaffold.sh 003-slug` | Cria specs e tasks, e `.claude/specs/.gitignore`: equipe, painel, mapa, bloqueios e `karazhan.json` ficam locais; spec, plan, tasks e decisões vão para o git, com papel no lugar do nome do agente. |
 | `mapa-check.sh` | Mapa ainda vale? Idade e impressão digital da árvore. |
 | `donos.sh 003-slug` | Arquivo no escopo sem dono? Lista. |
 | `wp-check.sh WP-03` | Lint, pytest, `aceite` (oráculo da WP), `--dry-run` real, diff restrito aos paths, arquivo fora do path, `aceite-intacto`. `--regressao` soma o aceite das WPs prontas; `--tudo`, o `tests/aceite/` inteiro. |
@@ -141,7 +141,7 @@ Por que assim: [`docs/pesquisa/2026-10-24-praticas-agentes.md`](docs/pesquisa/20
 
 ## Onde roda
 
-- **Maestri:** cada papel é um terminal no canvas, com nota própria e worktree próprio. Reviewer em Codex.
+- **Maestri:** cada papel é um terminal no canvas, com nota própria e worktree próprio. Reviewer em Codex. Os worktrees ficam em `.worktrees/` dentro do repo (escondidos pelo `info/exclude`), não ao lado dele.
 - **Terminal comum, sem Maestri:** os papéis viram subagentes do Claude Code; Reviewer em Claude com preset diferente; guard de path vira só checagem de diff. A skill avisa na primeira linha qual modo está ativo.
 
 ## Instalar
