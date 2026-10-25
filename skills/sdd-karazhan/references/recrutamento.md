@@ -119,7 +119,7 @@ maestri connect "Grom" "tasks-Grom"
 
 Nunca reestilize terminal que já estava no canvas (nem o seu) sem pedido do usuário; se pedir: `maestri arrange "<Nome>" --icon <ícone> --color <cor>`. O nome final (com `#2`, se tomado) vale para `tasks-<nome>`, `connect`, `equipe.md` e a delegação.
 
-- `--dir`: Builder no worktree da WP; Reviewer no worktree desanexado `../<repo>-rev`, único no andar; Architect e Git Manager (Grande) na raiz do repo.
+- `--dir`: Builder no worktree da WP; Reviewer no worktree desanexado `.worktrees/rev` (caminho absoluto), único no andar; Architect e Git Manager (Grande) na raiz do repo.
 - Preset: o da linha `Presets:` da folha. Builder sempre em preset `claude`; Reviewer sempre em preset `codex`.
 - `--role` é sempre o papel exato da tabela, com maiúscula e espaço (`"Git Manager"`), nunca o nome do agente.
 

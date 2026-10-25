@@ -6,3 +6,5 @@ assert_exit 0 jq -e 'keys | length == 6' skills/sdd-karazhan/roster.json
 assert_exit 0 jq -e '[.[][]] as $n | ($n | unique | length) == ($n | length)' skills/sdd-karazhan/roster.json   # nome em um pool só
 assert_exit 0 jq -e '[.[][]] | all(test("^[a-z]+$"))' skills/sdd-karazhan/roster.json
 assert_exit 0 jq -e '.mapa_max_dias == 30' skills/sdd-karazhan/config.json
+assert_exit 0 jq -e '.version == "0.1.2"' .claude-plugin/plugin.json
+assert_exit 0 jq -e '.plugins[0].version == "0.1.2"' .claude-plugin/marketplace.json

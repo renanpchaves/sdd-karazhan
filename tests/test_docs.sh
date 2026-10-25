@@ -63,3 +63,12 @@ gr=$(grep -n '^maestri recruit "Grom"' $R | head -n 1 | cut -d: -f1); gn=$(grep 
 [ -n "$gr" ] && [ -n "$gn" ] && [ "$gr" -lt "$gn" ] || fail "recrutamento.md: recruit Grom deve vir antes da nota tasks-Grom"
 grep -qF 'Nome | Papel' $R && grep -qF 'role Orchestrator: atribuído' $R || fail "recrutamento.md sem o conteúdo de equipe.md criado pelo Orchestrator"
 grep -q 'Carregue no passo 1' $R || fail "recrutamento.md deve ser carregado também no passo 1"
+# v0.1.2: worktrees dentro do repo, em .worktrees/ (info/exclude); nada de pastas irmãs
+for p in '.worktrees/WP-NN' '.worktrees/rev'; do
+  grep -qF -- "$p" $SK/references/ciclo.md || fail "ciclo.md sem '$p'"
+done
+grep -qF -- '.worktrees/rev' $SK/agents/git-manager.md || fail "git-manager.md sem .worktrees/rev"
+grep -qF '.worktrees/' $SK/agents/git-manager.md || fail "git-manager.md sem .worktrees/"
+grep -qF 'info/exclude' $SK/agents/git-manager.md || fail "git-manager.md sem info/exclude"
+! grep -rnE '<repo>-(WP|rev)' skills README.md | grep -v 'references/ciclo.md:.*Migração' | grep -q . || fail "sobrou worktree irmão (<repo>-WP/-rev) fora da nota de migração"
+[ "$(grep -c '^- Migração' $SK/references/ciclo.md)" -eq 1 ] || fail "ciclo.md sem a nota de migração"

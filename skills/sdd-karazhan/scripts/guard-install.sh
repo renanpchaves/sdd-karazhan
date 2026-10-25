@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # guard-install.sh <worktree> <bld|rev> <WP-NN> <paths-csv>
-# Grava <worktree>/.sdd-role, instala o hook pre-commit e esconde .sdd-role no info/exclude.
+# Grava <worktree>/.sdd-role, instala o hook pre-commit e esconde .sdd-role e .worktrees/ no info/exclude.
 # O hook vai para o hooks/ comum do repo (worktrees compartilham): instalar uma vez vale para
 # todos, e é no-op onde não há .sdd-role. Exit 2 se core.hooksPath já estiver definido.
 . "$(dirname "$0")/../lib/common.sh"
@@ -51,5 +51,6 @@ printf 'role=%s\nwp=%s\npaths=%s\nroot=%s\naceite=tests/aceite/**\n' "$role" "$w
 exclude="$(git_path info/exclude)"
 mkdir -p "$(dirname "$exclude")"
 grep -qxF '.sdd-role' "$exclude" 2>/dev/null || echo '.sdd-role' >> "$exclude"
+grep -qxF '.worktrees/' "$exclude" 2>/dev/null || echo '.worktrees/' >> "$exclude"
 
 echo "guarda instalada: $role $wp em $worktree"

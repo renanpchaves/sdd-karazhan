@@ -2,7 +2,7 @@
   "name": "sdd-karazhan",
   "displayName": "SDD Karazhan",
   "description": "Orquestração SDD de times de agentes, no canvas do Maestri ou com subagentes no terminal: time mínimo decidido sobre fatos do repo, guardrails de ambiente e spec como contrato.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Renan Chaves"
   },
