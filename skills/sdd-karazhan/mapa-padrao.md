@@ -4,7 +4,7 @@ Vale para repo com esqueleto padrão (`mapa-check.sh` diz `esqueleto=padrao`: `d
 
 ## Organização
 
-- `<pacote>/` na raiz, com o nome do repo (`relatorios/`, `sincronia/`, `auditoria/`, `termos/`; `src/` nos mais antigos). Módulos típicos:
+- `<pacote>/` na raiz, com o nome do repo (`coletor/`, `relatorios/`; `src/` nos mais antigos). Módulos típicos:
   - entrada e configuração: `cli.py`, `config.py`, `logging_setup.py`
   - clientes externos: `graph_client.py` ou `cliente.py` (Microsoft Graph, helpdesk, monitoramento)
   - coleta: `coleta.py` ou `coletor.py`
@@ -14,7 +14,7 @@ Vale para repo com esqueleto padrão (`mapa-check.sh` diz `esqueleto=padrao`: `d
   - estado: `estado.py` ou `db.py`; guardas de execução: `guardas.py`
 - `config/`: `config/settings.py`, `config/*.json`.
 - `tests/`: `conftest.py`, `fabrica.py` ou `fakes.py`, `fixtures/*.json`, `test_<modulo>.py` (pytest).
-- `deploy/`: `com.exemplo.<nome>.plist` e `ARMAR.md`; às vezes `rotina-nuvem-SKILL.md` para Cowork.
+- `deploy/`: `com.<org>.<nome>.plist` e `ARMAR.md`; às vezes `rotina-nuvem-SKILL.md` para Cowork.
 - Raiz: `run.sh`, `setup.sh`, `.env.example`, `pyproject.toml` ou `requirements.txt`, `README.md`, `DECISOES.md`.
 - Às vezes: `alembic/` (migrações), `backups/`, `historico/`, `logs/.gitkeep`, `.claude/specs/` herdado do sdd-maestri.
 
