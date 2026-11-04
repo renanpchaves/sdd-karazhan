@@ -150,6 +150,21 @@ Base: feat/001-filtro
 - Pouso do andar: a nota do Reviewer diz `WP: andar (pouso)`, o comando `wp-check.sh WP-NN --tasks <abs> --tudo` (qualquer WP), diff vazio esperado, e o critério: aprovar = `aceite: ok` com `--tudo` e `testes: ok`.
 - Leitura: `maestri note read "tasks-<Nome>"`.
 
+## Dispensar agente (só modo Maestri)
+
+Dispensar sai em par: terminal e nota `tasks-<Nome>`. O ok do usuário para dispensar vale para os dois, sem pergunta à parte. A nota sai primeiro: depois do `dismiss` ela fica órfã, fora do alcance do CLI, e só o usuário consegue tirar do canvas.
+
+```bash
+maestri list                          # nome exato do agente e da nota
+maestri note delete "tasks-Grom"      # a nota do agente, antes do terminal
+maestri dismiss "Grom"
+```
+
+- Só a `tasks-<Nome>` do agente dispensado. Ficam a nota de quem continua (Reviewer até o pouso, Builder que segue na WP depois da caracterização), a `painel-NNN-slug` e qualquer nota que o usuário criou.
+- Nota que não aparece em `maestri list` ou `note delete` com erro: siga com o `dismiss` e diga no retorno qual nota ficou para o usuário apagar.
+- Dois erros: o Builder antigo sai com a nota dele; o novo já tem a própria `tasks-<Nome>`.
+- Modo subagente não tem nota: nada a apagar.
+
 ## Delegar e acompanhar
 
 ```bash

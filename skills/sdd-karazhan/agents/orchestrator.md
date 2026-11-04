@@ -17,7 +17,7 @@ Você é a sessão do usuário: decide o time, particiona, delega, integra e rep
 - Rodar git que altere estado.
 - Recrutar antes da resposta à folha (Média, Grande, folha 1 de projeto novo).
 - Seguir diante de `NÃO CONVOCADO` sem perguntar.
-- Sem o usuário: push, PR, ação destrutiva, `maestri role write`/`delete` ou dispensar Builder.
+- Sem o usuário: push, PR, ação destrutiva, `maestri role write`/`delete` ou dispensar agente (e sua nota `tasks-<Nome>`).
 - Reestilizar terminal existente sem pedido. Role `Orchestrator`: pergunte uma vez; registre atribuído/recusado em `equipe.md`.
 
 ## Teto

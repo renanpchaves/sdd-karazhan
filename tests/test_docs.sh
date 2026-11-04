@@ -82,3 +82,9 @@ grep -q 'branch da WP' $SK/references/ciclo.md || fail "ciclo.md sem a base pela
 grep -q 'branch da WP' $SK/references/guardrails.md || fail "guardrails.md sem a base pela branch da WP"
 grep -q 'wp-check' $SK/agents/orchestrator.md || fail "orchestrator.md não proíbe rodar wp-check"
 grep -qF 'sem `setup.sh`' $SK/agents/git-manager.md || fail "git-manager.md sem a regra de setup.sh ausente"
+# dispensar agente no Maestri leva a nota tasks-<Nome>, apagada antes do dismiss
+grep -q '^## Dispensar agente' $R || fail "recrutamento.md sem a seção Dispensar agente"
+dn=$(grep -n '^maestri note delete "tasks-' $R | head -n 1 | cut -d: -f1); dd=$(grep -n '^maestri dismiss ' $R | head -n 1 | cut -d: -f1)
+[ -n "$dn" ] && [ -n "$dd" ] && [ "$dn" -lt "$dd" ] || fail "recrutamento.md: note delete da tasks-<Nome> deve vir antes do dismiss"
+grep -q 'Dispensar agente' $SK/references/ciclo.md || fail "ciclo.md não liga o pouso à seção Dispensar agente"
+grep -qF 'tasks-<Nome>' $SK/agents/orchestrator.md || fail "orchestrator.md sem a nota na dispensa"
