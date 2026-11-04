@@ -77,3 +77,8 @@ grep -qF 'info/exclude' $SK/agents/git-manager.md || fail "git-manager.md sem in
 ! grep -rqE '## [0-9<][^`]* · (Grom|Uther|Ysera|Gazlowe|Antonidas|Jaina|<orch>) · (decisão|lição|Reviewer)' skills README.md || fail "decisoes.md com nome de personagem como autor"
 grep -qF 'Dono:' $SK/references/ciclo.md && grep -qE 'Dono:.*papel|papel.*Dono' $SK/references/ciclo.md || fail "ciclo.md sem Dono = papel"
 grep -qF '.claude/specs/.gitignore' $SK/references/ciclo.md || fail "ciclo.md sem .claude/specs/.gitignore"
+# base do wp-check: feat/<slug>, senão a branch da WP, senão main avisado; Orchestrator não roda wp-check; worktree sem setup.sh é bloqueio
+grep -q 'branch da WP' $SK/references/ciclo.md || fail "ciclo.md sem a base pela branch da WP"
+grep -q 'branch da WP' $SK/references/guardrails.md || fail "guardrails.md sem a base pela branch da WP"
+grep -q 'wp-check' $SK/agents/orchestrator.md || fail "orchestrator.md não proíbe rodar wp-check"
+grep -qF 'sem `setup.sh`' $SK/agents/git-manager.md || fail "git-manager.md sem a regra de setup.sh ausente"

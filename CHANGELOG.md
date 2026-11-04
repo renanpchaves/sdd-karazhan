@@ -1,5 +1,11 @@
 # Changelog
 
+## Não lançado
+
+- `wp-check.sh`: sem `feat/<slug>`, a base sai da branch da WP (`feat/NNN-slug-WP-NN` sem o sufixo, também com HEAD desanexado no worktree do Reviewer). `main` fica como último recurso e aparece no resumo como `base: main (aviso: …)`, para `fora-dos-paths: falha` não ser lido como defeito da WP.
+- Orchestrator não roda `wp-check.sh` nem testes: a evidência é do Builder (sem flag) e do Reviewer (`--regressao`). Antes do commit, `diff` e `fora-dos-paths` saem vazios e não são evidência.
+- Worktree sem `setup.sh`: o Git Manager devolve `bloqueado` em vez de deixar o Builder instalar dependência, o que cai em prompt de permissão e para o andar.
+
 ## 0.1.2 — 2026-10-24
 
 - Worktrees das WPs e do Reviewer ficam dentro do repo, em `.worktrees/WP-NN` e `.worktrees/rev`, escondidos pelo `info/exclude` do git. Nada mais de pastas irmãs na raiz de projetos.

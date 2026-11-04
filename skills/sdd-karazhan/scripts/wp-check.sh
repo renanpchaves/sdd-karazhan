@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--regressao|--tudo]
-# Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir, senão main,
-# senão o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
+# Base padrão: feat/<NNN-slug> (slug tirado do caminho do tasks.md) se existir; senão a branch da WP
+# (feat/NNN-slug-WP-NN, de HEAD ou da branch que aponta para HEAD desanexado) sem o sufixo -WP-NN;
+# senão main, com aviso no resumo; se o ref não existir, o primeiro commit. Arquivos em .claude/ são ignorados em fora-dos-paths.
 # Reúne evidência de uma WP para o Reviewer. Etapas: lint, testes, aceite, dry-run, diff, fora-dos-paths, aceite-intacto.
 # aceite roda tests/aceite/test_wp<NN>_*.py da WP (sem nenhum test_wp*, tests/aceite inteiro);
 # --regressao soma os das WPs pronto, já integradas (Reviewer, após o merge de integração);
@@ -74,8 +75,9 @@ done <<EOT
 $globs
 EOT
 
-# Base: --base; senão feat/<slug> (slug do caminho do tasks.md) se existir; senão main;
-# se o ref não existir, o primeiro commit.
+# Base: --base; senão feat/<slug> (slug do caminho do tasks.md) se existir; senão a branch da WP
+# (feat/NNN-slug-WP-NN) sem o sufixo; senão main, com aviso no resumo; se o ref não existir, o primeiro commit.
+base_aviso=""
 if [ -z "$base" ]; then
   slug=""
   case "/$tasks" in
@@ -89,10 +91,26 @@ if [ -z "$base" ]; then
   if [ -n "$slug" ] && git rev-parse --verify -q "feat/$slug^{commit}" >/dev/null 2>&1; then
     base="feat/$slug"
   else
-    base="main"
+    # Branch da WP: a de HEAD ou, com HEAD desanexado (worktree do Reviewer), a primeira feat/*-WP-NN que aponta para HEAD.
+    ramo="$(git symbolic-ref --short -q HEAD 2>/dev/null || true)"
+    if [ -z "$ramo" ]; then
+      ramo="$(git for-each-ref --format='%(refname:short)' --points-at HEAD 'refs/heads/feat/*' 2>/dev/null \
+        | while IFS= read -r r; do case "$r" in feat/*-WP-[0-9][0-9]) echo "$r"; break ;; esac; done)"
+    fi
+    case "$ramo" in
+      feat/*-WP-[0-9][0-9])
+        cand="${ramo%-WP-[0-9][0-9]}"
+        if git rev-parse --verify -q "$cand^{commit}" >/dev/null 2>&1; then base="$cand"; fi
+        ;;
+    esac
+    if [ -z "$base" ]; then
+      base="main"
+      base_aviso="feat/${slug:-<slug>} ausente e branch fora do padrão feat/NNN-slug-WP-NN; o diff pode trazer commits de fora da WP"
+    fi
   fi
 fi
 base_nota=" (base $base)"
+[ -z "$base_aviso" ] || base_nota=" (base main: $base_aviso)"
 if ! git rev-parse --verify -q "$base^{commit}" >/dev/null 2>&1; then
   primeiro="$(git rev-list --max-parents=0 HEAD | tail -1)"
   [ -n "$primeiro" ] || die "repositório sem commits"
@@ -313,4 +331,5 @@ fi
 
 echo "== resumo"
 printf '%s' "$resumo"
+[ -z "$base_aviso" ] || echo "base: main (aviso: $base_aviso)"
 exit "$falhou"

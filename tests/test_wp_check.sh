@@ -194,3 +194,25 @@ out=$(bash $W WP-01 --tasks $T || true)
 assert_contains "$out" "aceite: falha" "oráculo da spec ausente é falha"
 assert_contains "$out" "oráculo declarado na spec mas ausente" "motivo da falha"
 assert_exit 1 bash $W WP-01 --tasks $T
+# --- base: feat/<slug> ausente ---
+# A branch da WP (feat/NNN-slug-WP-NN) dá a base; main só em último caso, com aviso no resumo.
+bash $SK/scripts/scaffold.sh 002-y >/dev/null
+T2=.claude/specs/current/002-y/tasks.md
+printf '### WP-01 — coleta\n- Dono: Builder\n- Possui: pkg/coleta.py\n' > $T2
+git add -f $T2; git commit -qm tasks-002
+git checkout -qb feat/outro; echo "# o" >> pkg/envio.py; git commit -qam outro-envio
+git checkout -qb feat/outro-WP-01 feat/outro
+echo "# y" >> pkg/coleta.py; git commit -qam coleta-y
+out=$(bash $W WP-01 --tasks $T2 || true)
+assert_contains "$out" "== diff (base feat/outro" "base pela branch da WP"
+assert_contains "$out" "fora-dos-paths: ok" "diff só da WP com a base da branch"
+git checkout -q --detach feat/outro-WP-01
+out=$(bash $W WP-01 --tasks $T2 || true)
+assert_contains "$out" "== diff (base feat/outro" "base pela branch da WP com HEAD desanexado (Reviewer)"
+git checkout -qb qualquer; echo "# z" >> pkg/coleta.py; git commit -qam coleta-z
+out=$(bash $W WP-01 --tasks $T2 || true)
+assert_contains "$out" "== diff (base main" "sem feat/<slug> nem branch da WP: main"
+assert_contains "$out" "fora-dos-paths: falha" "com main, o diff traz commits de fora da WP"
+assert_contains "$(printf '%s\n' "$out" | sed -n '/== resumo/,$p')" "base: main" "aviso de main no resumo"
+out=$(bash $W WP-01 --tasks $T2 --base feat/outro || true)
+case "$(printf '%s\n' "$out" | sed -n '/== resumo/,$p')" in *"base: "*) fail "aviso de base com --base explícito: $out" ;; esac

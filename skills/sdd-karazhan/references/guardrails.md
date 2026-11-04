@@ -42,7 +42,7 @@ Hook `PreToolUse` do plugin para `Edit`, `Write`, `MultiEdit` e `NotebookEdit` (
 
 ## `wp-check.sh`
 
-`scripts/wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--regressao|--tudo]` roda lint, testes, aceite, dry-run real, diff, fora-dos-paths e aceite-intacto contra a base (padrão `feat/<slug>`), ignorando `.claude/`. Arquivo commitado fora dos paths da WP é `falha`, independente de quem commitou.
+`scripts/wp-check.sh WP-NN [--base <ref>] [--tasks <arquivo>] [--regressao|--tudo]` roda lint, testes, aceite, dry-run real, diff, fora-dos-paths e aceite-intacto contra a base (padrão `feat/<slug>`; sem ela, a branch da WP sem o sufixo `-WP-NN`; senão `main`, com `base: main (aviso: …)` no resumo), ignorando `.claude/`. Arquivo commitado fora dos paths da WP é `falha`, independente de quem commitou.
 
 ## Oráculo de aceite
 
