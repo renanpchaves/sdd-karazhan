@@ -29,3 +29,7 @@ Entrada: `## data · papel · decisão` (papel, não o nome do agente: este arqu
 ## 2026-11-16 · Orchestrator · terceira falha antiga do test_docs: convocacao.md
 - `references/convocacao.md` tem 1110 palavras (limite 1050); estava escondida atrás das falhas dos agents/*.md no mesmo teste. O Builder conferiu as três checagens de tamanho: é a última.
 - Decisão: entra no Possui da WP-01; cortar ≥ 60 palavras só de prosa, sem mudar regra, tabela, exemplo de folha nem comando. O Reviewer confere o diff do convocacao.md frase a frase contra a versão anterior.
+
+## 2026-11-16 · Orchestrator · segunda devolução da WP-01
+- Reviewer: ponto 1 (glob/chaves sem aspas no alvo) é DEFEITO: com paths=tests/**, `tee tests/{aceite,outro}/x.py` passa e grava em tests/aceite. Pontos 2 ($, crase, ~, $'...'), 3 ($(...), crases, xargs, find -exec) e 4 (symlink) são LIMITE.
+- Decisão: o mesmo Builder corrige o ponto 1 (defeitos distintos a cada rodada, não o mesmo erro duas vezes; regra dos dois erros não se aplica) e documenta em guardrails.md os limites 2 a 4 com exemplos. Se a próxima revisão devolver de novo, Builder novo com contexto limpo.
