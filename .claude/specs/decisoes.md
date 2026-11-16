@@ -17,3 +17,11 @@ Entrada: `## data · papel · decisão` (papel, não o nome do agente: este arqu
 - O oráculo exige `bash tests/run.sh` com 0, mas no HEAD 1cdd92b falham test_docs (agents/orchestrator.md com 253 palavras, limite 250) e test_wp_check (wp-check.sh:98, `case` dentro de `$( )`, não parseia no /bin/bash 3.2 do macOS).
 - Decisão: entram no Possui da WP-01 como correção mínima: enxugar orchestrator.md e só a sintaxe da linha 98 do wp-check.sh, sem mudar comportamento. Alternativa (relaxar o critério) rejeitada: o Reviewer roda o wp-check em HEAD desanexado, justamente o caminho quebrado no macOS. Custo de reverter: baixo. Escopo: só esta WP.
 - path-guard.sh e tests/test_manifests.sh entraram no Possui (helper comum em lib/ e versão 0.1.3); docs/** e tests/run.sh saíram (não precisam mudar).
+
+## 2026-11-16 · Orchestrator · checkpoint da spec
+- O usuário mandou seguir ("Pode voltar de onde parou") depois de ver o resumo da spec; tomado como ok do checkpoint. Builder recrutado em .worktrees/WP-01.
+
+## 2026-11-16 · Orchestrator · bloqueio do Builder: test_docs também falha em architect.md e builder.md
+- `agents/architect.md` e `agents/builder.md` têm 251 palavras cada (limite 250). O test_docs para no primeiro fail, por isso só o orchestrator.md apareceu antes.
+- Decisão: os dois entram no Possui da WP-01, cada um enxuga 1+ palavra sem mudar regra. Mesmo racional da decisão anterior. Custo de reverter: baixo.
+- Lacuna apontada pelo Builder: `mv fora/x dentro/x` remove a origem fora dos paths. Decisão: entra na WP-01 (a origem do `mv` também conta como alvo de escrita), com casos em tests/test_bash_guard.sh; o oráculo não muda.

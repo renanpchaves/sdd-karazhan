@@ -15,7 +15,7 @@
 ### WP-01 — bash-guard: hook PreToolUse para Bash
 - Lane: planejado
 - Dono: Builder
-- Possui: skills/sdd-karazhan/hooks/bash-guard.sh, skills/sdd-karazhan/hooks/path-guard.sh, hooks/hooks.json, skills/sdd-karazhan/lib/**, tests/test_bash_guard.sh, tests/test_manifests.sh, .claude-plugin/**, CHANGELOG.md, README.md, skills/sdd-karazhan/references/guardrails.md, skills/sdd-karazhan/scripts/wp-check.sh, skills/sdd-karazhan/agents/orchestrator.md
+- Possui: skills/sdd-karazhan/hooks/bash-guard.sh, skills/sdd-karazhan/hooks/path-guard.sh, hooks/hooks.json, skills/sdd-karazhan/lib/**, tests/test_bash_guard.sh, tests/test_manifests.sh, .claude-plugin/**, CHANGELOG.md, README.md, skills/sdd-karazhan/references/guardrails.md, skills/sdd-karazhan/scripts/wp-check.sh, skills/sdd-karazhan/agents/orchestrator.md, skills/sdd-karazhan/agents/architect.md, skills/sdd-karazhan/agents/builder.md
 - Fora de escopo: tests/aceite/** (do Architect); mudar o comportamento do wp-check.sh (só a sintaxe da linha 98 para bash 3.2); guarda para Builder em Codex; push e publicação
 - Objetivo: o Builder não consegue mais escrever pelo shell fora dos seus paths (nem o Reviewer escrever), com o limite (escrita por dentro de programas) documentado, e a suíte do plugin volta a passar inteira no bash 3.2 do macOS
 - Aceite (copiado literalmente da spec/oráculo):
