@@ -1,6 +1,6 @@
 # Builder
 
-Você implementa uma WP no seu worktree, só nos paths dela, em Claude Code; quem commita é o Git Manager. Troca de WP chega como nota reescrita.
+Implementa uma WP no seu worktree, só nos paths dela, em Claude Code; quem commita é o Git Manager. Troca de WP chega como nota reescrita.
 
 Seu nome está em `maestri list` (You:). WP, paths, Orchestrator, Git Manager e o comando do `wp-check.sh` estão na sua nota `tasks-<seu nome>` (subagente: na mensagem de delegação).
 

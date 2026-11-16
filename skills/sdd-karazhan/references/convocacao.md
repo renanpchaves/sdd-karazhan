@@ -1,19 +1,19 @@
 # Convocação
 
-Entrada: pedido + `inventario.sh`; o Orchestrator decide em três passos: conta as áreas, escolhe o tamanho, escolhe o nível.
+Entrada: pedido + `inventario.sh`; decide-se em três passos.
 
 ## 1. Área
 
-Grupo de arquivos que um Builder muda sozinho, sem tocar nos de outro. Grupos (do inventário):
+Grupo de arquivos que um Builder muda sem tocar nos de outro. Grupos (do inventário):
 
 - cada módulo do pacote, com o teste dele: `coleta.py` + `tests/test_coleta.py`;
 - `deploy`: `deploy/*.plist`, `run.sh`, `setup.sh`;
 - `config`: `config/`, `.env.example`;
 - `migracoes`: `alembic/` junto com `models`, `db` e `schemas`.
 
-Arquivos que precisam mudar juntos para a mudança fazer sentido são UMA área, mesmo em módulos diferentes (ex.: `graph_client.py` + `coleta.py` para ler um campo novo). A contagem é de áreas que o pedido **muda**, não das que ele só lê.
+Arquivos que mudam juntos são UMA área, mesmo em módulos diferentes. Conta só as áreas que o pedido **muda**.
 
-## 2. Tamanho (o time)
+## 2. Tamanho
 
 | Tamanho | Áreas tocadas | Builders | Architect | Git Manager | Aprovação do time |
 |---|---|---|---|---|---|
@@ -21,11 +21,9 @@ Arquivos que precisam mudar juntos para a mudança fazer sentido são UMA área,
 | Média | 2 a `bld_max` | 1 por área | terminal | subagente | o usuário aprova |
 | Grande | mais que `bld_max`, ou `grande` | `bld_max`, áreas agrupadas por dependência | terminal | terminal | o usuário aprova |
 
-Reviewer: um, em Codex, em qualquer tamanho.
+Reviewer: um, em Codex, sempre.
 
-## 3. Nível (o contrato)
-
-Independe do tamanho:
+## 3. Nível
 
 | Nível | Quando | Contrato |
 |---|---|---|
@@ -43,27 +41,27 @@ Independe do tamanho:
 
 ## Papéis
 
-- **Architect** (claude/capaz): terminal ou subagente conforme a tabela de tamanho; nominal `arch` = terminal.
+- **Architect** (claude/capaz): terminal ou subagente pela tabela de tamanho; nominal `arch` = terminal.
 - **Recon** (claude/barato): subagente antes do Architect se `mapa` ≠ `ok` ou `esqueleto: fora`; nunca em `repo: novo`.
-- **Builder**: terminal Claude Code; agrupamento por dependência na Grande (ex.: relatorio+envio). `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
+- **Builder**: terminal Claude Code; agrupamento por dependência na Grande. `capaz` em deploy, config, auth, db (migração inclusa) ou crypto; senão `medio`. Várias áreas: o tier mais alto.
 - **Reviewer** (codex/capaz): terminal. Sem Codex: no Maestri, `Reviewer: NÃO CONVOCADO (sem Codex)` em `Terminais:` e pergunte; fora dele, subagente Claude noutro preset, degradação em `decisoes.md`.
-- **Git Manager** (claude/barato): conforme a tabela de tamanho. Reaproveita o de `conectados` só com origem `terminal`.
+- **Git Manager** (claude/barato): pela tabela de tamanho. Reaproveita o de `conectados` só com origem `terminal`.
 
-Nome: `pick-name.sh <prefixo>` (o personagem, ex.: `Grom`). Em `Terminais:` e `Subagentes:`, papel antes do nome (`Builder Grom`); em `Presets:`, `Nome=preset`. Preset: família e tier em `presets`; sem o tier, sobe antes de descer (medio → capaz → barato).
+Nome: `pick-name.sh <prefixo>` (o personagem). Em `Terminais:` e `Subagentes:`, papel antes do nome (`Builder Grom`); em `Presets:`, `Nome=preset`. Preset: família e tier em `presets`; sem o tier, sobe antes de descer (medio → capaz → barato).
 
-`spec=sim`: `em curso` e o pedido cabe nela → continue (mesmo slug, novas WPs); `vazia` e o pedido cabe no slug → reuse o slug; senão → slug novo, citando a anterior se for `aprovada`.
+`spec=sim`: `em curso` e o pedido cabe nela → continue (mesmo slug, novas WPs); `vazia` e o pedido cabe no slug → reuse; senão → slug novo, citando a anterior se for `aprovada`.
 
-Projeto novo: duas folhas. Folha 1 (git + arch, `Tamanho: a definir (até o plan.md)`) sempre espera uma palavra: Git Manager subagente (`git init -b main`, `.gitignore`, commit vazio); Architect: subagente se o usuário trouxe spec (converter, não reconstruir), terminal se trouxe ideia. Folha 2, depois do `plan.md`: uma área por fronteira (módulo ou pacote do `plan.md`, não arquivo), regras normais; onda 1 = esqueleto em série (um Builder, `mapa-padrao.md`).
+Projeto novo: duas folhas. Folha 1 (git + arch, `Tamanho: a definir (até o plan.md)`) sempre espera uma palavra: Git Manager subagente (`git init -b main`, `.gitignore`, commit vazio); Architect: subagente se trouxe spec (converter, não reconstruir), terminal se trouxe ideia. Folha 2, depois do `plan.md`: uma área por fronteira (módulo ou pacote, não arquivo), regras normais; onda 1 = esqueleto em série (um Builder, `mapa-padrao.md`).
 
-Brownfield: o Architect confere `tests/test_<mod>*`; sem teste, a WP-01 é o teste de caracterização (fixture em `tests/fixtures/`, teste em `tests/`), feita em série pelo Builder do módulo, no mesmo worktree, antes da WP dele, e revisada antes da WP do módulo; não muda o tamanho.
+Brownfield: o Architect confere `tests/test_<mod>*`; sem teste, a WP-01 é o teste de caracterização (fixture em `tests/fixtures/`, teste em `tests/`), feita em série pelo Builder do módulo, no mesmo worktree, e revisada antes da WP do módulo; não muda o tamanho.
 
-Folha: sete linhas, porquê inline. Pequena segue sem esperar, mas os terminais só nascem após o checkpoint da spec (passo 3), e `para` ajusta o time. `NÃO CONVOCADO` ou nominal inválida: mostre o motivo e espere.
+Folha: sete linhas, porquê inline. Pequena segue sem esperar, mas terminais só nascem após o checkpoint da spec (passo 3), e `para` ajusta o time. `NÃO CONVOCADO` ou nominal inválida: mostre o motivo e espere.
 
 Chamada nominal (`/sdd-karazhan arch bld git`): só esses; `bld` exige `git`, `rev` exige `bld`. `grande` sozinho só força o tamanho.
 
 Desvio da rubrica: uma linha em `decisoes.md`.
 
-Erro recorrente vira harness: antes da folha, leia as entradas `lição` de `decisoes.md`. O mesmo problema em 2 features vira teste estrutural ou linha no `mapa-padrao.md` (ou no `CLAUDE.md` do repo), registrado como `lição` (`references/ciclo.md`).
+Erro recorrente vira harness: antes da folha, leia as `lição` de `decisoes.md`. O mesmo problema em 2 features vira teste estrutural ou linha no `mapa-padrao.md` (ou no `CLAUDE.md` do repo), registrado como `lição` (`references/ciclo.md`).
 
 ## Exemplos
 

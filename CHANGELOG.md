@@ -1,6 +1,10 @@
 # Changelog
 
-## Não lançado
+## 0.1.3 — 2026-11-16
+
+- `bash-guard.sh`: hook `PreToolUse` para `Bash` (`hooks/hooks.json`). Acha, por heurística, os alvos de escrita do comando (`>`, `>>`, `&>`, `N>`, `tee`, `sed -i`, `perl -i`, destino de `cp`/`mv`/`install`/`ln`, origem do `mv`, `rm`, `touch`, `truncate`, `dd of=`), também dentro de `&&`, `||`, `;`, `|` e `bash -c '...'`, e aplica as regras do `path-guard.sh`: o Builder não escreve pelo shell fora dos paths, em `.sdd-role`, em `tests/aceite/**` nem fora do worktree; o Reviewer não escreve. `/dev/null`, `/dev/std*`, `/tmp`, `/private/tmp` e `$TMPDIR` ficam livres. Limite: escrita por dentro de programa (`python`, `node`) não é detectável; valem o role, o `pre-commit` e o `wp-check.sh`.
+- `lib/guard.sh`: `canon`, `norm`, raiz do worktree, leitura do `.sdd-role` e regras do Builder saem do `path-guard.sh` e são usadas pelos dois hooks. O `path-guard.sh` não muda de comportamento.
+- Suíte volta a passar no `/bin/bash` 3.2 do macOS: sintaxe do `case` dentro de `$( )` no `wp-check.sh` e `agents/orchestrator.md` dentro do limite de 250 palavras.
 
 - `wp-check.sh`: sem `feat/<slug>`, a base sai da branch da WP (`feat/NNN-slug-WP-NN` sem o sufixo, também com HEAD desanexado no worktree do Reviewer). `main` fica como último recurso e aparece no resumo como `base: main (aviso: …)`, para `fora-dos-paths: falha` não ser lido como defeito da WP.
 - Orchestrator não roda `wp-check.sh` nem testes: a evidência é do Builder (sem flag) e do Reviewer (`--regressao`). Antes do commit, `diff` e `fora-dos-paths` saem vazios e não são evidência.

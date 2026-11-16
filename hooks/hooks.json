@@ -1,5 +1,5 @@
 {
-  "description": "sdd-karazhan: guarda de paths por worktree",
+  "description": "sdd-karazhan: guarda de paths por worktree (Edit/Write e Bash)",
   "hooks": {
     "PreToolUse": [
       {
@@ -8,6 +8,16 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/skills/sdd-karazhan/hooks/path-guard.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/skills/sdd-karazhan/hooks/bash-guard.sh\"",
             "timeout": 10
           }
         ]
