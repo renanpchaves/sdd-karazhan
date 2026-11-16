@@ -1,0 +1,31 @@
+# Tasks done — 001-guarda-bash
+
+### WP-01 — bash-guard: hook PreToolUse para Bash
+- Lane: pronto (aprovado pelo Reviewer em 321fb38; merge 0792d0d)
+- Dono: Builder
+- Possui: skills/sdd-karazhan/hooks/bash-guard.sh, skills/sdd-karazhan/hooks/path-guard.sh, hooks/hooks.json, skills/sdd-karazhan/lib/**, tests/test_bash_guard.sh, tests/test_manifests.sh, .claude-plugin/**, CHANGELOG.md, README.md, skills/sdd-karazhan/references/guardrails.md, skills/sdd-karazhan/scripts/wp-check.sh, skills/sdd-karazhan/agents/orchestrator.md, skills/sdd-karazhan/agents/architect.md, skills/sdd-karazhan/agents/builder.md, skills/sdd-karazhan/references/convocacao.md
+- Fora de escopo: tests/aceite/** (do Architect); mudar o comportamento do wp-check.sh (só a sintaxe da linha 98 para bash 3.2); guarda para Builder em Codex; push e publicação
+- Objetivo: o Builder não consegue mais escrever pelo shell fora dos seus paths (nem o Reviewer escrever), com o limite (escrita por dentro de programas) documentado, e a suíte do plugin volta a passar inteira no bash 3.2 do macOS
+- Aceite (copiado literalmente da spec/oráculo):
+  - bloqueia `sed -i` fora dos paths (GNU, `-i ''`, `-i.bak`, `-i -e`), com o alvo citado no stderr
+  - bloqueia redirecionamento fora dos paths (`>`, `>>`, `&>`, `2>`, `x>arq` sem espaço)
+  - bloqueia `tee` e `tee -a` fora dos paths
+  - bloqueia `cp`, `mv` e `install` com destino fora dos paths
+  - bloqueia `rm`, `touch`, `truncate`, `ln`, `dd of=` e `perl -i`/`-pi` fora dos paths
+  - bloqueia escrita fora dos paths dentro de `&&`, `;`, `|` e `bash -c '...'`
+  - bloqueia escrita em `tests/aceite/**` mesmo com `paths=tests/**`, e libera `tests/` fora do aceite
+  - bloqueia escrita no `.sdd-role` (`>`, `>>`, `sed -i`), mesmo com `paths=**`
+  - bloqueia escrita fora do worktree (caminho absoluto fora de temp, ou com `..`)
+  - bloqueia o Reviewer escrevendo (stderr com "Reviewer") e libera a leitura e o `/dev/null` dele
+  - permite escrita dentro dos paths: relativa, absoluta e com cwd num subdiretório do worktree
+  - permite `/dev/null`, `/dev/stderr`, `/tmp`, `/private/tmp` e `$TMPDIR`
+  - permite comandos de leitura (`git status`, `ls`, `bash tests/run.sh 2>&1 | tail`, `>&2`, `python3 script.py`)
+  - não bloqueia alvo com variável não expandida (`> "$OUT"`)
+  - não faz nada sem `.sdd-role`, e ignora tool_name que não seja Bash
+  - `hooks/hooks.json` registra matcher Bash para `bash-guard.sh` e mantém o path-guard em Edit|Write|MultiEdit|NotebookEdit
+  - `tests/test_bash_guard.sh` existe na suíte do plugin
+  - versão 0.1.3 em plugin.json e em marketplace.json, com `## 0.1.3` no CHANGELOG.md
+  - guardrails.md cita `bash-guard.sh`, não diz mais "Não cobre Bash" e documenta o limite (python e afins)
+  - `bash tests/run.sh` sai com returncode 0
+- Evidência: saída do `wp-check.sh WP-01` (aceite ok, nada fora dos paths) + `bash tests/run.sh` (11+/11+ passaram) rodados em /bin/bash 3.2
+- Depende de: nenhuma

@@ -1,0 +1,35 @@
+# Decisões
+
+Entrada: `## data · papel · decisão` (papel, não o nome do agente: este arquivo é versionado), com racional, alternativas, custo de reverter e escopo.
+
+## 2026-11-15 · Orchestrator · folha da 001-guarda-bash
+- Pedido: o usuário pediu um time pequeno para fechar a lacuna da guarda (Builder editando arquivo pelo shell), com o Reviewer aprovando antes de atualizar o plugin.
+- Tamanho Pequena, nível 1: 1 área (guarda de hooks: hooks.json + hooks/*.sh + tests/ + manifests de versão); sem banco, integração ou auth.
+- Architect subagente (Pequena), Git Manager subagente (Pequena), Builder terminal claude/capaz (guarda é segurança: tier capaz), Reviewer terminal Codex.
+- Recon não convocado: repo pequeno e conhecido; o Architect lê hooks/, tests/test_guard.sh e lib/ direto.
+- Desvio: o inventário diz `repo: novo` e `testes: não` porque só reconhece Python; o repo é bash com suíte em tests/run.sh. Tratado como brownfield com testes.
+- Desvio: o repo não tem setup.sh nem pytest. O oráculo de aceite fica em tests/aceite/test_wp01_*.py (pytest chamando bash) e o Git Manager cria um .venv com pytest em cada worktree (excluído pelo info/exclude), no lugar do setup.sh. A suíte do plugin (tests/run.sh) é evidência obrigatória a mais.
+- Desvio: presets Antigravity, OpenCode e Shell continuam fora do karazhan.json (mesmo desvio da feature anterior).
+- Commit: o commit pré-revisão fica na branch da WP (local); nada entra em main antes do `aprovado` do Reviewer, como o usuário pediu. Push só com o ok do usuário.
+- Ajuste do usuário (2026-11-15): Git Manager vira terminal no canvas (Mekkatorque), em vez de subagente; o Architect da spec segue subagente porque já estava escrevendo.
+
+## 2026-11-15 · Orchestrator · bloqueio do Architect: run.sh já falha no HEAD
+- O oráculo exige `bash tests/run.sh` com 0, mas no HEAD 1cdd92b falham test_docs (agents/orchestrator.md com 253 palavras, limite 250) e test_wp_check (wp-check.sh:98, `case` dentro de `$( )`, não parseia no /bin/bash 3.2 do macOS).
+- Decisão: entram no Possui da WP-01 como correção mínima: enxugar orchestrator.md e só a sintaxe da linha 98 do wp-check.sh, sem mudar comportamento. Alternativa (relaxar o critério) rejeitada: o Reviewer roda o wp-check em HEAD desanexado, justamente o caminho quebrado no macOS. Custo de reverter: baixo. Escopo: só esta WP.
+- path-guard.sh e tests/test_manifests.sh entraram no Possui (helper comum em lib/ e versão 0.1.3); docs/** e tests/run.sh saíram (não precisam mudar).
+
+## 2026-11-16 · Orchestrator · checkpoint da spec
+- O usuário mandou seguir ("Pode voltar de onde parou") depois de ver o resumo da spec; tomado como ok do checkpoint. Builder recrutado em .worktrees/WP-01.
+
+## 2026-11-16 · Orchestrator · bloqueio do Builder: test_docs também falha em architect.md e builder.md
+- `agents/architect.md` e `agents/builder.md` têm 251 palavras cada (limite 250). O test_docs para no primeiro fail, por isso só o orchestrator.md apareceu antes.
+- Decisão: os dois entram no Possui da WP-01, cada um enxuga 1+ palavra sem mudar regra. Mesmo racional da decisão anterior. Custo de reverter: baixo.
+- Lacuna apontada pelo Builder: `mv fora/x dentro/x` remove a origem fora dos paths. Decisão: entra na WP-01 (a origem do `mv` também conta como alvo de escrita), com casos em tests/test_bash_guard.sh; o oráculo não muda.
+
+## 2026-11-16 · Orchestrator · terceira falha antiga do test_docs: convocacao.md
+- `references/convocacao.md` tem 1110 palavras (limite 1050); estava escondida atrás das falhas dos agents/*.md no mesmo teste. O Builder conferiu as três checagens de tamanho: é a última.
+- Decisão: entra no Possui da WP-01; cortar ≥ 60 palavras só de prosa, sem mudar regra, tabela, exemplo de folha nem comando. O Reviewer confere o diff do convocacao.md frase a frase contra a versão anterior.
+
+## 2026-11-16 · Orchestrator · segunda devolução da WP-01
+- Reviewer: ponto 1 (glob/chaves sem aspas no alvo) é DEFEITO: com paths=tests/**, `tee tests/{aceite,outro}/x.py` passa e grava em tests/aceite. Pontos 2 ($, crase, ~, $'...'), 3 ($(...), crases, xargs, find -exec) e 4 (symlink) são LIMITE.
+- Decisão: o mesmo Builder corrige o ponto 1 (defeitos distintos a cada rodada, não o mesmo erro duas vezes; regra dos dois erros não se aplica) e documenta em guardrails.md os limites 2 a 4 com exemplos. Se a próxima revisão devolver de novo, Builder novo com contexto limpo.

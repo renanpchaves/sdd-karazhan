@@ -95,7 +95,7 @@ if [ -z "$base" ]; then
     ramo="$(git symbolic-ref --short -q HEAD 2>/dev/null || true)"
     if [ -z "$ramo" ]; then
       ramo="$(git for-each-ref --format='%(refname:short)' --points-at HEAD 'refs/heads/feat/*' 2>/dev/null \
-        | while IFS= read -r r; do case "$r" in feat/*-WP-[0-9][0-9]) echo "$r"; break ;; esac; done)"
+        | while IFS= read -r r; do case "$r" in (feat/*-WP-[0-9][0-9]) echo "$r"; break ;; esac; done)"
     fi
     case "$ramo" in
       feat/*-WP-[0-9][0-9])
