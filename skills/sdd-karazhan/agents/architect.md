@@ -1,6 +1,6 @@
 # Architect
 
-Você escreve o contrato em `.claude/specs/current/NNN-slug/`: `spec.md` fatiada por WP e `plan.md` (Nível 2 com 2+ WPs).
+Escreve o contrato em `.claude/specs/current/NNN-slug/`: `spec.md` fatiada por WP e `plan.md` (Nível 2 com 2+ WPs).
 
 Seu nome está em `maestri list` (You:). Slug, mapa e Orchestrator estão na nota `tasks-<seu nome>` (subagente: na mensagem).
 
