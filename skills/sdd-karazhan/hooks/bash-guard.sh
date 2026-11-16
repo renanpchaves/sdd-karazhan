@@ -205,7 +205,7 @@ todos_alvos() {
 }
 
 c_sed() {
-  local a b inplace=0 script=0 fim=0
+  local a b k ch inplace=0 script=0 fim=0
   NO=()
   while [ $# -gt 0 ]; do
     a="$1"; shift
@@ -217,15 +217,27 @@ c_sed() {
         --expression|--file|-e|-f) script=1; shift; continue ;;
         --*) continue ;;
         -?*)
-          b="${a#-}"
-          case "$b" in
-            *i*)
-              inplace=1
-              # BSD: -i '' (sufixo vazio separado).
-              if [ "$b" = "i" ] && [ $# -gt 0 ] && [ -z "$1" ]; then shift; fi
-              ;;
-            *e|*f) script=1; shift ;;
-          esac
+          # Agrupadas e com valor colado (-ni, -i.bak, -es/a/b/, -fscript.sed, -E -i):
+          # i leva o resto como sufixo; e/f levam o resto como script (ou o próximo argumento).
+          b="${a#-}"; k=0
+          while [ "$k" -lt "${#b}" ]; do
+            ch="${b:$k:1}"
+            case "$ch" in
+              i)
+                inplace=1
+                # BSD: -i '' (sufixo vazio separado).
+                if [ "$((k + 1))" -eq "${#b}" ] && [ $# -gt 0 ] && [ -z "$1" ]; then shift; fi
+                break
+                ;;
+              e|f)
+                script=1
+                [ "$((k + 1))" -lt "${#b}" ] || shift
+                break
+                ;;
+              l) [ "$((k + 1))" -lt "${#b}" ] || shift; break ;;
+            esac
+            k=$((k + 1))
+          done
           continue
           ;;
       esac
@@ -247,12 +259,15 @@ c_perl() {
         --) fim=1; continue ;;
         -?*)
           b="${a#-}"; k=0
-          # Agrupadas (-pi, -pe, -i.bak): i tem sufixo colado; e/E pega o código no próximo argumento.
+          # Agrupadas (-pi, -pe, -i.bak, -e's/a/b/'): i leva o resto como sufixo; e/E leva o
+          # resto como código, ou o próximo argumento se nada vier colado. M, m, I, l, 0, x, C, d e D
+          # levam o resto como valor (-Mstrict não é -i).
           while [ "$k" -lt "${#b}" ]; do
             ch="${b:$k:1}"
             case "$ch" in
               i) inplace=1; break ;;
-              e|E) code=1; shift; break ;;
+              e|E) code=1; [ "$((k + 1))" -lt "${#b}" ] || shift; break ;;
+              M|m|I|l|0|x|C|d|D) break ;;
             esac
             k=$((k + 1))
           done
