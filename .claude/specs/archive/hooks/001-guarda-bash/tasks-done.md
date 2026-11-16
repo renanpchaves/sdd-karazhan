@@ -27,5 +27,5 @@
   - versão 0.1.3 em plugin.json e em marketplace.json, com `## 0.1.3` no CHANGELOG.md
   - guardrails.md cita `bash-guard.sh`, não diz mais "Não cobre Bash" e documenta o limite (python e afins)
   - `bash tests/run.sh` sai com returncode 0
-- Evidência: saída do `wp-check.sh WP-01` (aceite ok, nada fora dos paths) + `bash tests/run.sh` (11+/11+ passaram) rodados em /bin/bash 3.2
+- Evidência: (reprovações: rodada 1 — sed/perl -eSCRIPT colado; rodada 2 — glob/chaves sem aspas; rodada 3 aprovada em 321fb38) saída do `wp-check.sh WP-01` (aceite ok, nada fora dos paths) + `bash tests/run.sh` (11+/11+ passaram) rodados em /bin/bash 3.2
 - Depende de: nenhuma
