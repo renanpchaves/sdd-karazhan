@@ -25,3 +25,7 @@ Entrada: `## data · papel · decisão` (papel, não o nome do agente: este arqu
 - `agents/architect.md` e `agents/builder.md` têm 251 palavras cada (limite 250). O test_docs para no primeiro fail, por isso só o orchestrator.md apareceu antes.
 - Decisão: os dois entram no Possui da WP-01, cada um enxuga 1+ palavra sem mudar regra. Mesmo racional da decisão anterior. Custo de reverter: baixo.
 - Lacuna apontada pelo Builder: `mv fora/x dentro/x` remove a origem fora dos paths. Decisão: entra na WP-01 (a origem do `mv` também conta como alvo de escrita), com casos em tests/test_bash_guard.sh; o oráculo não muda.
+
+## 2026-11-16 · Orchestrator · terceira falha antiga do test_docs: convocacao.md
+- `references/convocacao.md` tem 1110 palavras (limite 1050); estava escondida atrás das falhas dos agents/*.md no mesmo teste. O Builder conferiu as três checagens de tamanho: é a última.
+- Decisão: entra no Possui da WP-01; cortar ≥ 60 palavras só de prosa, sem mudar regra, tabela, exemplo de folha nem comando. O Reviewer confere o diff do convocacao.md frase a frase contra a versão anterior.
