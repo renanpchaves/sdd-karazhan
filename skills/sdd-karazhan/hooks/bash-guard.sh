@@ -160,9 +160,16 @@ BEGIN {
       if (substr(s, i, 1) == ">") i++
       pend = 1; continue
     }
-    if (c == ";" || c == "&" || c == "|" || c == "(" || c == ")" || c == "{" && !inw || c == "}" && !inw) {
+    # "{ " abre grupo; "{" colado (tee {a,b}) é expansão de chaves.
+    if (c == "{" && !inw && (i == n || substr(s, i + 1, 1) ~ /[ \t\n]/)) { sep(); i++; continue }
+    if (c == ";" || c == "&" || c == "|" || c == "(" || c == ")" || c == "}" && !inw) {
       sep(); i++; continue
     }
+    # Fora de aspas, * ? [ ] { } , viram marcadores (\016-\024): o shell expande esses,
+    # e o bash-guard precisa saber quais vieram sem aspas.
+    if (c == "*") c = "\016"; else if (c == "?") c = "\017"; else if (c == "[") c = "\020"
+    else if (c == "]") c = "\021"; else if (c == "{") c = "\022"; else if (c == "}") c = "\023"
+    else if (c == ",") c = "\024"
     buf = buf c; inw = 1; i++
   }
   flush()
@@ -260,14 +267,37 @@ c_perl() {
         -?*)
           b="${a#-}"; k=0
           # Agrupadas (-pi, -pe, -i.bak, -e's/a/b/'): i leva o resto como sufixo; e/E leva o
-          # resto como código, ou o próximo argumento se nada vier colado. M, m, I, l, 0, x, C, d e D
-          # levam o resto como valor (-Mstrict não é -i).
+          # resto como código, ou o próximo argumento se nada vier colado. M, m, I, x, C, d e D
+          # levam o resto como valor (-Mstrict não é -i); 0 e l levam só dígitos e a leitura
+          # segue (-0pi e -lpi são -i).
           while [ "$k" -lt "${#b}" ]; do
             ch="${b:$k:1}"
             case "$ch" in
               i) inplace=1; break ;;
               e|E) code=1; [ "$((k + 1))" -lt "${#b}" ] || shift; break ;;
-              M|m|I|l|0|x|C|d|D) break ;;
+              0)
+                # -0[octal] ou -0x[hex].
+                k=$((k + 1))
+                if [ "${b:$k:1}" = "x" ]; then
+                  k=$((k + 1))
+                  while [ "$k" -lt "${#b}" ]; do
+                    case "${b:$k:1}" in [0-9a-fA-F]) k=$((k + 1)) ;; *) break ;; esac
+                  done
+                else
+                  while [ "$k" -lt "${#b}" ]; do
+                    case "${b:$k:1}" in [0-7]) k=$((k + 1)) ;; *) break ;; esac
+                  done
+                fi
+                continue
+                ;;
+              l)
+                k=$((k + 1))
+                while [ "$k" -lt "${#b}" ]; do
+                  case "${b:$k:1}" in [0-7]) k=$((k + 1)) ;; *) break ;; esac
+                done
+                continue
+                ;;
+              M|m|I|x|C|d|D) break ;;
             esac
             k=$((k + 1))
           done
@@ -386,9 +416,213 @@ temporario() {
   return 1
 }
 
-# verifica <alvo>: sai 2 com o motivo se o alvo não pode ser escrito.
+# Marcadores do tokenizador para * ? [ ] { } , sem aspas (\001 e \177 ficam de fora: o bash 3.2
+# os usa internamente).
+MG_E="$(printf '\016')"; MG_Q="$(printf '\017')"; MG_C="$(printf '\020')"; MG_F="$(printf '\021')"
+MB_A="$(printf '\022')"; MB_F="$(printf '\023')"; MB_V="$(printf '\024')"
+
+# literal <alvo>: troca os marcadores pelos caracteres originais.
+literal() { printf '%s' "$1" | tr '\016\017\020\021\022\023\024' '*?[]{},'; }
+
+# expandir <alvo>: expansão de chaves sem aspas ({a,b}, aninhadas), como o shell faz. Junta
+# as alternativas em EXP. Chave sem vírgula de topo ou sem fechamento fica literal.
+expandir() {
+  local s="$1" pre resto n i c dep corpo pos alt virg
+  [ "${#EXP[@]}" -le 256 ] || return 0
+  case "$s" in *"$MB_A"*) ;; *) EXP[${#EXP[@]}]="$s"; return 0 ;; esac
+  pre="${s%%"$MB_A"*}"; resto="${s#*"$MB_A"}"
+  n=${#resto}; i=0; dep=0; virg=0
+  while [ "$i" -lt "$n" ]; do
+    c="${resto:$i:1}"
+    if [ "$c" = "$MB_A" ]; then dep=$((dep + 1))
+    elif [ "$c" = "$MB_F" ]; then [ "$dep" -gt 0 ] || break; dep=$((dep - 1))
+    elif [ "$c" = "$MB_V" ] && [ "$dep" -eq 0 ]; then virg=1
+    fi
+    i=$((i + 1))
+  done
+  if [ "$i" -ge "$n" ] || [ "$virg" -eq 0 ]; then
+    expandir "$pre{$resto"
+    return 0
+  fi
+  corpo="${resto:0:$i}"; pos="${resto:$((i + 1))}"
+  # Separa o corpo nas vírgulas de topo.
+  n=${#corpo}; i=0; dep=0; alt=""
+  while [ "$i" -lt "$n" ]; do
+    c="${corpo:$i:1}"
+    if [ "$c" = "$MB_V" ] && [ "$dep" -eq 0 ]; then
+      expandir "$pre$alt$pos"; alt=""
+    else
+      [ "$c" = "$MB_A" ] && dep=$((dep + 1))
+      [ "$c" = "$MB_F" ] && dep=$((dep - 1))
+      alt="$alt$c"
+    fi
+    i=$((i + 1))
+  done
+  expandir "$pre$alt$pos"
+}
+
+# tem_glob <texto marcado>: 0 se tem * ? ou [ sem aspas.
+tem_glob() { case "$1" in *"$MG_E"*|*"$MG_Q"*|*"$MG_C"*) return 0 ;; esac; return 1; }
+
+# padrao <segmento marcado>: o segmento como padrão do [[ == ]]; o que veio entre aspas é escapado.
+padrao() {
+  local s="$1" i=0 c out=""
+  while [ "$i" -lt "${#s}" ]; do
+    c="${s:$i:1}"
+    case "$c" in
+      "$MG_E") out="$out*" ;;
+      "$MG_Q") out="$out?" ;;
+      "$MG_C") out="$out[" ;;
+      "$MG_F") out="$out]" ;;
+      '*'|'?'|'['|']'|'\') out="$out\\$c" ;;
+      *) out="$out$c" ;;
+    esac
+    i=$((i + 1))
+  done
+  printf '%s' "$out"
+}
+
+# casa_seg <nome> <segmento marcado>: 0 se o segmento pode casar com o nome. Como no shell,
+# glob só casa nome com "." inicial se o próprio segmento começar com "." literal.
+casa_seg() {
+  local p
+  if tem_glob "$2"; then
+    case "$1" in .*) case "$2" in .*) ;; *) return 1 ;; esac ;; esac
+    p="$(padrao "$2")"
+    [[ "$1" == $p ]]
+  else
+    [ "$1" = "$(literal "$2")" ]
+  fi
+}
+
+# segs <caminho>: põe em SG os segmentos do caminho.
+segs() { SG=(); IFS=/ read -r -a SG <<EOT
+$1
+EOT
+}
+
+# prefixo_literal: segmentos de SG antes do primeiro com glob, juntados por "/".
+prefixo_literal() {
+  local k=0 p=""
+  while [ "$k" -lt "${#SG[@]}" ]; do
+    tem_glob "${SG[$k]}" && break
+    if [ -z "$p" ]; then p="${SG[$k]}"; else p="$p/${SG[$k]}"; fi
+    k=$((k + 1))
+  done
+  printf '%s' "$p"
+}
+
+# sobe_dir: 0 se algum segmento de SG é ".." ou é glob que casa "..".
+sobe_dir() {
+  local k=0
+  while [ "$k" -lt "${#SG[@]}" ]; do
+    [ "${SG[$k]}" != ".." ] || return 0
+    if tem_glob "${SG[$k]}" && casa_seg ".." "${SG[$k]}"; then return 0; fi
+    k=$((k + 1))
+  done
+  return 1
+}
+
+# regra_glob_bld <rel marcado>: como guard_regra_bld, para um padrão. Bloqueia se o padrão
+# puder casar com .sdd-role, com o aceite ou com algo fora dos paths. Retorna 0, 1, 2 ou 3.
+regra_glob_bld() {
+  local rel="$1" m aceite k lim pre g base
+  local -a R A
+  segs "$rel"; R=("${SG[@]}"); m=${#R[@]}
+  sobe_dir && return 3
+  if [ "$m" -eq 1 ] && casa_seg ".sdd-role" "${R[0]}"; then return 1; fi
+  # Aceite: o padrão casa com o prefixo literal do glob do aceite (comparação em minúsculas).
+  aceite="$(guard_campo "$role_file" aceite | tr 'A-Z' 'a-z')"
+  aceite="${aceite#./}"; aceite="${aceite#/}"
+  if [ -n "$aceite" ]; then
+    segs "$aceite"; A=()
+    k=0
+    while [ "$k" -lt "${#SG[@]}" ]; do
+      case "${SG[$k]}" in *'*'*|*'?'*|*'['*) break ;; esac
+      A[${#A[@]}]="${SG[$k]}"; k=$((k + 1))
+    done
+    [ "${#A[@]}" -gt 0 ] || return 2
+    segs "$(printf '%s' "$rel" | tr 'A-Z' 'a-z')"
+    lim=${#A[@]}; [ "$m" -ge "$lim" ] || lim=$m
+    k=0
+    while [ "$k" -lt "$lim" ] && casa_seg "${A[$k]}" "${SG[$k]}"; do k=$((k + 1)); done
+    [ "$k" -lt "$lim" ] || return 2
+  fi
+  # Paths: o prefixo literal do padrão precisa estar sob um glob "<dir>/**" (ou "**") dos paths.
+  segs "$rel"; pre="$(literal "$(prefixo_literal)")"
+  while IFS= read -r g; do
+    g="$(printf '%s' "$g" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+    g="${g#./}"; g="${g#/}"
+    case "$g" in */) g="$g**" ;; esac
+    [ "$g" != "**" ] || return 0
+    case "$g" in
+      */\*\*)
+        base="${g%/\*\*}"
+        case "$base" in *'*'*|*'?'*|*'['*) continue ;; esac
+        if [ "$pre" = "$base" ]; then return 0; fi
+        case "$pre" in "$base"/*) return 0 ;; esac
+        ;;
+    esac
+  done <<EOT
+$(guard_campo "$role_file" paths | tr ',' '\n')
+EOT
+  return 3
+}
+
+# bloqueia <rc> <rel>: mensagem do role e exit 2 (rc 0 volta).
+bloqueia() {
+  if [ "$role" = "rev" ]; then
+    echo "bash-guard: Reviewer não edita arquivos: $2" >&2
+    exit 2
+  fi
+  case "$1" in
+    0) return 0 ;;
+    1) echo "bash-guard: .sdd-role é protegido" >&2 ;;
+    2) echo "bash-guard: $2 — tests/aceite é do Architect" >&2 ;;
+    *) echo "bash-guard: fora dos paths da $wp: $2" >&2 ;;
+  esac
+  exit 2
+}
+
+# verifica_glob <alvo marcado>: alvo com * ? [ sem aspas, que o shell expande.
+verifica_glob() {
+  local abs rel rc=0 pre
+  abs="$(guard_abs "$cwd" "$1")"
+  rel="$(guard_rel "$abs" "$top")"
+  if [ "$rel" = "$abs" ]; then
+    segs "${abs#/}"; pre="/$(literal "$(prefixo_literal)")"
+    if ! sobe_dir && temporario "$pre/"; then return 0; fi
+    bloqueia 3 "$(literal "$rel")"
+  fi
+  [ "$role" = "rev" ] && bloqueia 3 "$(literal "$rel")"
+  regra_glob_bld "$rel" || rc=$?
+  [ "$rc" -eq 0 ] && return 0
+  bloqueia "$rc" "$(literal "$rel")"
+}
+
+# verifica <alvo>: expande chaves sem aspas e checa cada alternativa.
 verifica() {
-  local a="$1" abs rel rc=3
+  local k=0
+  local -a lista
+  case "$1" in ""|-|*'$'*|*'`'*|*'~'*) return 0 ;; esac
+  case "$1" in *"$MB_A"*) ;; *) verifica_um "$1"; return 0 ;; esac
+  EXP=()
+  expandir "$1"
+  if [ "${#EXP[@]}" -gt 256 ]; then
+    echo "bash-guard: expansão de chaves grande demais: $(literal "$1")" >&2
+    exit 2
+  fi
+  lista=("${EXP[@]}")
+  while [ "$k" -lt "${#lista[@]}" ]; do verifica_um "${lista[$k]}"; k=$((k + 1)); done
+}
+
+# verifica_um <alvo>: sai 2 com o motivo se o alvo não pode ser escrito.
+verifica_um() {
+  local a abs rel rc=3
+  # Chave ou vírgula que sobrou da expansão é literal.
+  a="$(printf '%s' "$1" | tr '\022\023\024' '{},')"
+  if tem_glob "$a"; then verifica_glob "$a"; return 0; fi
+  a="$(literal "$a")"
   # 1. Literal com $, ` ou ~: não dá para saber o alvo; ignora.
   case "$a" in ""|-|*'$'*|*'`'*|*'~'*) return 0 ;; esac
   # 2. Descartes e saídas padrão.
@@ -404,17 +638,7 @@ verifica() {
     rc=0
     guard_regra_bld "$role_file" "$rel" || rc=$?
   fi
-  if [ "$role" = "rev" ]; then
-    echo "bash-guard: Reviewer não edita arquivos: $rel" >&2
-    exit 2
-  fi
-  case "$rc" in
-    0) return 0 ;;
-    1) echo "bash-guard: .sdd-role é protegido" >&2 ;;
-    2) echo "bash-guard: $rel — tests/aceite é do Architect" >&2 ;;
-    *) echo "bash-guard: fora dos paths da $wp: $rel" >&2 ;;
-  esac
-  exit 2
+  bloqueia "$rc" "$rel"
 }
 
 analisa "$comando_bash" 0

@@ -49,7 +49,13 @@ Hook `PreToolUse` do plugin para `Bash` (`hooks/hooks.json`). Mesma ativação d
 - Ordem por alvo: com `$`, `` ` `` ou `~`, ignora; `/dev/null` e `/dev/std*`, permite; relativo resolve a partir do cwd; dentro da raiz do worktree, regras do role (temporário não isenta, o worktree pode estar sob `$TMPDIR`); fora da raiz, sem `..`, sob `/tmp`, `/private/tmp` ou `$TMPDIR`, permite; o resto conta como fora do worktree.
 - `role=bld`: bloqueia `.sdd-role`, depois `tests/aceite/**`, depois o que estiver fora dos paths ou fora do worktree.
 - `role=rev`: bloqueia toda escrita no worktree ou fora dele (`Reviewer não edita arquivos`); leitura, `/dev/null` e temporários seguem livres.
-- Limites: é heurística, não um parser de shell. Escrita feita por dentro de um programa (`python script.py`, `node`, `npx remotion render`) não é detectável. Alvo em variável, `eval`, here-doc complexo e `cd` antes da escrita passam. Para esses casos valem o role, o `pre-commit` e o `wp-check.sh`.
+- Chaves e glob sem aspas, que o shell expande: `{a,b}` vira uma alternativa por item, cada uma checada (`tee tests/{aceite,outro}/x.py` bloqueia por `tests/aceite/x.py`). Alvo com `*`, `?` ou `[` bloqueia se o padrão puder casar com `.sdd-role`, com `tests/aceite/**` ou com algo fora dos paths: o prefixo literal (`src` em `src/*.tmp`) precisa estar sob um `<dir>/**` dos paths, e nenhum segmento pode casar `..` (`rm src/*.tmp` passa com `paths=src/**`; `rm tests/*/x.py`, `rm -rf t*` e `rm .sdd-r*` bloqueiam). Entre aspas ou com `\`, é texto.
+- Limites aceitos: é heurística, não um parser de shell. Para os casos abaixo valem o role, o `pre-commit` e o `wp-check.sh`.
+  - Escrita por dentro de um programa não é detectável: `python script.py`, `node gera.js`, `npx remotion render`.
+  - Alvo com `$`, crase, `~` ou `$'...'` é ignorado, porque o valor só existe na execução: `echo x > "$OUT"`, ``echo x > `pwd`/x``, `touch ~/x`, `touch $'lib/x.py'`.
+  - Escrita dentro de `$(...)` ou crases, e alvos vindos de `xargs` ou `find -exec` não são vistos: `echo $(rm lib/x.py)`, `ls lib/*.py | xargs rm`, `find lib -name '*.py' -exec rm {} +`.
+  - A resolução de caminho é só lexical, sem seguir symlink: com `src/link -> ../lib`, `echo x > src/link/x.py` conta como `src/` e grava em `lib/`.
+  - `eval`, here-doc complexo e `cd` antes da escrita passam: `cd lib && touch x.py` checa `x.py` a partir do cwd da sessão.
 - No modo subagente não se aplica, como o `path-guard.sh`.
 
 ## `wp-check.sh`
